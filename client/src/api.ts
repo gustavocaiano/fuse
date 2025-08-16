@@ -25,4 +25,12 @@ export async function startCamera(id: string): Promise<{ playlistUrl: string }> 
   return data;
 }
 
+export async function ptzMove(cameraId: string, payload: { type: 'relative' | 'continuous'; pan?: number; tilt?: number; zoom?: number; speed?: number; timeoutMs?: number }) {
+  await axios.post(`${API_BASE}/cameras/${cameraId}/ptz/move`, payload);
+}
+
+export async function ptzStop(cameraId: string, payload: { panTilt?: boolean; zoom?: boolean } = { panTilt: true, zoom: true }) {
+  await axios.post(`${API_BASE}/cameras/${cameraId}/ptz/stop`, payload);
+}
+
 

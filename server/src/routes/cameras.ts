@@ -4,6 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import { Camera, insertCamera, listCamerasStmt, getCameraStmt, deleteCameraStmt } from '../db';
 import { ffmpegManager } from '../ffmpegManager';
+import { onvifManager, PtzMovePayload, PtzStopPayload } from '../onvifManager';
 
 export const cameraRouter = Router();
 
@@ -48,6 +49,41 @@ cameraRouter.post('/:id/start', (req, res) => {
   const handle = ffmpegManager.ensureTranscoding(cam.id, cam.rtsp, baseHlsDir);
   const playlistUrl = `/hls/${cam.id}/index.m3u8`;
   res.json({ playlistUrl, outputDir: handle.outputDir });
+});
+
+// PTZ move
+cameraRouter.post('/:id/ptz/move', async (req, res) => {
+  const camRow = getCameraStmt.get(req.params.id) as Camera | undefined;
+  if (!camRow) return res.status(404).json({ error: 'not found' });
+  const payload = req.body as PtzMovePayload;
+  if (!payload || (payload.type !== 'continuous' && payload.type !== 'relative')) {
+    return res.status(400).json({ error: 'invalid payload' });
+  }
+  try {
+    const cam = await onvifManager.getCamForCamera(camRow);
+    if (payload.type === 'continuous') {
+      await onvifManager.continuousMove(cam, payload);
+    } else {
+      await onvifManager.relativeMove(cam, payload);
+    }
+    res.status(204).end();
+  } catch (e: any) {
+    res.status(500).json({ error: String(e?.message || e) });
+  }
+});
+
+// PTZ stop
+cameraRouter.post('/:id/ptz/stop', async (req, res) => {
+  const camRow = getCameraStmt.get(req.params.id) as Camera | undefined;
+  if (!camRow) return res.status(404).json({ error: 'not found' });
+  const payload = req.body as PtzStopPayload;
+  try {
+    const cam = await onvifManager.getCamForCamera(camRow);
+    await onvifManager.stop(cam, payload);
+    res.status(204).end();
+  } catch (e: any) {
+    res.status(500).json({ error: String(e?.message || e) });
+  }
 });
 
 

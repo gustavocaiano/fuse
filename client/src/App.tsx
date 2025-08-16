@@ -91,5 +91,5 @@ function MultiStream({ camera }: { camera: Camera }) {
   }, [camera.id])
 
   if (!playlistUrl) return <div className="rounded-md bg-neutral-900 aspect-video grid place-items-center text-sm text-neutral-400">Starting...</div>
-  return <StreamPlayer playlistUrl={playlistUrl} title={camera.name} />
+  return <StreamPlayer playlistUrl={playlistUrl} title={camera.name} cameraId={camera.id} />
 }

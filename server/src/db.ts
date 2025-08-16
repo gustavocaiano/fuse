@@ -22,7 +22,7 @@ export type Camera = {
   createdAt: string;
 };
 
-export const insertCamera = db.prepare(`
+export const insertCamera = db.prepare<Camera>(`
   INSERT INTO cameras (id, name, rtsp, createdAt) VALUES (@id, @name, @rtsp, @createdAt)
 `);
 

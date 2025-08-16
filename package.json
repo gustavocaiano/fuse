@@ -1,0 +1,14 @@
+{
+  "name": "cam-parser",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "bash ./dev.sh",
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "build": "npm --prefix server run build && npm --prefix client run build",
+    "start": "npm --prefix server run start"
+  }
+}
+
+

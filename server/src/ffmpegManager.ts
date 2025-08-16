@@ -1,10 +1,10 @@
-import { spawn, ChildProcessWithoutNullStreams } from 'child_process';
+import { spawn, type ChildProcess } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 
 export type TranscodeHandle = {
   cameraId: string;
-  process: ChildProcessWithoutNullStreams;
+  process: ChildProcess;
   outputDir: string;
 };
 
