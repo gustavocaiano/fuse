@@ -16,7 +16,7 @@ export default function App() {
           </Link>
         </nav>
       </header>
-      <main className="flex-1 p-6 overflow-hidden min-h-0">
+      <main className="flex-1 p-6 overflow-auto min-h-0">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/ptz/:id" element={<PTZControl />} />
@@ -214,7 +214,7 @@ function MultiStream({ camera }: { camera: Camera }) {
   }
 
   return (
-    <div className="rounded-lg overflow-hidden border border-slate-600 hover:border-slate-500 transition-colors">
+    <div className="rounded-lg overflow-auto border border-slate-600 hover:border-slate-500 transition-colors">
       <StreamPlayer playlistUrl={playlistUrl} title={camera.name} />
     </div>
   )

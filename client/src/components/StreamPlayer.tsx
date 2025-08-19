@@ -41,7 +41,7 @@ export default function StreamPlayer({ playlistUrl, title }: Props) {
   }, [playlistUrl])
 
   return (
-    <div className="rounded-lg overflow-hidden bg-black relative">
+    <div className="rounded-lg overflow-auto bg-black relative">
       <video ref={videoRef} className="w-full aspect-video" controls muted playsInline />
       {title ? (
         <div className="absolute top-2 left-2 px-2 py-1 text-xs text-white bg-black/60 rounded">
