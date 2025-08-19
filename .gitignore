@@ -1,2 +1,7 @@
 node_modules/
 */.env
+
+# Server build and runtime outputs
+server/dist/
+server/**/hls/
+server/*.db*
