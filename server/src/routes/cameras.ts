@@ -35,10 +35,26 @@ cameraRouter.get('/:id', (req, res) => {
   res.json(cam);
 });
 
-// Delete a camera
+// Delete a camera (stops streaming, removes HLS data, releases resources, deletes DB row)
 cameraRouter.delete('/:id', (req, res) => {
-  ffmpegManager.stopTranscoding(req.params.id);
-  deleteCameraStmt.run(req.params.id);
+  const id = req.params.id;
+  const cam = getCameraStmt.get(id) as Camera | undefined;
+  if (!cam) return res.status(404).json({ error: 'not found' });
+
+  // Stop any active transcoding and release ONVIF resources
+  ffmpegManager.stopTranscoding(id);
+  onvifManager.release(id);
+
+  // Remove HLS output directory for this camera
+  const camHlsDir = path.join(baseHlsDir, id);
+  try {
+    fs.rmSync(camHlsDir, { recursive: true, force: true });
+  } catch {
+    // ignore cleanup errors
+  }
+
+  // Remove DB record
+  deleteCameraStmt.run(id);
   res.status(204).end();
 });
 

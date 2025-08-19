@@ -6,9 +6,9 @@
     "dev": "bash ./dev.sh",
     "dev:server": "npm --prefix server run dev",
     "dev:client": "npm --prefix client run dev",
-    "build": "npm --prefix server run build && npm --prefix client run build",
-    "start": "npm --prefix server run start"
+    "start": "concurrently -n \"server,client\" -c \"green,blue\" \"npm --prefix server run dev\" \"npm --prefix client run dev\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0"
   }
 }
-
-

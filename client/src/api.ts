@@ -25,6 +25,15 @@ export async function startCamera(id: string): Promise<{ playlistUrl: string }> 
   return data;
 }
 
+export async function getCamera(id: string): Promise<Camera> {
+  const { data } = await axios.get(`${API_BASE}/cameras/${id}`);
+  return data;
+}
+
+export async function deleteCamera(id: string): Promise<void> {
+  await axios.delete(`${API_BASE}/cameras/${id}`);
+}
+
 export async function ptzMove(cameraId: string, payload: { type: 'relative' | 'continuous'; pan?: number; tilt?: number; zoom?: number; speed?: number; timeoutMs?: number }) {
   await axios.post(`${API_BASE}/cameras/${cameraId}/ptz/move`, payload);
 }

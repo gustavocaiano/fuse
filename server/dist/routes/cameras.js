@@ -36,10 +36,25 @@ exports.cameraRouter.get('/:id', (req, res) => {
         return res.status(404).json({ error: 'not found' });
     res.json(cam);
 });
-// Delete a camera
+// Delete a camera (stops streaming, removes HLS data, releases resources, deletes DB row)
 exports.cameraRouter.delete('/:id', (req, res) => {
-    ffmpegManager_1.ffmpegManager.stopTranscoding(req.params.id);
-    db_1.deleteCameraStmt.run(req.params.id);
+    const id = req.params.id;
+    const cam = db_1.getCameraStmt.get(id);
+    if (!cam)
+        return res.status(404).json({ error: 'not found' });
+    // Stop any active transcoding and release ONVIF resources
+    ffmpegManager_1.ffmpegManager.stopTranscoding(id);
+    onvifManager_1.onvifManager.release(id);
+    // Remove HLS output directory for this camera
+    const camHlsDir = path_1.default.join(baseHlsDir, id);
+    try {
+        fs_1.default.rmSync(camHlsDir, { recursive: true, force: true });
+    }
+    catch {
+        // ignore cleanup errors
+    }
+    // Remove DB record
+    db_1.deleteCameraStmt.run(id);
     res.status(204).end();
 });
 // Start HLS for camera and return m3u8 URL
