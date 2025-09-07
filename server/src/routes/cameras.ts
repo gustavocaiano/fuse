@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs';
-import { Camera, insertCamera, listCamerasStmt, getCameraStmt, deleteCameraStmt, updateCameraRecordingStmt } from '../db';
+import { Camera, insertCamera, listCamerasStmt, getCameraStmt, deleteCameraStmt, updateCameraRecordingStmt, listAccessibleCameraIdsForUserStmt, getUserStmt } from '../db';
 import { ffmpegManager } from '../ffmpegManager';
 import { onvifManager, PtzMovePayload, PtzStopPayload } from '../onvifManager';
 
@@ -11,9 +11,24 @@ export const cameraRouter = Router();
 const baseHlsDir = process.env.HLS_DIR ? path.resolve(process.env.HLS_DIR) : path.resolve(path.join(__dirname, '..', 'hls'));
 fs.mkdirSync(baseHlsDir, { recursive: true });
 
-// List cameras
-cameraRouter.get('/', (_req, res) => {
+// Attach user from x-user-id header
+cameraRouter.use((req, _res, next) => {
+  const userId = (req.headers['x-user-id'] as string) || '';
+  const user = userId ? (getUserStmt.get(userId) as any) : null;
+  (req as any).user = user || null;
+  next();
+});
+
+// List cameras (filter by access for non-admin)
+cameraRouter.get('/', (req, res) => {
+  const user = (req as any).user as { id?: string; role?: string } | undefined;
   const rows = listCamerasStmt.all() as Camera[];
+  if (!user || user.role !== 'admin') {
+    // if user is not provided, treat as no access
+    const allowedIds = user && user.id ? (listAccessibleCameraIdsForUserStmt.all(user.id) as Array<{ cameraId: string }>).map(r => r.cameraId) : [];
+    const filtered = rows.map(c => ({ ...c, rtsp: undefined as any })).filter(c => allowedIds.includes(c.id));
+    return res.json(filtered);
+  }
   res.json(rows);
 });
 
@@ -28,10 +43,17 @@ cameraRouter.post('/', (req, res) => {
   res.status(201).json(cam);
 });
 
-// Get a camera
+// Get a camera (hide rtsp for non-admin)
 cameraRouter.get('/:id', (req, res) => {
+  const user = (req as any).user as { id?: string; role?: string } | undefined;
   const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
   if (!cam) return res.status(404).json({ error: 'not found' });
+  if (!user || user.role !== 'admin') {
+    const allowedIds = user && user.id ? (listAccessibleCameraIdsForUserStmt.all(user.id) as Array<{ cameraId: string }>).map(r => r.cameraId) : [];
+    if (!allowedIds.includes(cam.id)) return res.status(403).json({ error: 'forbidden' });
+    const { rtsp, ...rest } = cam as any;
+    return res.json(rest);
+  }
   res.json(cam);
 });
 

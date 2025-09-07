@@ -3,6 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import dotenv from 'dotenv';
 import { cameraRouter } from './routes/cameras';
+import { userRouter } from './routes';
 
 dotenv.config();
 
@@ -12,6 +13,7 @@ app.use(express.json());
 
 // API routes
 app.use('/api/cameras', cameraRouter);
+app.use('/api/users', userRouter);
 
 // Serve HLS output static directory
 const hlsDir = path.resolve(process.env.HLS_DIR || path.join(__dirname, 'hls'));
