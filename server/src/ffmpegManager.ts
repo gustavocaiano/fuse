@@ -22,13 +22,24 @@ class FfmpegManager {
       '-rtsp_transport', 'tcp',
       '-i', rtspUrl,
       '-fflags', '+genpts',
+      // balanced x264 encode for stability
+      '-c:v', 'libx264',
       '-preset', 'veryfast',
-      '-g', '48',
+      '-profile:v', 'baseline',
+      '-x264-params', 'keyint=50:min-keyint=50:scenecut=0',
+      // target ~2s keyframe interval for 2s segments
+      '-g', '50',
       '-sc_threshold', '0',
+      // drop audio to avoid extra mux/demux latency (enable if needed)
+      '-an',
+      // reduce muxing delay
+      '-flush_packets', '1',
       '-f', 'hls',
+      // 2s segments, 3 in playlist ≈ ~6s window
       '-hls_time', '2',
-      '-hls_list_size', '6',
-      '-hls_flags', 'delete_segments+append_list+program_date_time',
+      '-hls_list_size', '3',
+      // make segments independently decodable and trim old ones
+      '-hls_flags', 'delete_segments+append_list+program_date_time+independent_segments',
       path.join(outputDir, 'index.m3u8')
     ];
 

@@ -18,6 +18,9 @@ const hlsDir = path.resolve(process.env.HLS_DIR || path.join(__dirname, 'hls'));
 app.use('/hls', express.static(hlsDir, {
 	setHeaders: (res) => {
 		res.setHeader('Access-Control-Allow-Origin', '*');
+		res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+		res.setHeader('Pragma', 'no-cache');
+		res.setHeader('Expires', '0');
 	}
 }));
 

@@ -19,17 +19,41 @@ export default function StreamPlayer({ playlistUrl, title }: Props) {
       hlsRef.current = null
     }
 
-    if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = playlistUrl
-      void video.play()
-    } else if (Hls.isSupported()) {
-      const hls = new Hls({ maxBufferLength: 10 })
+    if (Hls.isSupported()) {
+      const hls = new Hls({
+        // moderate live tuning for stability (~5–6s)
+        lowLatencyMode: false,
+        liveSyncDurationCount: 2,
+        liveMaxLatencyDurationCount: 4,
+        maxBufferLength: 5,
+        backBufferLength: 1,
+        enableWorker: true,
+        maxLiveSyncPlaybackRate: 1.25,
+      })
       hlsRef.current = hls
       hls.loadSource(playlistUrl)
       hls.attachMedia(video)
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         void video.play()
       })
+      hls.on(Hls.Events.ERROR, (_event, data) => {
+        if (data.fatal) {
+          switch (data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              hls.startLoad()
+              break
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              hls.recoverMediaError()
+              break
+            default:
+              hls.destroy()
+              hlsRef.current = null
+          }
+        }
+      })
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = playlistUrl
+      void video.play()
     }
 
     return () => {
