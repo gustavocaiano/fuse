@@ -5,3 +5,5 @@ node_modules/
 server/dist/
 server/**/hls/
 server/*.db*
+
+.DS_Store

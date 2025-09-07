@@ -38,6 +38,12 @@ class FfmpegManager {
       this.cameraIdToProcess.delete(cameraId);
     });
 
+    child.on('error', (err) => {
+      // Simple visibility into spawn failures
+      console.error(`ffmpeg spawn error for camera ${cameraId}:`, err?.message || err);
+      this.cameraIdToProcess.delete(cameraId);
+    });
+
     const handle: TranscodeHandle = { cameraId, process: child, outputDir };
     this.cameraIdToProcess.set(cameraId, handle);
     return handle;

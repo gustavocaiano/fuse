@@ -59,11 +59,30 @@ cameraRouter.delete('/:id', (req, res) => {
 });
 
 // Start HLS for camera and return m3u8 URL
-cameraRouter.post('/:id/start', (req, res) => {
+cameraRouter.post('/:id/start', async (req, res) => {
   const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
   if (!cam) return res.status(404).json({ error: 'not found' });
   const handle = ffmpegManager.ensureTranscoding(cam.id, cam.rtsp, baseHlsDir);
   const playlistUrl = `/hls/${cam.id}/index.m3u8`;
+
+  // Wait briefly for the HLS playlist to appear to avoid an initial 404 in the player
+  const playlistPath = path.join(baseHlsDir, cam.id, 'index.m3u8');
+
+  const waitForFile = async (filePath: string, timeoutMs = 12000, pollMs = 300) => {
+    const start = Date.now();
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      try {
+        fs.accessSync(filePath, fs.constants.F_OK);
+        return true;
+      } catch {}
+      if (Date.now() - start > timeoutMs) return false;
+      await new Promise(r => setTimeout(r, pollMs));
+    }
+  };
+
+  await waitForFile(playlistPath);
+
   res.json({ playlistUrl, outputDir: handle.outputDir });
 });
 
