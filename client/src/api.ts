@@ -7,6 +7,7 @@ export type Camera = {
   name: string;
   rtsp: string;
   createdAt: string;
+  recordEnabled?: number;
 };
 
 export async function listCameras(): Promise<Camera[]> {
@@ -32,6 +33,11 @@ export async function getCamera(id: string): Promise<Camera> {
 
 export async function deleteCamera(id: string): Promise<void> {
   await axios.delete(`${API_BASE}/cameras/${id}`);
+}
+
+export async function setRecording(id: string, enabled: boolean): Promise<{ id: string; recordEnabled: number }>{
+  const { data } = await axios.post(`${API_BASE}/cameras/${id}/recording`, { enabled });
+  return data;
 }
 
 export async function ptzMove(cameraId: string, payload: { type: 'relative' | 'continuous'; pan?: number; tilt?: number; zoom?: number; speed?: number; timeoutMs?: number }) {

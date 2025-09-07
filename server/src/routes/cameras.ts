@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs';
-import { Camera, insertCamera, listCamerasStmt, getCameraStmt, deleteCameraStmt } from '../db';
+import { Camera, insertCamera, listCamerasStmt, getCameraStmt, deleteCameraStmt, updateCameraRecordingStmt } from '../db';
 import { ffmpegManager } from '../ffmpegManager';
 import { onvifManager, PtzMovePayload, PtzStopPayload } from '../onvifManager';
 
@@ -19,11 +19,11 @@ cameraRouter.get('/', (_req, res) => {
 
 // Create camera
 cameraRouter.post('/', (req, res) => {
-  const { name, rtsp } = req.body as Partial<Camera>;
+  const { name, rtsp, recordEnabled } = req.body as Partial<Camera>;
   if (!name || !rtsp) return res.status(400).json({ error: 'name and rtsp are required' });
 
   const id = uuidv4();
-  const cam: Camera = { id, name, rtsp, createdAt: new Date().toISOString() };
+  const cam: Camera = { id, name, rtsp, createdAt: new Date().toISOString(), recordEnabled: recordEnabled ? 1 : 0 } as any;
   insertCamera.run(cam);
   res.status(201).json(cam);
 });
@@ -43,6 +43,7 @@ cameraRouter.delete('/:id', (req, res) => {
 
   // Stop any active transcoding and release ONVIF resources
   ffmpegManager.stopTranscoding(id);
+  ffmpegManager.stopRecording(id);
   onvifManager.release(id);
 
   // Remove HLS output directory for this camera
@@ -56,6 +57,33 @@ cameraRouter.delete('/:id', (req, res) => {
   // Remove DB record
   deleteCameraStmt.run(id);
   res.status(204).end();
+});
+
+// Toggle recording per camera
+cameraRouter.post('/:id/recording', (req, res) => {
+  const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
+  if (!cam) return res.status(404).json({ error: 'not found' });
+  const { enabled } = req.body as { enabled: boolean };
+  updateCameraRecordingStmt.run(enabled ? 1 : 0, cam.id);
+
+  const recordDir = process.env.RECORDINGS_DIR ? path.resolve(process.env.RECORDINGS_DIR) : '';
+  const recordMinutes = Number(process.env.RECORD_SEGMENT_MINUTES || 10);
+  if (recordDir) {
+    if (enabled) {
+      try {
+        fs.mkdirSync(recordDir, { recursive: true });
+        ffmpegManager.ensureRecording(cam.id, cam.rtsp, recordDir, recordMinutes);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error('Recording toggle on error:', e);
+      }
+    } else {
+      ffmpegManager.stopRecording(cam.id);
+    }
+  }
+
+  const updated = getCameraStmt.get(cam.id) as Camera;
+  res.json({ id: updated.id, recordEnabled: updated.recordEnabled });
 });
 
 // Start HLS for camera and return m3u8 URL
@@ -83,7 +111,20 @@ cameraRouter.post('/:id/start', async (req, res) => {
 
   await waitForFile(playlistPath);
 
-  res.json({ playlistUrl, outputDir: handle.outputDir });
+  // Start recording if configured and enabled
+  const recordDir = process.env.RECORDINGS_DIR ? path.resolve(process.env.RECORDINGS_DIR) : '';
+  const recordMinutes = Number(process.env.RECORD_SEGMENT_MINUTES || 10);
+  if (recordDir && cam.recordEnabled) {
+    try {
+      fs.mkdirSync(recordDir, { recursive: true });
+      ffmpegManager.ensureRecording(cam.id, cam.rtsp, recordDir, recordMinutes);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('Recording start error:', e);
+    }
+  }
+
+  res.json({ playlistUrl, outputDir: handle.outputDir, recording: Boolean(recordDir) });
 });
 
 // PTZ move
