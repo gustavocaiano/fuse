@@ -19,19 +19,42 @@ export default function StreamPlayer({ playlistUrl, title }: Props) {
       hlsRef.current = null
     }
 
+    const attachCatchUp = () => {
+      const onTimeUpdate = () => {
+        const v = videoRef.current
+        if (!v) return
+        // Keep within ~3-4s of the live edge to avoid drift
+        const ranges = v.buffered
+        if (!ranges || ranges.length === 0) return
+        const end = ranges.end(ranges.length - 1)
+        const gap = end - v.currentTime
+        // If we are falling >6s behind, jump closer to live edge
+        if (gap > 6) {
+          try { v.currentTime = Math.max(0, end - 3) } catch {}
+        }
+      }
+      video.addEventListener('timeupdate', onTimeUpdate)
+      return () => video.removeEventListener('timeupdate', onTimeUpdate)
+    }
+
+    let detachCatchUp: (() => void) | undefined
+
     if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = playlistUrl
+      detachCatchUp = attachCatchUp()
       void video.play()
     } else if (Hls.isSupported()) {
       const hls = new Hls({
-        // allow DVR scrubbing without jumping to live
+        // standard HLS (not LL-HLS) tuned to stay near live edge
         lowLatencyMode: false,
-        liveSyncDurationCount: 2,
-        liveMaxLatencyDurationCount: 20,
-        maxBufferLength: 6,
-        backBufferLength: 1,
+        liveDurationInfinity: true,
+        liveSyncDurationCount: 1,
+        liveMaxLatencyDurationCount: 6,
+        maxBufferLength: 4,
+        backBufferLength: 0.5,
+        maxBufferHole: 0.5,
+        maxLiveSyncPlaybackRate: 1.15,
         enableWorker: true,
-        maxLiveSyncPlaybackRate: 1.0,
       })
       hlsRef.current = hls
       hls.loadSource(playlistUrl)
@@ -39,6 +62,17 @@ export default function StreamPlayer({ playlistUrl, title }: Props) {
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         void video.play()
       })
+      hls.on(Hls.Events.LEVEL_UPDATED, () => {
+        // Nudge to live if we somehow drifted far back
+        const v = videoRef.current
+        if (!v) return
+        const details = hls.levels?.[hls.currentLevel]?.details
+        const liveEdge = (details && (details as any).live ? hls.liveSyncPosition ?? NaN : NaN)
+        if (!Number.isNaN(liveEdge) && v.currentTime < liveEdge - 6) {
+          try { v.currentTime = liveEdge - 3 } catch {}
+        }
+      })
+      detachCatchUp = attachCatchUp()
       hls.on(Hls.Events.ERROR, (_event, data) => {
         if (data.fatal) {
           switch (data.type) {
@@ -61,6 +95,7 @@ export default function StreamPlayer({ playlistUrl, title }: Props) {
         hlsRef.current.destroy()
         hlsRef.current = null
       }
+      if (detachCatchUp) detachCatchUp()
     }
   }, [playlistUrl])
 
