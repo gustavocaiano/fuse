@@ -16,8 +16,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={<RequireAuth><Home /></RequireAuth>} />
           <Route path="/login" element={<Login />} />
-          <Route path="/admin" element={<RequireAuth><Admin /></RequireAuth>} />
-          <Route path="/ptz/:id" element={<PTZControl />} />
+          <Route path="/admin" element={<RequireAdmin><Admin /></RequireAdmin>} />
+          <Route path="/ptz/:id" element={<RequireAdmin><PTZControl /></RequireAdmin>} />
         </Routes>
       </main>
     </div>
@@ -37,6 +37,22 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   }, [])
   if (checking) return <div className="text-slate-400">Checking session…</div>
   if (!ok) return <Navigate to="/login" replace />
+  return <>{children}</>
+}
+
+function RequireAdmin({ children }: { children: React.ReactNode }) {
+  const [checking, setChecking] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(false)
+  useEffect(() => {
+    const saved = localStorage.getItem('userId')
+    setAuthUser(saved)
+    getMe().then(me => {
+      setIsAdmin(Boolean(me && me.role === 'admin'))
+      setChecking(false)
+    })
+  }, [])
+  if (checking) return <div className="text-slate-400">Checking permissions…</div>
+  if (!isAdmin) return <Navigate to="/" replace />
   return <>{children}</>
 }
 
@@ -69,13 +85,14 @@ function Login() {
   const navigate = useNavigate()
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setAuthUser(userId || null)
+    const cleaned = userId.trim()
+    setAuthUser(cleaned || null)
     const me = await getMe()
     if (!me) {
       setError('User not found. Ask an admin to create your user ID.')
       return
     }
-    localStorage.setItem('userId', userId)
+    localStorage.setItem('userId', cleaned)
     navigate('/')
   }
   return (
@@ -172,9 +189,11 @@ function Home() {
   const [name, setName] = useState('')
   const [rtsp, setRtsp] = useState('')
   const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [me, setMe] = useState<User | null>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
+    getMe().then(setMe).catch(() => setMe(null))
     refresh()
   }, [])
 
@@ -200,36 +219,38 @@ function Home() {
     <div className="h-full flex gap-6">
       {/* Left Sidebar */}
       <div className="w-80 flex-shrink-0 space-y-4 overflow-y-auto">
-        {/* Add Camera Card */}
-        <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
-          <h2 className="text-lg font-semibold text-emerald-400 mb-4">Add Camera</h2>
-          <form onSubmit={onAdd} className="space-y-3">
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Camera Name</label>
-              <input 
-                value={name} 
-                onChange={(e) => setName(e.target.value)} 
-                placeholder="e.g., Lobby Camera" 
-                className="w-full rounded bg-slate-700 border border-slate-600 px-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">RTSP Stream URL</label>
-              <input 
-                value={rtsp} 
-                onChange={(e) => setRtsp(e.target.value)} 
-                placeholder="rtsp://user:pass@ip:554/stream" 
-                className="w-full rounded bg-slate-700 border border-slate-600 px-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
-              />
-            </div>
-            <button 
-              type="submit" 
-              className="w-full bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded text-sm font-medium transition-colors"
-            >
-              + Add Camera
-            </button>
-          </form>
-        </div>
+        {/* Add Camera Card (admin only) */}
+        {me?.role === 'admin' ? (
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
+            <h2 className="text-lg font-semibold text-emerald-400 mb-4">Add Camera</h2>
+            <form onSubmit={onAdd} className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Camera Name</label>
+                <input 
+                  value={name} 
+                  onChange={(e) => setName(e.target.value)} 
+                  placeholder="e.g., Lobby Camera" 
+                  className="w-full rounded bg-slate-700 border border-slate-600 px-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">RTSP Stream URL</label>
+                <input 
+                  value={rtsp} 
+                  onChange={(e) => setRtsp(e.target.value)} 
+                  placeholder="rtsp://user:pass@ip:554/stream" 
+                  className="w-full rounded bg-slate-700 border border-slate-600 px-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
+                />
+              </div>
+              <button 
+                type="submit" 
+                className="w-full bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded text-sm font-medium transition-colors"
+              >
+                + Add Camera
+              </button>
+            </form>
+          </div>
+        ) : null}
 
         {/* Cameras List */}
         <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
@@ -262,39 +283,41 @@ function Home() {
                         <div className="text-xs text-slate-400 font-mono break-all">{c.rtsp}</div>
                       </div>
                     </label>
-                    <div className="flex gap-1 items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <label className="flex items-center gap-1 text-xs text-slate-300">
-                        <input
-                          type="checkbox"
-                          checked={Boolean(c.recordEnabled)}
-                          onChange={async (e) => {
-                            const enabled = e.target.checked
-                            await setRecording(c.id, enabled)
+                    {me?.role === 'admin' ? (
+                      <div className="flex gap-1 items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <label className="flex items-center gap-1 text-xs text-slate-300">
+                          <input
+                            type="checkbox"
+                            checked={Boolean(c.recordEnabled)}
+                            onChange={async (e) => {
+                              const enabled = e.target.checked
+                              await setRecording(c.id, enabled)
+                              await refresh()
+                            }}
+                            className="accent-red-500"
+                            title="Toggle recording"
+                          />
+                          <span>Record</span>
+                        </label>
+                        <button 
+                          onClick={() => navigate(`/ptz/${c.id}`)} 
+                          className="text-xs px-2 py-1 bg-indigo-600 hover:bg-indigo-500 rounded text-white transition-colors"
+                        >
+                          Control
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (!window.confirm(`Delete camera \"${c.name}\" and all its data?`)) return
+                            await deleteCamera(c.id)
+                            setSelectedIds(prev => prev.filter(x => x !== c.id))
                             await refresh()
                           }}
-                          className="accent-red-500"
-                          title="Toggle recording"
-                        />
-                        <span>Record</span>
-                      </label>
-                      <button 
-                        onClick={() => navigate(`/ptz/${c.id}`)} 
-                        className="text-xs px-2 py-1 bg-indigo-600 hover:bg-indigo-500 rounded text-white transition-colors"
-                      >
-                        Control
-                      </button>
-                      <button
-                        onClick={async () => {
-                          if (!window.confirm(`Delete camera "${c.name}" and all its data?`)) return
-                          await deleteCamera(c.id)
-                          setSelectedIds(prev => prev.filter(x => x !== c.id))
-                          await refresh()
-                        }}
-                        className="text-xs px-2 py-1 bg-red-600 hover:bg-red-500 rounded text-white transition-colors"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                          className="text-xs px-2 py-1 bg-red-600 hover:bg-red-500 rounded text-white transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               ))}
@@ -327,7 +350,7 @@ function Home() {
                 {selectedIds.map(id => {
                   const cam = cameras.find(c => c.id === id)
                   if (!cam) return null
-                  return <MultiStream key={id} camera={cam} />
+                  return <MultiStream key={id} camera={cam} isAdmin={me?.role === 'admin'} />
                 })}
               </div>
             )}
@@ -338,7 +361,7 @@ function Home() {
   )
 }
 
-function MultiStream({ camera }: { camera: Camera }) {
+function MultiStream({ camera, isAdmin }: { camera: Camera; isAdmin?: boolean }) {
   const [playlistUrl, setPlaylistUrl] = useState<string>('')
   const [isLoading, setIsLoading] = useState(true)
 
@@ -381,10 +404,12 @@ function MultiStream({ camera }: { camera: Camera }) {
             onClick={() => window.open(playlistUrl, '_blank')}
             className="text-xs px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-200"
           >Open HLS</button>
-          <button 
-            onClick={() => navigator.clipboard.writeText(camera.rtsp!)}
-            className="text-xs px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-200"
-          >Copy RTSP</button>
+          {isAdmin ? (
+            <button 
+              onClick={() => navigator.clipboard.writeText(camera.rtsp!)}
+              className="text-xs px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-200"
+            >Copy RTSP</button>
+          ) : null}
         </div>
       </div>
     </div>
