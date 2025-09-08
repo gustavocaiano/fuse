@@ -382,7 +382,7 @@ function MultiStream({ camera }: { camera: Camera }) {
             className="text-xs px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-200"
           >Open HLS</button>
           <button 
-            onClick={() => navigator.clipboard.writeText(camera.rtsp)}
+            onClick={() => navigator.clipboard.writeText(camera.rtsp!)}
             className="text-xs px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-200"
           >Copy RTSP</button>
         </div>
