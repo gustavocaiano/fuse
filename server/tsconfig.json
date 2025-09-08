@@ -37,9 +37,10 @@
     "strict": true,
     "jsx": "react-jsx",
     
-    
-    "noUncheckedSideEffectImports": true,
-    "moduleDetection": "force",
+    "verbatimModuleSyntax": false,
+    "moduleDetection": "auto",
+    "noUncheckedSideEffectImports": false,
+
     "skipLibCheck": true,
 
     "esModuleInterop": true,
