@@ -33,27 +33,31 @@ const port = Number(process.env.PORT || 4000);
 app.listen(port, () => {
 	console.log(`cam-parser server listening on http://localhost:${port}`);
 
-	// Auto-start recordings for cameras that have recording enabled
+	// Auto-start combined pipeline for cameras; include recording if enabled
 	try {
-		const recordDir = process.env.RECORDINGS_DIR ? path.resolve(process.env.RECORDINGS_DIR) : '';
+		const recordDirEnv = process.env.RECORDINGS_DIR ? path.resolve(process.env.RECORDINGS_DIR) : '';
 		const recordMinutes = Number(process.env.RECORD_SEGMENT_MINUTES || 10);
-		if (recordDir) {
-			try { fs.mkdirSync(recordDir, { recursive: true }); } catch {}
-			const rows = listCamerasStmt.all() as Array<{ id: string; rtsp: string; recordEnabled: number }>;
-			for (const cam of rows) {
-				if (cam.recordEnabled) {
-					try {
-						ffmpegManager.ensureRecording(cam.id, cam.rtsp, recordDir, recordMinutes);
-					} catch (e) {
-						// eslint-disable-next-line no-console
-						console.error('Auto-start recording error:', cam.id, e);
-					}
-				}
+		try { fs.mkdirSync(hlsDir, { recursive: true }); } catch {}
+		if (recordDirEnv) { try { fs.mkdirSync(recordDirEnv, { recursive: true }); } catch {} }
+		const rows = listCamerasStmt.all() as Array<{ id: string; rtsp: string; recordEnabled: number }>;
+		for (const cam of rows) {
+			try {
+				ffmpegManager.ensurePipeline(
+					cam.id,
+					cam.rtsp,
+					hlsDir,
+					cam.recordEnabled ? recordDirEnv : '',
+					recordMinutes,
+					Boolean(cam.recordEnabled)
+				);
+			} catch (e) {
+				// eslint-disable-next-line no-console
+				console.error('Auto-start pipeline error:', cam.id, e);
 			}
 		}
 	} catch (e) {
 		// eslint-disable-next-line no-console
-		console.error('Auto-start recordings supervisor error:', e);
+		console.error('Auto-start pipelines supervisor error:', e);
 	}
 });
 

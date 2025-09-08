@@ -63,7 +63,8 @@ cameraRouter.delete('/:id', (req, res) => {
   const cam = getCameraStmt.get(id) as Camera | undefined;
   if (!cam) return res.status(404).json({ error: 'not found' });
 
-  // Stop any active transcoding and release ONVIF resources
+  // Stop any active pipelines and release ONVIF resources
+  ffmpegManager.stopPipeline(id);
   ffmpegManager.stopTranscoding(id);
   ffmpegManager.stopRecording(id);
   onvifManager.release(id);
@@ -90,18 +91,18 @@ cameraRouter.post('/:id/recording', (req, res) => {
 
   const recordDir = process.env.RECORDINGS_DIR ? path.resolve(process.env.RECORDINGS_DIR) : '';
   const recordMinutes = Number(process.env.RECORD_SEGMENT_MINUTES || 10);
-  if (recordDir) {
+  try {
+    fs.mkdirSync(baseHlsDir, { recursive: true });
     if (enabled) {
-      try {
-        fs.mkdirSync(recordDir, { recursive: true });
-        ffmpegManager.ensureRecording(cam.id, cam.rtsp, recordDir, recordMinutes);
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error('Recording toggle on error:', e);
-      }
+      if (recordDir) fs.mkdirSync(recordDir, { recursive: true });
+      ffmpegManager.ensurePipeline(cam.id, cam.rtsp, baseHlsDir, recordDir, recordMinutes, true);
     } else {
-      ffmpegManager.stopRecording(cam.id);
+      // Switch pipeline to HLS-only (if running) or do nothing if idle
+      ffmpegManager.ensurePipeline(cam.id, cam.rtsp, baseHlsDir, '', recordMinutes, false);
     }
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error('Recording toggle pipeline error:', e);
   }
 
   const updated = getCameraStmt.get(cam.id) as Camera;
@@ -112,7 +113,9 @@ cameraRouter.post('/:id/recording', (req, res) => {
 cameraRouter.post('/:id/start', async (req, res) => {
   const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
   if (!cam) return res.status(404).json({ error: 'not found' });
-  const handle = ffmpegManager.ensureTranscoding(cam.id, cam.rtsp, baseHlsDir);
+  const recordDir = process.env.RECORDINGS_DIR ? path.resolve(process.env.RECORDINGS_DIR) : '';
+  const recordMinutes = Number(process.env.RECORD_SEGMENT_MINUTES || 10);
+  const handle = ffmpegManager.ensurePipeline(cam.id, cam.rtsp, baseHlsDir, cam.recordEnabled ? recordDir : '', recordMinutes, Boolean(cam.recordEnabled));
   const playlistUrl = `/hls/${cam.id}/index.m3u8`;
 
   // Wait briefly for the HLS playlist to appear to avoid an initial 404 in the player
@@ -133,20 +136,9 @@ cameraRouter.post('/:id/start', async (req, res) => {
 
   await waitForFile(playlistPath);
 
-  // Start recording if configured and enabled
-  const recordDir = process.env.RECORDINGS_DIR ? path.resolve(process.env.RECORDINGS_DIR) : '';
-  const recordMinutes = Number(process.env.RECORD_SEGMENT_MINUTES || 10);
-  if (recordDir && cam.recordEnabled) {
-    try {
-      fs.mkdirSync(recordDir, { recursive: true });
-      ffmpegManager.ensureRecording(cam.id, cam.rtsp, recordDir, recordMinutes);
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error('Recording start error:', e);
-    }
-  }
+  // Pipeline already includes recording if enabled; nothing else to do
 
-  res.json({ playlistUrl, outputDir: handle.outputDir, recording: Boolean(recordDir) });
+  res.json({ playlistUrl, outputDir: (handle as any).hlsDir || path.join(baseHlsDir, cam.id), recording: Boolean(cam.recordEnabled) });
 });
 
 // PTZ move
