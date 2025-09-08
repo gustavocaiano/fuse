@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000/api';
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 
 export type Camera = {
   id: string;
@@ -18,7 +18,8 @@ export type User = {
 };
 
 export function setAuthUser(userId: string | null) {
-  if (userId) axios.defaults.headers.common['x-user-id'] = userId;
+  const clean = (userId ?? '').trim();
+  if (clean) axios.defaults.headers.common['x-user-id'] = clean;
   else delete axios.defaults.headers.common['x-user-id'];
 }
 
