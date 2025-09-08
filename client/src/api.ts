@@ -5,9 +5,31 @@ const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000/api';
 export type Camera = {
   id: string;
   name: string;
-  rtsp: string;
+  rtsp?: string;
+  createdAt: string;
+  recordEnabled?: number;
+};
+
+export type User = {
+  id: string;
+  name: string;
+  role: 'admin' | 'user';
   createdAt: string;
 };
+
+export function setAuthUser(userId: string | null) {
+  if (userId) axios.defaults.headers.common['x-user-id'] = userId;
+  else delete axios.defaults.headers.common['x-user-id'];
+}
+
+export async function getMe(): Promise<User | null> {
+  try {
+    const { data } = await axios.get(`${API_BASE}/users/me`);
+    return data as User;
+  } catch {
+    return null;
+  }
+}
 
 export async function listCameras(): Promise<Camera[]> {
   const { data } = await axios.get(`${API_BASE}/cameras`);
@@ -23,6 +45,62 @@ export async function startCamera(id: string): Promise<{ playlistUrl: string }> 
   const { data } = await axios.post(`${API_BASE}/cameras/${id}/start`);
   // server serves hls at same origin (client dev proxy will map): return relative url
   return data;
+}
+
+export async function getCamera(id: string): Promise<Camera> {
+  const { data } = await axios.get(`${API_BASE}/cameras/${id}`);
+  return data;
+}
+
+export async function deleteCamera(id: string): Promise<void> {
+  await axios.delete(`${API_BASE}/cameras/${id}`);
+}
+
+export async function setRecording(id: string, enabled: boolean): Promise<{ id: string; recordEnabled: number }>{
+  const { data } = await axios.post(`${API_BASE}/cameras/${id}/recording`, { enabled });
+  return data;
+}
+
+// Admin APIs
+export async function updateCamera(id: string, payload: { name: string; rtsp: string }) {
+  const { data } = await axios.put(`${API_BASE}/users/cameras/${id}`, payload);
+  return data as Camera;
+}
+
+export async function createUser(name: string, role: 'admin' | 'user') {
+  const { data } = await axios.post(`${API_BASE}/users`, { name, role });
+  return data as User;
+}
+
+export async function listUsers() {
+  const { data } = await axios.get(`${API_BASE}/users`);
+  return data as User[];
+}
+
+export async function grantAccess(userId: string, cameraId: string) {
+  await axios.post(`${API_BASE}/users/${userId}/access/${cameraId}`);
+}
+
+export async function revokeAccess(userId: string, cameraId: string) {
+  await axios.delete(`${API_BASE}/users/${userId}/access/${cameraId}`);
+}
+
+export async function getAccessibleCameraIds(): Promise<'ALL' | string[]> {
+  const { data } = await axios.get(`${API_BASE}/users/me/cameras`);
+  return data.cameraIds as any;
+}
+
+export async function listUsersWithAccess(cameraId: string): Promise<User[]> {
+  const { data } = await axios.get(`${API_BASE}/users/cameras/${cameraId}/users`);
+  return data as User[];
+}
+
+export async function ptzMove(cameraId: string, payload: { type: 'relative' | 'continuous'; pan?: number; tilt?: number; zoom?: number; speed?: number; timeoutMs?: number }) {
+  await axios.post(`${API_BASE}/cameras/${cameraId}/ptz/move`, payload);
+}
+
+export async function ptzStop(cameraId: string, payload: { panTilt?: boolean; zoom?: boolean } = { panTilt: true, zoom: true }) {
+  await axios.post(`${API_BASE}/cameras/${cameraId}/ptz/stop`, payload);
 }
 
 
