@@ -45,25 +45,32 @@ class FfmpegManager {
     const args = [
       '-rtsp_transport', 'tcp',
       '-i', rtspUrl,
-      '-fflags', '+genpts',
-      // balanced x264 encode for stability
+      '-fflags', '+genpts+flush_packets',
+      '-flags', 'low_delay',
+      '-probesize', '32',
+      '-analyzeduration', '0',
+      // Ultra-low latency x264 encode
       '-c:v', 'libx264',
-      '-preset', 'veryfast',
+      '-preset', 'ultrafast',
+      '-tune', 'zerolatency',
       '-profile:v', 'baseline',
-      '-x264-params', 'keyint=50:min-keyint=50:scenecut=0',
-      // target ~2s keyframe interval for 2s segments
-      '-g', '50',
+      '-x264-params', 'keyint=15:min-keyint=15:scenecut=0:bframes=0',
+      // Very small GOP for minimal delay
+      '-g', '15',
       '-sc_threshold', '0',
-      // drop audio to avoid extra mux/demux latency (enable if needed)
+      // drop audio to avoid extra mux/demux latency
       '-an',
       // reduce muxing delay
       '-flush_packets', '1',
+      '-muxdelay', '0.1',
       '-f', 'hls',
-      // 2s segments, 3 in playlist ≈ ~6s window
-      '-hls_time', '2',
-      '-hls_list_size', '3',
+      // 0.5s segments, 2 in playlist ≈ ~1s window
+      '-hls_time', '0.5',
+      '-hls_list_size', '2',
       // make segments independently decodable and trim old ones
-      '-hls_flags', 'delete_segments+append_list+program_date_time+independent_segments',
+      '-hls_flags', 'delete_segments+append_list+independent_segments',
+      '-hls_allow_cache', '0',
+      '-hls_segment_type', 'mpegts',
       path.join(outputDir, 'index.m3u8')
     ];
 
@@ -122,16 +129,20 @@ class FfmpegManager {
       const args = [
         '-rtsp_transport', 'tcp',
         // Generate PTS if missing (some RTSP sources)
-        '-fflags', '+genpts',
+        '-fflags', '+genpts+flush_packets',
+        '-flags', 'low_delay',
+        '-probesize', '32',
+        '-analyzeduration', '0',
         '-i', rtspUrl,
         // transcode for compatibility and consistent container
         '-c:v', 'libx264',
-        '-preset', 'veryfast',
+        '-preset', 'ultrafast',
+        '-tune', 'zerolatency',
         '-profile:v', 'baseline',
         // consistent GOP to help clean segmenting
-        '-g', '50',
+        '-g', '15',
         '-sc_threshold', '0',
-        '-x264-params', 'keyint=50:min-keyint=50:scenecut=0',
+        '-x264-params', 'keyint=15:min-keyint=15:scenecut=0:bframes=0',
         // ensure a keyframe exactly at each segment boundary
         '-force_key_frames', forceKeyExpr,
         '-movflags', '+faststart',
@@ -229,13 +240,17 @@ class FfmpegManager {
       const forceKeyExpr = `expr:gte(t, n_forced*${segmentSeconds})`;
       const args: string[] = [
         '-rtsp_transport', 'tcp',
-        '-fflags', '+genpts',
+        '-fflags', '+genpts+flush_packets',
+        '-flags', 'low_delay',
+        '-probesize', '32',
+        '-analyzeduration', '0',
         '-i', rtspUrl,
         '-c:v', 'libx264',
-        '-preset', 'veryfast',
+        '-preset', 'ultrafast',
+        '-tune', 'zerolatency',
         '-profile:v', 'baseline',
-        '-x264-params', 'keyint=50:min-keyint=50:scenecut=0',
-        '-g', '50',
+        '-x264-params', 'keyint=15:min-keyint=15:scenecut=0:bframes=0',
+        '-g', '15',
         '-sc_threshold', '0',
         '-an',
       ];
@@ -245,7 +260,7 @@ class FfmpegManager {
         const segPattern = path.join(dir, 'part-%03d.mp4');
         const teeDest =
           `tee:` +
-          `[f=hls:hls_time=2:hls_list_size=3:hls_flags=delete_segments+append_list+program_date_time+independent_segments]${hlsOut}` +
+          `[f=hls:hls_time=0.5:hls_list_size=2:hls_flags=delete_segments+append_list+independent_segments:hls_allow_cache=0:hls_segment_type=mpegts]${hlsOut}` +
           `|` +
           `[f=segment:segment_time=${segmentSeconds}:segment_atclocktime=1:reset_timestamps=1]${segPattern}`;
         args.push(
@@ -255,10 +270,13 @@ class FfmpegManager {
       } else {
         args.push(
           '-flush_packets', '1',
+          '-muxdelay', '0.1',
           '-f', 'hls',
-          '-hls_time', '2',
-          '-hls_list_size', '3',
-          '-hls_flags', 'delete_segments+append_list+program_date_time+independent_segments',
+          '-hls_time', '0.5',
+          '-hls_list_size', '2',
+          '-hls_flags', 'delete_segments+append_list+independent_segments',
+          '-hls_allow_cache', '0',
+          '-hls_segment_type', 'mpegts',
           path.join(hlsDir, 'index.m3u8')
         );
       }

@@ -21,11 +21,23 @@ app.use('/api/users', userRouter);
 // Serve HLS output static directory
 const hlsDir = path.resolve(process.env.HLS_DIR || path.join(__dirname, 'hls'));
 app.use('/hls', express.static(hlsDir, {
-	setHeaders: (res) => {
+	setHeaders: (res, path) => {
 		res.setHeader('Access-Control-Allow-Origin', '*');
-		res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
-		res.setHeader('Pragma', 'no-cache');
-		res.setHeader('Expires', '0');
+		
+		// Ultra-low latency: different caching for manifest vs segments
+		if (path.endsWith('.m3u8')) {
+			// Playlist files: no caching for live updates
+			res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+			res.setHeader('Pragma', 'no-cache');
+			res.setHeader('Expires', '0');
+		} else if (path.endsWith('.ts') || path.endsWith('.mp4')) {
+			// Segment files: allow minimal caching since they're immutable once created
+			res.setHeader('Cache-Control', 'public, max-age=1, immutable');
+		}
+		
+		// Additional headers for streaming optimization
+		res.setHeader('Connection', 'keep-alive');
+		res.setHeader('X-Content-Type-Options', 'nosniff');
 	}
 }));
 

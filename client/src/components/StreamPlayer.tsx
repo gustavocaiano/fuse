@@ -23,14 +23,14 @@ export default function StreamPlayer({ playlistUrl, title }: Props) {
       const onTimeUpdate = () => {
         const v = videoRef.current
         if (!v) return
-        // Keep within ~3-4s of the live edge to avoid drift
+        // Ultra-low latency: keep within ~0.5-1s of the live edge
         const ranges = v.buffered
         if (!ranges || ranges.length === 0) return
         const end = ranges.end(ranges.length - 1)
         const gap = end - v.currentTime
-        // If we are falling >6s behind, jump closer to live edge
-        if (gap > 6) {
-          try { v.currentTime = Math.max(0, end - 3) } catch {}
+        // If we are falling >2s behind, jump closer to live edge immediately
+        if (gap > 2) {
+          try { v.currentTime = Math.max(0, end - 0.5) } catch {}
         }
       }
       video.addEventListener('timeupdate', onTimeUpdate)
@@ -45,16 +45,31 @@ export default function StreamPlayer({ playlistUrl, title }: Props) {
       void video.play()
     } else if (Hls.isSupported()) {
       const hls = new Hls({
-        // standard HLS (not LL-HLS) tuned to stay near live edge
-        lowLatencyMode: false,
+        // Ultra-low latency HLS settings
+        lowLatencyMode: true,
         liveDurationInfinity: true,
         liveSyncDurationCount: 1,
-        liveMaxLatencyDurationCount: 6,
-        maxBufferLength: 4,
-        backBufferLength: 0.5,
-        maxBufferHole: 0.5,
-        maxLiveSyncPlaybackRate: 1.15,
+        liveMaxLatencyDurationCount: 2,
+        // Minimal buffering for lowest latency
+        maxBufferLength: 1,
+        maxMaxBufferLength: 2,
+        backBufferLength: 0,
+        maxBufferHole: 0.1,
+        maxFragLookUpTolerance: 0,
+        // Aggressive live sync
+        maxLiveSyncPlaybackRate: 1.5,
+        liveSyncOnStallIncrease: 1,
+        // Fast loading and parsing
         enableWorker: true,
+        progressive: true,
+        // Minimal startup delay
+        startFragPrefetch: true,
+        manifestLoadingTimeOut: 2000,
+        manifestLoadingMaxRetry: 1,
+        levelLoadingTimeOut: 2000,
+        levelLoadingMaxRetry: 1,
+        fragLoadingTimeOut: 2000,
+        fragLoadingMaxRetry: 1,
       })
       hlsRef.current = hls
       hls.loadSource(playlistUrl)
@@ -63,13 +78,13 @@ export default function StreamPlayer({ playlistUrl, title }: Props) {
         void video.play()
       })
       hls.on(Hls.Events.LEVEL_UPDATED, () => {
-        // Nudge to live if we somehow drifted far back
+        // Ultra-low latency: nudge to live if we drift >1s back
         const v = videoRef.current
         if (!v) return
         const details = hls.levels?.[hls.currentLevel]?.details
         const liveEdge = (details && (details as any).live ? hls.liveSyncPosition ?? NaN : NaN)
-        if (!Number.isNaN(liveEdge) && v.currentTime < liveEdge - 6) {
-          try { v.currentTime = liveEdge - 3 } catch {}
+        if (!Number.isNaN(liveEdge) && v.currentTime < liveEdge - 1) {
+          try { v.currentTime = liveEdge - 0.2 } catch {}
         }
       })
       detachCatchUp = attachCatchUp()
