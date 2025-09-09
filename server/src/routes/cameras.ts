@@ -233,10 +233,15 @@ cameraRouter.get('/:id/recordings/years', (req, res) => {
   const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
   if (!cam) return res.status(404).json({ error: 'not found' });
 
+  console.log(`Recordings years request - User: ${user?.id} (${user?.role}), Camera: ${cam.id}`);
+
   // Check permissions (same as camera access)
   if (!user || user.role !== 'admin') {
     const allowedIds = user && user.id ? (listAccessibleCameraIdsForUserStmt.all(user.id) as Array<{ cameraId: string }>).map(r => r.cameraId) : [];
-    if (!allowedIds.includes(cam.id)) return res.status(403).json({ error: 'forbidden' });
+    if (!allowedIds.includes(cam.id)) {
+      console.log(`Access denied - User ${user?.id} not in allowed IDs: ${allowedIds.join(', ')}`);
+      return res.status(403).json({ error: 'forbidden' });
+    }
   }
 
   try {
@@ -417,10 +422,14 @@ cameraRouter.get('/:id/recordings/:year/:month/:day/:hour/file/:filename', (req,
 
   try {
     const recordingsDir = process.env.RECORDINGS_DIR || path.join(__dirname, '..', '..', 'recordings');
-    const filePath = path.join(recordingsDir, cam.id, req.params.year, req.params.month, req.params.day, req.params.hour, req.params.filename);
+    const resolvedRecordingsDir = path.resolve(recordingsDir);
+    const filePath = path.resolve(path.join(recordingsDir, cam.id, req.params.year, req.params.month, req.params.day, req.params.hour, req.params.filename));
+    
+    console.log(`Playback request - User: ${(req as any).user?.id}, Camera: ${cam.id}, File: ${filePath}`);
     
     // Security: prevent path traversal
-    if (!filePath.startsWith(recordingsDir)) {
+    if (!filePath.startsWith(resolvedRecordingsDir)) {
+      console.error(`Path traversal attempt: ${filePath} not under ${resolvedRecordingsDir}`);
       return res.status(403).json({ error: 'forbidden' });
     }
 
