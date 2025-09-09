@@ -30,6 +30,9 @@ app.use('/hls', express.static(hlsDir, {
 			res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
 			res.setHeader('Pragma', 'no-cache');
 			res.setHeader('Expires', '0');
+			// Additional anti-proxy headers
+			res.setHeader('Surrogate-Control', 'no-store');
+			res.setHeader('X-Accel-Expires', '0');
 		} else if (path.endsWith('.ts') || path.endsWith('.mp4')) {
 			// Segment files: allow minimal caching since they're immutable once created
 			res.setHeader('Cache-Control', 'public, max-age=1, immutable');
@@ -38,6 +41,11 @@ app.use('/hls', express.static(hlsDir, {
 		// Additional headers for streaming optimization
 		res.setHeader('Connection', 'keep-alive');
 		res.setHeader('X-Content-Type-Options', 'nosniff');
+		// Anti-proxy buffering headers
+		res.setHeader('X-Accel-Buffering', 'no');
+		res.setHeader('Proxy-Buffering', 'off');
+		// Force proxy to not transform content
+		res.setHeader('Cache-Control', res.getHeader('Cache-Control') + ', no-transform');
 	}
 }));
 

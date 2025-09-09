@@ -65,12 +65,22 @@ export default function StreamPlayer({ playlistUrl, title }: Props) {
         progressive: true,
         // Minimal startup delay
         startFragPrefetch: true,
-        manifestLoadingTimeOut: 2000,
-        manifestLoadingMaxRetry: 1,
-        levelLoadingTimeOut: 2000,
-        levelLoadingMaxRetry: 1,
-        fragLoadingTimeOut: 2000,
-        fragLoadingMaxRetry: 1,
+        // Increased timeouts for proxy environments
+        manifestLoadingTimeOut: 8000,
+        manifestLoadingMaxRetry: 3,
+        levelLoadingTimeOut: 8000,
+        levelLoadingMaxRetry: 3,
+        fragLoadingTimeOut: 8000,
+        fragLoadingMaxRetry: 3,
+        // Additional proxy-friendly settings
+        xhrSetup: function(xhr, url) {
+          // Add headers to bypass proxy caching
+          xhr.setRequestHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+          xhr.setRequestHeader('Pragma', 'no-cache');
+          xhr.setRequestHeader('Expires', '0');
+          // Prevent proxy transformation
+          xhr.setRequestHeader('Accept-Encoding', 'identity');
+        },
       })
       hlsRef.current = hls
       hls.loadSource(playlistUrl)
