@@ -227,6 +227,241 @@ cameraRouter.get('/:id/status', (req, res) => {
   res.json(status);
 });
 
+// Get available recording years for a camera
+cameraRouter.get('/:id/recordings/years', (req, res) => {
+  const user = (req as any).user as { id?: string; role?: string } | undefined;
+  const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
+  if (!cam) return res.status(404).json({ error: 'not found' });
+
+  // Check permissions (same as camera access)
+  if (!user || user.role !== 'admin') {
+    const allowedIds = user && user.id ? (listAccessibleCameraIdsForUserStmt.all(user.id) as Array<{ cameraId: string }>).map(r => r.cameraId) : [];
+    if (!allowedIds.includes(cam.id)) return res.status(403).json({ error: 'forbidden' });
+  }
+
+  try {
+    const recordingsDir = process.env.RECORDINGS_DIR || path.join(__dirname, '..', '..', 'recordings');
+    const cameraDir = path.join(recordingsDir, cam.id);
+    
+    if (!fs.existsSync(cameraDir)) {
+      return res.json([]);
+    }
+
+    const years = fs.readdirSync(cameraDir, { withFileTypes: true })
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => dirent.name)
+      .filter(name => /^\d{4}$/.test(name))
+      .sort((a, b) => parseInt(b) - parseInt(a)); // Most recent first
+
+    res.json(years);
+  } catch (e) {
+    console.error('Error listing recording years:', e);
+    res.status(500).json({ error: 'Failed to list years' });
+  }
+});
+
+// Get available recording months for a camera/year
+cameraRouter.get('/:id/recordings/:year/months', (req, res) => {
+  const user = (req as any).user as { id?: string; role?: string } | undefined;
+  const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
+  if (!cam) return res.status(404).json({ error: 'not found' });
+
+  // Check permissions
+  if (!user || user.role !== 'admin') {
+    const allowedIds = user && user.id ? (listAccessibleCameraIdsForUserStmt.all(user.id) as Array<{ cameraId: string }>).map(r => r.cameraId) : [];
+    if (!allowedIds.includes(cam.id)) return res.status(403).json({ error: 'forbidden' });
+  }
+
+  try {
+    const recordingsDir = process.env.RECORDINGS_DIR || path.join(__dirname, '..', '..', 'recordings');
+    const yearDir = path.join(recordingsDir, cam.id, req.params.year);
+    
+    if (!fs.existsSync(yearDir)) {
+      return res.json([]);
+    }
+
+    const monthOrder = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+    const months = fs.readdirSync(yearDir, { withFileTypes: true })
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => dirent.name)
+      .filter(name => monthOrder.includes(name.toLowerCase()))
+      .sort((a, b) => monthOrder.indexOf(b.toLowerCase()) - monthOrder.indexOf(a.toLowerCase())); // Most recent first
+
+    res.json(months);
+  } catch (e) {
+    console.error('Error listing recording months:', e);
+    res.status(500).json({ error: 'Failed to list months' });
+  }
+});
+
+// Get available recording days for a camera/year/month
+cameraRouter.get('/:id/recordings/:year/:month/days', (req, res) => {
+  const user = (req as any).user as { id?: string; role?: string } | undefined;
+  const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
+  if (!cam) return res.status(404).json({ error: 'not found' });
+
+  // Check permissions
+  if (!user || user.role !== 'admin') {
+    const allowedIds = user && user.id ? (listAccessibleCameraIdsForUserStmt.all(user.id) as Array<{ cameraId: string }>).map(r => r.cameraId) : [];
+    if (!allowedIds.includes(cam.id)) return res.status(403).json({ error: 'forbidden' });
+  }
+
+  try {
+    const recordingsDir = process.env.RECORDINGS_DIR || path.join(__dirname, '..', '..', 'recordings');
+    const monthDir = path.join(recordingsDir, cam.id, req.params.year, req.params.month);
+    
+    if (!fs.existsSync(monthDir)) {
+      return res.json([]);
+    }
+
+    const days = fs.readdirSync(monthDir, { withFileTypes: true })
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => dirent.name)
+      .filter(name => /^\d{2}$/.test(name))
+      .sort((a, b) => parseInt(b) - parseInt(a)); // Most recent first
+
+    res.json(days);
+  } catch (e) {
+    console.error('Error listing recording days:', e);
+    res.status(500).json({ error: 'Failed to list days' });
+  }
+});
+
+// Get available recording hours for a camera/year/month/day
+cameraRouter.get('/:id/recordings/:year/:month/:day/hours', (req, res) => {
+  const user = (req as any).user as { id?: string; role?: string } | undefined;
+  const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
+  if (!cam) return res.status(404).json({ error: 'not found' });
+
+  // Check permissions
+  if (!user || user.role !== 'admin') {
+    const allowedIds = user && user.id ? (listAccessibleCameraIdsForUserStmt.all(user.id) as Array<{ cameraId: string }>).map(r => r.cameraId) : [];
+    if (!allowedIds.includes(cam.id)) return res.status(403).json({ error: 'forbidden' });
+  }
+
+  try {
+    const recordingsDir = process.env.RECORDINGS_DIR || path.join(__dirname, '..', '..', 'recordings');
+    const dayDir = path.join(recordingsDir, cam.id, req.params.year, req.params.month, req.params.day);
+    
+    if (!fs.existsSync(dayDir)) {
+      return res.json([]);
+    }
+
+    const hours = fs.readdirSync(dayDir, { withFileTypes: true })
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => dirent.name)
+      .filter(name => /^\d{2}$/.test(name))
+      .sort((a, b) => parseInt(b) - parseInt(a)); // Most recent first
+
+    res.json(hours);
+  } catch (e) {
+    console.error('Error listing recording hours:', e);
+    res.status(500).json({ error: 'Failed to list hours' });
+  }
+});
+
+// Get recording files for a specific camera/year/month/day/hour
+cameraRouter.get('/:id/recordings/:year/:month/:day/:hour/files', (req, res) => {
+  const user = (req as any).user as { id?: string; role?: string } | undefined;
+  const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
+  if (!cam) return res.status(404).json({ error: 'not found' });
+
+  // Check permissions
+  if (!user || user.role !== 'admin') {
+    const allowedIds = user && user.id ? (listAccessibleCameraIdsForUserStmt.all(user.id) as Array<{ cameraId: string }>).map(r => r.cameraId) : [];
+    if (!allowedIds.includes(cam.id)) return res.status(403).json({ error: 'forbidden' });
+  }
+
+  try {
+    const recordingsDir = process.env.RECORDINGS_DIR || path.join(__dirname, '..', '..', 'recordings');
+    const hourDir = path.join(recordingsDir, cam.id, req.params.year, req.params.month, req.params.day, req.params.hour);
+    
+    if (!fs.existsSync(hourDir)) {
+      return res.json([]);
+    }
+
+    const files = fs.readdirSync(hourDir, { withFileTypes: true })
+      .filter(dirent => dirent.isFile())
+      .filter(dirent => dirent.name.endsWith('.mp4'))
+      .map(dirent => {
+        const filePath = path.join(hourDir, dirent.name);
+        const stats = fs.statSync(filePath);
+        return {
+          filename: dirent.name,
+          size: stats.size,
+          created: stats.birthtime,
+          modified: stats.mtime,
+          duration: null, // Could add ffprobe integration later
+        };
+      })
+      .sort((a, b) => a.created.getTime() - b.created.getTime()); // Chronological order
+
+    res.json(files);
+  } catch (e) {
+    console.error('Error listing recording files:', e);
+    res.status(500).json({ error: 'Failed to list files' });
+  }
+});
+
+// Serve recorded video files
+cameraRouter.get('/:id/recordings/:year/:month/:day/:hour/file/:filename', (req, res) => {
+  const user = (req as any).user as { id?: string; role?: string } | undefined;
+  const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
+  if (!cam) return res.status(404).json({ error: 'not found' });
+
+  // Check permissions
+  if (!user || user.role !== 'admin') {
+    const allowedIds = user && user.id ? (listAccessibleCameraIdsForUserStmt.all(user.id) as Array<{ cameraId: string }>).map(r => r.cameraId) : [];
+    if (!allowedIds.includes(cam.id)) return res.status(403).json({ error: 'forbidden' });
+  }
+
+  try {
+    const recordingsDir = process.env.RECORDINGS_DIR || path.join(__dirname, '..', '..', 'recordings');
+    const filePath = path.join(recordingsDir, cam.id, req.params.year, req.params.month, req.params.day, req.params.hour, req.params.filename);
+    
+    // Security: prevent path traversal
+    if (!filePath.startsWith(recordingsDir)) {
+      return res.status(403).json({ error: 'forbidden' });
+    }
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: 'file not found' });
+    }
+
+    // Set appropriate headers for video streaming
+    const stat = fs.statSync(filePath);
+    const fileSize = stat.size;
+    const range = req.headers.range;
+
+    if (range) {
+      // Support range requests for video seeking
+      const parts = range.replace(/bytes=/, "").split("-");
+      const start = parseInt(parts[0] || '0', 10) || 0;
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+      const chunksize = (end - start) + 1;
+      const file = fs.createReadStream(filePath, { start, end });
+      const head = {
+        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': chunksize,
+        'Content-Type': 'video/mp4',
+      };
+      res.writeHead(206, head);
+      file.pipe(res);
+    } else {
+      const head = {
+        'Content-Length': fileSize,
+        'Content-Type': 'video/mp4',
+      };
+      res.writeHead(200, head);
+      fs.createReadStream(filePath).pipe(res);
+    }
+  } catch (e) {
+    console.error('Error serving recording file:', e);
+    res.status(500).json({ error: 'Failed to serve file' });
+  }
+});
+
 // Stop HLS streaming for camera (keep recording active)
 cameraRouter.post('/:id/stop', (req, res) => {
   const cam = getCameraStmt.get(req.params.id) as Camera | undefined;

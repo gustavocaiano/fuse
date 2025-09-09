@@ -104,4 +104,42 @@ export async function ptzStop(cameraId: string, payload: { panTilt?: boolean; zo
   await axios.post(`${API_BASE}/cameras/${cameraId}/ptz/stop`, payload);
 }
 
+// Recording playback APIs
+export async function getRecordingYears(cameraId: string): Promise<string[]> {
+  const { data } = await axios.get(`${API_BASE}/cameras/${cameraId}/recordings/years`);
+  return data;
+}
+
+export async function getRecordingMonths(cameraId: string, year: string): Promise<string[]> {
+  const { data } = await axios.get(`${API_BASE}/cameras/${cameraId}/recordings/${year}/months`);
+  return data;
+}
+
+export async function getRecordingDays(cameraId: string, year: string, month: string): Promise<string[]> {
+  const { data } = await axios.get(`${API_BASE}/cameras/${cameraId}/recordings/${year}/${month}/days`);
+  return data;
+}
+
+export async function getRecordingHours(cameraId: string, year: string, month: string, day: string): Promise<string[]> {
+  const { data } = await axios.get(`${API_BASE}/cameras/${cameraId}/recordings/${year}/${month}/${day}/hours`);
+  return data;
+}
+
+export type RecordingFile = {
+  filename: string;
+  size: number;
+  created: string;
+  modified: string;
+  duration: number | null;
+};
+
+export async function getRecordingFiles(cameraId: string, year: string, month: string, day: string, hour: string): Promise<RecordingFile[]> {
+  const { data } = await axios.get(`${API_BASE}/cameras/${cameraId}/recordings/${year}/${month}/${day}/${hour}/files`);
+  return data;
+}
+
+export function getRecordingFileUrl(cameraId: string, year: string, month: string, day: string, hour: string, filename: string): string {
+  return `${API_BASE}/cameras/${cameraId}/recordings/${year}/${month}/${day}/${hour}/file/${filename}`;
+}
+
 

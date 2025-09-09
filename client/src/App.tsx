@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Routes, Route, Link, useNavigate, useParams, Navigate } from 'react-router-dom'
-import { type Camera, createCamera, listCameras, startCamera, deleteCamera, getCamera, setRecording, getMe, setAuthUser, type User, listUsers, createUser, listUsersWithAccess, grantAccess, revokeAccess } from './api'
+import { type Camera, createCamera, listCameras, startCamera, deleteCamera, getCamera, setRecording, getMe, setAuthUser, type User, listUsers, createUser, listUsersWithAccess, grantAccess, revokeAccess, getRecordingYears, getRecordingMonths, getRecordingDays, getRecordingHours, getRecordingFiles, getRecordingFileUrl, type RecordingFile } from './api'
 import StreamPlayer from './components/StreamPlayer'
 
 export default function App() {
@@ -18,6 +18,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/admin" element={<RequireAdmin><Admin /></RequireAdmin>} />
           <Route path="/ptz/:id" element={<RequireAdmin><PTZControl /></RequireAdmin>} />
+          <Route path="/playback" element={<RequireAuth><Playback /></RequireAuth>} />
         </Routes>
       </main>
     </div>
@@ -68,9 +69,12 @@ function AuthStatus() {
       {me ? (
         <span className="flex items-center gap-3">
           <span>Signed in as <span className="font-semibold">{me.name}</span> ({me.role})</span>
-          {me.role === 'admin' ? (
-            <Link to="/admin" className="px-3 py-1 rounded bg-slate-700 hover:bg-slate-600 transition-colors text-xs">Admin</Link>
-          ) : null}
+          <div className="flex gap-2">
+            <Link to="/playback" className="px-3 py-1 rounded bg-indigo-600 hover:bg-indigo-500 transition-colors text-xs">Playback</Link>
+            {me.role === 'admin' ? (
+              <Link to="/admin" className="px-3 py-1 rounded bg-slate-700 hover:bg-slate-600 transition-colors text-xs">Admin</Link>
+            ) : null}
+          </div>
         </span>
       ) : (
         <Link to="/login" className="px-3 py-2 rounded hover:bg-slate-700 text-slate-300 hover:text-white transition-colors">Sign in</Link>
@@ -411,6 +415,341 @@ function MultiStream({ camera, isAdmin }: { camera: Camera; isAdmin?: boolean })
             >Copy RTSP</button>
           ) : null}
         </div>
+      </div>
+    </div>
+  )
+}
+
+function Playback() {
+  const [cameras, setCameras] = useState<Camera[]>([])
+  const [selectedCamera, setSelectedCamera] = useState<string>('')
+  const [years, setYears] = useState<string[]>([])
+  const [selectedYear, setSelectedYear] = useState<string>('')
+  const [months, setMonths] = useState<string[]>([])
+  const [selectedMonth, setSelectedMonth] = useState<string>('')
+  const [days, setDays] = useState<string[]>([])
+  const [selectedDay, setSelectedDay] = useState<string>('')
+  const [hours, setHours] = useState<string[]>([])
+  const [selectedHour, setSelectedHour] = useState<string>('')
+  const [files, setFiles] = useState<RecordingFile[]>([])
+  const [selectedFile, setSelectedFile] = useState<RecordingFile | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    listCameras().then(setCameras)
+  }, [])
+
+  useEffect(() => {
+    if (!selectedCamera) return
+    setLoading(true)
+    getRecordingYears(selectedCamera)
+      .then(data => {
+        setYears(data)
+        setSelectedYear('')
+        setMonths([])
+        setDays([])
+        setHours([])
+        setFiles([])
+      })
+      .finally(() => setLoading(false))
+  }, [selectedCamera])
+
+  useEffect(() => {
+    if (!selectedCamera || !selectedYear) return
+    setLoading(true)
+    getRecordingMonths(selectedCamera, selectedYear)
+      .then(data => {
+        setMonths(data)
+        setSelectedMonth('')
+        setDays([])
+        setHours([])
+        setFiles([])
+      })
+      .finally(() => setLoading(false))
+  }, [selectedCamera, selectedYear])
+
+  useEffect(() => {
+    if (!selectedCamera || !selectedYear || !selectedMonth) return
+    setLoading(true)
+    getRecordingDays(selectedCamera, selectedYear, selectedMonth)
+      .then(data => {
+        setDays(data)
+        setSelectedDay('')
+        setHours([])
+        setFiles([])
+      })
+      .finally(() => setLoading(false))
+  }, [selectedCamera, selectedYear, selectedMonth])
+
+  useEffect(() => {
+    if (!selectedCamera || !selectedYear || !selectedMonth || !selectedDay) return
+    setLoading(true)
+    getRecordingHours(selectedCamera, selectedYear, selectedMonth, selectedDay)
+      .then(data => {
+        setHours(data)
+        setSelectedHour('')
+        setFiles([])
+      })
+      .finally(() => setLoading(false))
+  }, [selectedCamera, selectedYear, selectedMonth, selectedDay])
+
+  useEffect(() => {
+    if (!selectedCamera || !selectedYear || !selectedMonth || !selectedDay || !selectedHour) return
+    setLoading(true)
+    getRecordingFiles(selectedCamera, selectedYear, selectedMonth, selectedDay, selectedHour)
+      .then(setFiles)
+      .finally(() => setLoading(false))
+  }, [selectedCamera, selectedYear, selectedMonth, selectedDay, selectedHour])
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString()
+  }
+
+  return (
+    <div className="h-full flex gap-6">
+      {/* Left Navigation Panel */}
+      <div className="w-80 flex-shrink-0 space-y-4 overflow-y-auto">
+        {/* Camera Selector */}
+        <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
+          <h2 className="text-lg font-semibold text-indigo-400 mb-3">📹 Select Camera</h2>
+          <select 
+            value={selectedCamera} 
+            onChange={(e) => setSelectedCamera(e.target.value)}
+            className="w-full rounded bg-slate-700 border border-slate-600 px-3 py-2 text-sm text-white"
+          >
+            <option value="">Choose a camera...</option>
+            {cameras.map(camera => (
+              <option key={camera.id} value={camera.id}>{camera.name}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Date Navigation */}
+        {selectedCamera && (
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
+            <h2 className="text-lg font-semibold text-emerald-400 mb-3">📅 Select Date & Time</h2>
+            
+            {/* Breadcrumb */}
+            <div className="text-xs text-slate-400 mb-3 flex items-center gap-1">
+              <span>{cameras.find(c => c.id === selectedCamera)?.name}</span>
+              {selectedYear && <><span>/</span><span>{selectedYear}</span></>}
+              {selectedMonth && <><span>/</span><span className="capitalize">{selectedMonth}</span></>}
+              {selectedDay && <><span>/</span><span>{selectedDay}</span></>}
+              {selectedHour && <><span>/</span><span>{selectedHour}:00</span></>}
+            </div>
+            
+            <div className="space-y-3">
+              {/* Year Selector */}
+              {years.length > 0 && (
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">Year</label>
+                  <select 
+                    value={selectedYear} 
+                    onChange={(e) => setSelectedYear(e.target.value)}
+                    className="w-full rounded bg-slate-700 border border-slate-600 px-2 py-1 text-sm text-white"
+                  >
+                    <option value="">Select year...</option>
+                    {years.map(year => (
+                      <option key={year} value={year}>{year}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Month Selector */}
+              {months.length > 0 && (
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">Month</label>
+                  <select 
+                    value={selectedMonth} 
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                    className="w-full rounded bg-slate-700 border border-slate-600 px-2 py-1 text-sm text-white"
+                  >
+                    <option value="">Select month...</option>
+                    {months.map(month => (
+                      <option key={month} value={month} className="capitalize">{month}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Day Selector */}
+              {days.length > 0 && (
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">Day</label>
+                  <div className="grid grid-cols-7 gap-1">
+                    {days.map(day => (
+                      <button
+                        key={day}
+                        onClick={() => setSelectedDay(day)}
+                        className={`px-2 py-1 rounded text-xs transition-colors ${
+                          selectedDay === day
+                            ? 'bg-emerald-600 text-white'
+                            : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                        }`}
+                      >
+                        {day}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Hour Selector */}
+              {hours.length > 0 && (
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">Hour</label>
+                  <div className="grid grid-cols-6 gap-1">
+                    {hours.map(hour => (
+                      <button
+                        key={hour}
+                        onClick={() => setSelectedHour(hour)}
+                        className={`px-2 py-1 rounded text-xs transition-colors ${
+                          selectedHour === hour
+                            ? 'bg-indigo-600 text-white'
+                            : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                        }`}
+                      >
+                        {hour}:00
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {loading && (
+              <div className="mt-3 flex items-center gap-2 text-xs text-slate-400">
+                <div className="w-3 h-3 border border-slate-500 border-t-indigo-500 rounded-full animate-spin"></div>
+                Loading...
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 min-w-0">
+        {selectedFile ? (
+          /* Video Player */
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-4 h-full flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-purple-400">🎬 Video Player</h2>
+              <button
+                onClick={() => setSelectedFile(null)}
+                className="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded text-sm transition-colors"
+              >
+                ← Back to Files
+              </button>
+            </div>
+            
+            <div className="flex-1 flex flex-col">
+              <div className="bg-black rounded-lg overflow-hidden flex-1">
+                <video
+                  src={getRecordingFileUrl(selectedCamera, selectedYear, selectedMonth, selectedDay, selectedHour, selectedFile.filename)}
+                  controls
+                  className="w-full h-full object-contain"
+                  style={{ maxHeight: '70vh' }}
+                >
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+              
+              <div className="mt-4 p-3 bg-slate-700 rounded-lg">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-slate-400">File:</span>
+                    <span className="ml-2 text-white font-mono">{selectedFile.filename}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400">Size:</span>
+                    <span className="ml-2 text-white">{formatFileSize(selectedFile.size)}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400">Created:</span>
+                    <span className="ml-2 text-white">{formatDate(selectedFile.created)}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400">Modified:</span>
+                    <span className="ml-2 text-white">{formatDate(selectedFile.modified)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : files.length > 0 ? (
+          /* File List */
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-4 h-full flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-cyan-400">📁 Recording Files</h2>
+              <span className="text-xs px-2 py-1 bg-slate-700 rounded text-slate-400">
+                {files.length} files
+              </span>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-2">
+              {files.map((file, index) => (
+                <div
+                  key={file.filename}
+                  className="p-3 bg-slate-700/50 hover:bg-slate-700 rounded-lg cursor-pointer transition-colors"
+                  onClick={() => setSelectedFile(file)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium text-white flex items-center gap-2">
+                        <span className="text-purple-400">🎬</span>
+                        <span className="font-mono text-sm">{file.filename}</span>
+                      </div>
+                      <div className="text-xs text-slate-400 mt-1">
+                        Created: {formatDate(file.created)} • Size: {formatFileSize(file.size)}
+                      </div>
+                    </div>
+                    <div className="text-xs text-slate-500 ml-3">
+                      #{String(index + 1).padStart(2, '0')}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : selectedCamera ? (
+          /* Empty State */
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-8 h-full flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-6xl mb-4">🎬</div>
+              <h3 className="text-lg font-semibold text-slate-400 mb-2">No Recordings Found</h3>
+              <p className="text-sm text-slate-500">
+                {!selectedYear ? 'Select a year to view recordings' :
+                 !selectedMonth ? 'No recordings found for this year' :
+                 !selectedDay ? 'No recordings found for this month' :
+                 !selectedHour ? 'No recordings found for this day' :
+                 'No video files found for this hour'}
+              </p>
+            </div>
+          </div>
+        ) : (
+          /* Initial State */
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-8 h-full flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-6xl mb-4">📹</div>
+              <h3 className="text-lg font-semibold text-slate-400 mb-2">Recording Playback</h3>
+              <p className="text-sm text-slate-500 mb-4">
+                Select a camera to browse and play recorded videos
+              </p>
+              <div className="text-xs text-slate-600">
+                Navigate through years → months → days → hours to find recordings
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
