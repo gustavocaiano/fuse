@@ -25,8 +25,8 @@ class FfmpegManager {
   private buildRecordingDir(baseDir: string, cameraId: string, date: Date): { dir: string; hourKey: string } {
     const year = String(date.getFullYear());
     const month = this.getMonthShortLower(date);
-    const day = String(date.getDate()).padStart(2, '0') + 'day';
-    const hour = String(date.getHours()).padStart(2, '0') + 'h';
+    const day = String(date.getDate()).padStart(2, '0');
+    const hour = String(date.getHours()).padStart(2, '0');
     const dir = path.join(baseDir, cameraId, year, month, day, hour);
     const hourKey = `${year}-${month}-${day}-${hour}`;
     return { dir, hourKey };
@@ -67,48 +67,79 @@ class FfmpegManager {
       const { dir, hourKey } = this.buildRecordingDir(recordingBaseDir, cameraId, now);
       fs.mkdirSync(dir, { recursive: true });
 
-      const recordingPattern = path.join(dir, 'part-%03d.mp4');
+      // Create video filename with timestamp
+      const timestamp = now.toISOString().replace(/[:]/g, '-').replace(/\..+/, '');
+      const videoFilename = `video_${timestamp}.mp4`;
+      const recordingFile = path.join(dir, videoFilename);
       const hlsOutput = path.join(hlsOutputDir, 'index.m3u8');
       
-      const args = [
-        '-rtsp_transport', 'tcp',
-        '-fflags', '+genpts+flush_packets',
-        '-flags', 'low_delay',
-        '-probesize', '32',
-        '-analyzeduration', '0',
-        '-i', rtspUrl,
-        // Ultra-low latency encoding
-        '-c:v', 'libx264',
-        '-preset', 'ultrafast',
-        '-tune', 'zerolatency',
-        '-profile:v', 'baseline',
-        '-x264-params', 'keyint=15:min-keyint=15:scenecut=0:bframes=0',
-        '-g', '15',
-        '-sc_threshold', '0',
-        '-an', // No audio for simplicity
-        '-f', 'tee'
-      ];
-
-      // Build tee destinations
-      let teeDestinations = `[f=segment:segment_time=${segmentSeconds}:segment_atclocktime=1:reset_timestamps=1]${recordingPattern}`;
+      let args: string[];
       
       if (enableHLS) {
-        teeDestinations += `|[f=hls:hls_time=0.5:hls_list_size=2:hls_flags=delete_segments+append_list+independent_segments:hls_allow_cache=0:hls_segment_type=mpegts]${hlsOutput}`;
+        // Both recording and HLS - use tee to split output
+        args = [
+          '-rtsp_transport', 'tcp',
+          '-fflags', '+genpts+flush_packets',
+          '-flags', 'low_delay',
+          '-probesize', '32',
+          '-analyzeduration', '0',
+          '-i', rtspUrl,
+          '-c:v', 'libx264',
+          '-preset', 'ultrafast',
+          '-tune', 'zerolatency',
+          '-profile:v', 'baseline',
+          '-x264-params', 'keyint=15:min-keyint=15:scenecut=0:bframes=0',
+          '-g', '15',
+          '-sc_threshold', '0',
+          '-an',
+          '-f', 'tee',
+          '-map', '0:v',
+          `[f=segment:segment_time=${segmentSeconds}:reset_timestamps=1]${recordingFile.replace('.mp4', '_%03d.mp4')}|[f=hls:hls_time=0.5:hls_list_size=2:hls_flags=delete_segments+append_list+independent_segments:hls_allow_cache=0]${hlsOutput}`
+        ];
+      } else {
+        // Recording only - simple segment output
+        args = [
+          '-rtsp_transport', 'tcp',
+          '-fflags', '+genpts+flush_packets',
+          '-flags', 'low_delay',
+          '-probesize', '32',
+          '-analyzeduration', '0',
+          '-i', rtspUrl,
+          '-c:v', 'libx264',
+          '-preset', 'ultrafast',
+          '-profile:v', 'baseline',
+          '-x264-params', 'keyint=15:min-keyint=15:scenecut=0:bframes=0',
+          '-g', '15',
+          '-sc_threshold', '0',
+          '-an',
+          '-f', 'segment',
+          '-segment_time', String(segmentSeconds),
+          '-reset_timestamps', '1',
+          recordingFile.replace('.mp4', '_%03d.mp4')
+        ];
       }
 
-      args.push(teeDestinations);
-
       console.log(`Starting ${enableHLS ? 'recording+streaming' : 'recording-only'} for camera ${cameraId}`);
+      console.log(`FFmpeg command: ffmpeg ${args.join(' ')}`);
       
-      const child = spawn('ffmpeg', args, { stdio: 'ignore' });
+      const child = spawn('ffmpeg', args, { stdio: ['ignore', 'pipe', 'pipe'] });
+      
+      // Capture stdout and stderr for debugging
+      child.stdout?.on('data', (data) => {
+        console.log(`FFmpeg stdout ${cameraId}: ${data}`);
+      });
+      
+      child.stderr?.on('data', (data) => {
+        console.log(`FFmpeg stderr ${cameraId}: ${data}`);
+      });
       
       child.on('error', (err) => {
-        console.error(`FFmpeg error for camera ${cameraId}:`, err?.message || err);
+        console.error(`FFmpeg spawn error for camera ${cameraId}:`, err?.message || err);
         this.cameraIdToHandle.delete(cameraId);
       });
 
       child.on('exit', (code) => {
-        console.log(`FFmpeg process for camera ${cameraId} exited with code ${code}`);
+        console.error(`FFmpeg process for camera ${cameraId} exited with code ${code}`);
       });
 
       return { child, hourKey };
