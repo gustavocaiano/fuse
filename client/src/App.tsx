@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Routes, Route, Link, useNavigate, useParams, Navigate } from 'react-router-dom'
-import { type Camera, createCamera, listCameras, startCamera, deleteCamera, getCamera, setRecording, getMe, setAuthUser, type User, listUsers, createUser, listUsersWithAccess, grantAccess, revokeAccess, getRecordingYears, getRecordingMonths, getRecordingDays, getRecordingHours, getRecordingFiles, getRecordingFileUrl, generateVideoToken, type RecordingFile } from './api'
+import { type Camera, createCamera, listCameras, startCamera, deleteCamera, getCamera, getMe, setAuthUser, type User, listUsers, createUser, listUsersWithAccess, grantAccess, revokeAccess, getRecordingYears, getRecordingMonths, getRecordingDays, getRecordingHours, getRecordingFiles, getRecordingFileUrl, generateVideoToken, type RecordingFile } from './api'
 import StreamPlayer from './components/StreamPlayer'
 
 export default function App() {
@@ -289,20 +289,10 @@ function Home() {
                     </label>
                     {me?.role === 'admin' ? (
                       <div className="flex gap-1 items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <label className="flex items-center gap-1 text-xs text-slate-300">
-                          <input
-                            type="checkbox"
-                            checked={Boolean(c.recordEnabled)}
-                            onChange={async (e) => {
-                              const enabled = e.target.checked
-                              await setRecording(c.id, enabled)
-                              await refresh()
-                            }}
-                            className="accent-red-500"
-                            title="Toggle recording"
-                          />
-                          <span>Record</span>
-                        </label>
+                        <div className="flex items-center gap-1 text-xs text-emerald-400 px-2 py-1 bg-emerald-500/10 rounded border border-emerald-500/20">
+                          <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                          <span>Always Recording</span>
+                        </div>
                         <button 
                           onClick={() => navigate(`/ptz/${c.id}`)} 
                           className="text-xs px-2 py-1 bg-indigo-600 hover:bg-indigo-500 rounded text-white transition-colors"
