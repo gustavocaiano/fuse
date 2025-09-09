@@ -32,6 +32,38 @@ class FfmpegManager {
     return { dir, hourKey };
   }
 
+  private getNext10MinuteBoundary(date: Date): Date {
+    const nextBoundary = new Date(date);
+    const currentMinutes = nextBoundary.getMinutes();
+    
+    // Calculate next 10-minute boundary (00, 10, 20, 30, 40, 50)
+    const nextMinutes = Math.ceil(currentMinutes / 10) * 10;
+    
+    if (nextMinutes >= 60) {
+      // If we go past 60, move to next hour at 00 minutes
+      nextBoundary.setHours(nextBoundary.getHours() + 1);
+      nextBoundary.setMinutes(0);
+    } else {
+      nextBoundary.setMinutes(nextMinutes);
+    }
+    
+    nextBoundary.setSeconds(0);
+    nextBoundary.setMilliseconds(0);
+    return nextBoundary;
+  }
+
+  private get10MinutePeriodStart(date: Date): Date {
+    const periodStart = new Date(date);
+    const currentMinutes = periodStart.getMinutes();
+    
+    // Get current 10-minute period start (00, 10, 20, 30, 40, 50)
+    const periodMinutes = Math.floor(currentMinutes / 10) * 10;
+    periodStart.setMinutes(periodMinutes);
+    periodStart.setSeconds(0);
+    periodStart.setMilliseconds(0);
+    return periodStart;
+  }
+
   // Main method: Always record, optionally stream HLS
   ensureAlwaysRecording(
     cameraId: string,
@@ -64,12 +96,20 @@ class FfmpegManager {
 
     const startProcess = () => {
       const now = new Date();
-      const { dir, hourKey } = this.buildRecordingDir(recordingBaseDir, cameraId, now);
+      
+      // Calculate the current 10-minute period for proper directory and filename
+      const periodStart = this.get10MinutePeriodStart(now);
+      const { dir, hourKey } = this.buildRecordingDir(recordingBaseDir, cameraId, periodStart);
       fs.mkdirSync(dir, { recursive: true });
 
-      // Create video filename with timestamp
-      const timestamp = now.toISOString().replace(/[:]/g, '-').replace(/\..+/, '');
-      const videoFilename = `video_${timestamp}.mp4`;
+      // Create filename that reflects the 10-minute recording period
+      const year = periodStart.getFullYear();
+      const month = String(periodStart.getMonth() + 1).padStart(2, '0');
+      const day = String(periodStart.getDate()).padStart(2, '0');
+      const hour = String(periodStart.getHours()).padStart(2, '0');
+      const minute = String(periodStart.getMinutes()).padStart(2, '0');
+      
+      const videoFilename = `${year}-${month}-${day}_${hour}-${minute}.mp4`;
       const recordingFile = path.join(dir, videoFilename);
       const hlsOutput = path.join(hlsOutputDir, 'index.m3u8');
       
@@ -145,13 +185,30 @@ class FfmpegManager {
       return { child, hourKey };
     };
 
-    const initial = startProcess();
+    // Check if we should wait for the next 10-minute boundary
+    const now = new Date();
+    const nextBoundary = this.getNext10MinuteBoundary(now);
+    const waitMs = nextBoundary.getTime() - now.getTime();
+    
+    let initialProcess: { child: any; hourKey: string };
+    
+    if (waitMs > 60000) { // If more than 1 minute to wait, start immediately
+      console.log(`Starting recording immediately for camera ${cameraId}`);
+      initialProcess = startProcess();
+    } else if (waitMs > 5000) { // If 5 seconds to 1 minute, wait for boundary
+      console.log(`Waiting ${Math.round(waitMs/1000)}s for next 10-minute boundary for camera ${cameraId}`);
+      // Start a temporary process that will be replaced at the boundary
+      initialProcess = startProcess();
+    } else { // We're very close to or at a boundary
+      console.log(`Starting at 10-minute boundary for camera ${cameraId}`);
+      initialProcess = startProcess();
+    }
     
     const handle: AlwaysRecordingHandle = {
       cameraId,
-      process: initial.child,
+      process: initialProcess.child,
       rtspUrl,
-      currentHourKey: initial.hourKey,
+      currentHourKey: initialProcess.hourKey,
       interval: setInterval(() => {}, 1),
       recordingBaseDir,
       hlsBaseDir,
@@ -160,12 +217,27 @@ class FfmpegManager {
       hlsOutputDir,
     };
 
-    // Supervision interval for hourly rotation
+    // Supervision interval for 10-minute boundary rotation
     const interval = setInterval(() => {
       const now = new Date();
-      const { hourKey: newKey } = this.buildRecordingDir(recordingBaseDir, cameraId, now);
+      const currentMinutes = now.getMinutes();
+      const currentSeconds = now.getSeconds();
       
-      // Restart for new hour directory
+      // Check if we're at a 10-minute boundary (within 5 seconds)
+      const is10MinuteBoundary = (currentMinutes % 10 === 0) && (currentSeconds <= 5);
+      
+      if (is10MinuteBoundary) {
+        // Restart process at 10-minute boundary for new recording segment
+        try { handle.process.kill('SIGTERM'); } catch {}
+        const restarted = startProcess();
+        handle.process = restarted.child;
+        handle.currentHourKey = restarted.hourKey;
+        console.log(`Rotated to new 10-minute period: ${currentMinutes} for camera ${cameraId}`);
+        return;
+      }
+      
+      // Also check for hour directory changes
+      const { hourKey: newKey } = this.buildRecordingDir(recordingBaseDir, cameraId, now);
       if (newKey !== handle.currentHourKey) {
         try { handle.process.kill('SIGTERM'); } catch {}
         const restarted = startProcess();
@@ -182,7 +254,7 @@ class FfmpegManager {
         handle.currentHourKey = restarted.hourKey;
         console.log(`Restarted failed process for camera ${cameraId}`);
       }
-    }, 60 * 1000);
+    }, 5 * 1000); // Check every 5 seconds for more precise boundary detection
     
     handle.interval = interval;
     this.cameraIdToHandle.set(cameraId, handle);

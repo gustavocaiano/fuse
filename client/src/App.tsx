@@ -273,46 +273,56 @@ function Home() {
           ) : (
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {cameras.map(c => (
-                <div key={c.id} className="group p-3 rounded bg-slate-700/50 hover:bg-slate-700 transition-colors">
-                  <div className="flex items-start gap-3">
-                    <label className="flex items-start gap-2 flex-1 cursor-pointer">
+                <div key={c.id} className="group border border-slate-600 rounded-lg bg-slate-800 hover:bg-slate-750 hover:border-slate-500 transition-all">
+                  {/* Top section - Camera info and checkbox */}
+                  <div className="p-4">
+                    <div className="flex items-center gap-3">
                       <input 
                         type="checkbox" 
                         checked={selectedIds.includes(c.id)} 
                         onChange={() => toggleSelected(c.id)} 
-                        className="mt-1 accent-emerald-500"
+                        className="w-5 h-5 accent-emerald-500 cursor-pointer"
                       />
-                      <div className="min-w-0 flex-1">
-                        <div className="font-medium text-white truncate">{c.name}</div>
-                        <div className="text-xs text-slate-400 font-mono break-all">{c.rtsp}</div>
-                      </div>
-                    </label>
-                    {me?.role === 'admin' ? (
-                      <div className="flex gap-1 items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="flex items-center gap-1 text-xs text-emerald-400 px-2 py-1 bg-emerald-500/10 rounded border border-emerald-500/20">
-                          <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                          <span>Always Recording</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-lg">📹</span>
+                          <h3 className="font-semibold text-white text-lg truncate">{c.name}</h3>
                         </div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                          <span className="text-xs text-emerald-400 font-medium">Always Recording</span>
+                        </div>
+                        <div className="text-xs text-slate-400 font-mono bg-slate-700 px-2 py-1 rounded truncate">
+                          {c.rtsp}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Bottom section - Admin controls */}
+                  {me?.role === 'admin' && (
+                    <div className="px-4 pb-4 pt-2 border-t border-slate-600 opacity-60 group-hover:opacity-100 transition-opacity">
+                      <div className="flex justify-end gap-2">
                         <button 
                           onClick={() => navigate(`/ptz/${c.id}`)} 
-                          className="text-xs px-2 py-1 bg-indigo-600 hover:bg-indigo-500 rounded text-white transition-colors"
+                          className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded text-white text-sm font-medium transition-colors flex items-center gap-1"
                         >
-                          Control
+                          🎮 Control
                         </button>
                         <button
                           onClick={async () => {
-                            if (!window.confirm(`Delete camera \"${c.name}\" and all its data?`)) return
+                            if (!window.confirm(`Delete camera "${c.name}" and all its data?`)) return
                             await deleteCamera(c.id)
                             setSelectedIds(prev => prev.filter(x => x !== c.id))
                             await refresh()
                           }}
-                          className="text-xs px-2 py-1 bg-red-600 hover:bg-red-500 rounded text-white transition-colors"
+                          className="px-3 py-1.5 bg-red-600 hover:bg-red-500 rounded text-white text-sm font-medium transition-colors flex items-center gap-1"
                         >
-                          Delete
+                          🗑️ Delete
                         </button>
                       </div>
-                    ) : null}
-                  </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -733,7 +743,7 @@ function Playback() {
                         <span className="font-mono text-sm">{file.filename}</span>
                       </div>
                       <div className="text-xs text-slate-400 mt-1">
-                        Created: {formatDate(file.created)} • Size: {formatFileSize(file.size)}
+                        Created: {formatDate(file.modified)} • Size: {formatFileSize(file.size)}
                       </div>
                     </div>
                     <div className="text-xs text-slate-500 ml-3">

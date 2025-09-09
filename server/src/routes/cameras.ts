@@ -428,12 +428,12 @@ cameraRouter.get('/:id/recordings/:year/:month/:day/:hour/files', (req, res) => 
         return {
           filename: dirent.name,
           size: stats.size,
-          created: stats.birthtime,
-          modified: stats.mtime,
+          created: stats.birthtime.toISOString(),
+          modified: stats.mtime.toISOString(),
           duration: null, // Could add ffprobe integration later
         };
       })
-      .sort((a, b) => a.created.getTime() - b.created.getTime()); // Chronological order
+      .sort((a, b) => new Date(a.created).getTime() - new Date(b.created).getTime()); // Chronological order
 
     res.json(files);
   } catch (e) {
