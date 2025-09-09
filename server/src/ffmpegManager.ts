@@ -17,67 +17,51 @@ export type AlwaysRecordingHandle = {
 
 class FfmpegManager {
   private cameraIdToHandle: Map<string, AlwaysRecordingHandle> = new Map();
-  private readonly timezone: string = process.env.TIMEZONE || 'Europe/Lisbon';
 
   private getMonthShortLower(date: Date): string {
-    return date.toLocaleString('en-US', { month: 'short', timeZone: this.timezone }).toLowerCase();
-  }
-
-  private getLocalTime(date: Date): Date {
-    // Create a new date object adjusted to the configured timezone
-    const localTime = new Date(date.toLocaleString('en-CA', { timeZone: this.timezone }));
-    return localTime;
+    return date.toLocaleString('en-US', { month: 'short' }).toLowerCase();
   }
 
   private buildRecordingDir(baseDir: string, cameraId: string, date: Date): { dir: string; hourKey: string } {
-    // Convert to configured timezone
-    const localDate = this.getLocalTime(date);
-    
-    const year = String(localDate.getFullYear());
-    const month = this.getMonthShortLower(date); // Keep original date for timezone conversion
-    const day = String(localDate.getDate()).padStart(2, '0');
-    const hour = String(localDate.getHours()).padStart(2, '0');
+    const year = String(date.getFullYear());
+    const month = this.getMonthShortLower(date);
+    const day = String(date.getDate()).padStart(2, '0');
+    const hour = String(date.getHours()).padStart(2, '0');
     const dir = path.join(baseDir, cameraId, year, month, day, hour);
     const hourKey = `${year}-${month}-${day}-${hour}`;
     return { dir, hourKey };
   }
 
   private getNext10MinuteBoundary(date: Date): Date {
-    // Work with configured timezone
-    const localDate = this.getLocalTime(date);
-    const currentMinutes = localDate.getMinutes();
+    const nextBoundary = new Date(date);
+    const currentMinutes = nextBoundary.getMinutes();
     
     // Calculate next 10-minute boundary (00, 10, 20, 30, 40, 50)
     const nextMinutes = Math.ceil(currentMinutes / 10) * 10;
     
     if (nextMinutes >= 60) {
       // If we go past 60, move to next hour at 00 minutes
-      localDate.setHours(localDate.getHours() + 1);
-      localDate.setMinutes(0);
+      nextBoundary.setHours(nextBoundary.getHours() + 1);
+      nextBoundary.setMinutes(0);
     } else {
-      localDate.setMinutes(nextMinutes);
+      nextBoundary.setMinutes(nextMinutes);
     }
     
-    localDate.setSeconds(0);
-    localDate.setMilliseconds(0);
-    
-    // Convert back to system time for comparison
-    return new Date(localDate.toLocaleString('sv-SE', { timeZone: 'UTC' }));
+    nextBoundary.setSeconds(0);
+    nextBoundary.setMilliseconds(0);
+    return nextBoundary;
   }
 
   private get10MinutePeriodStart(date: Date): Date {
-    // Work with configured timezone
-    const localDate = this.getLocalTime(date);
-    const currentMinutes = localDate.getMinutes();
+    const periodStart = new Date(date);
+    const currentMinutes = periodStart.getMinutes();
     
     // Get current 10-minute period start (00, 10, 20, 30, 40, 50)
     const periodMinutes = Math.floor(currentMinutes / 10) * 10;
-    localDate.setMinutes(periodMinutes);
-    localDate.setSeconds(0);
-    localDate.setMilliseconds(0);
-    
-    // Return the timezone-adjusted date
-    return localDate;
+    periodStart.setMinutes(periodMinutes);
+    periodStart.setSeconds(0);
+    periodStart.setMilliseconds(0);
+    return periodStart;
   }
 
   // Main method: Always record, optionally stream HLS
@@ -236,11 +220,10 @@ class FfmpegManager {
     // Supervision interval for 10-minute boundary rotation
     const interval = setInterval(() => {
       const now = new Date();
-      const localNow = this.getLocalTime(now);
-      const currentMinutes = localNow.getMinutes();
-      const currentSeconds = localNow.getSeconds();
+      const currentMinutes = now.getMinutes();
+      const currentSeconds = now.getSeconds();
       
-      // Check if we're at a 10-minute boundary (within 5 seconds) in local time
+      // Check if we're at a 10-minute boundary (within 5 seconds)
       const is10MinuteBoundary = (currentMinutes % 10 === 0) && (currentSeconds <= 5);
       
       if (is10MinuteBoundary) {
