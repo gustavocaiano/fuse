@@ -428,7 +428,7 @@ cameraRouter.get('/:id/recordings/:year/:month/:day/:hour/files', (req, res) => 
         return {
           filename: dirent.name,
           size: stats.size,
-          created: stats.birthtime.toISOString(),
+          created: stats.mtime.toISOString(), // Use modified time since birthtime is unreliable
           modified: stats.mtime.toISOString(),
           duration: null, // Could add ffprobe integration later
         };
