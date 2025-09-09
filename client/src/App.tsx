@@ -292,7 +292,7 @@ function Home() {
                           <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
                           <span className="text-xs text-emerald-400 font-medium">Always Recording</span>
                         </div>
-                        <div className="text-xs text-slate-400 font-mono bg-slate-700 px-2 py-1 rounded truncate">
+                        <div className="text-xs text-slate-400 font-mono bg-slate-700 px-2 py-1 rounded text-ellipsis">
                           {c.rtsp}
                         </div>
                       </div>
@@ -532,7 +532,16 @@ function Playback() {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString()
+    const timezone = import.meta.env.VITE_TIMEZONE || 'Europe/Lisbon';
+    return new Date(dateString).toLocaleString('pt-PT', { 
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit', 
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    })
   }
 
   return (
@@ -743,7 +752,7 @@ function Playback() {
                         <span className="font-mono text-sm">{file.filename}</span>
                       </div>
                       <div className="text-xs text-slate-400 mt-1">
-                        Created: {formatDate(file.modified)} • Size: {formatFileSize(file.size)}
+                        Created: {formatDate(file.created)} • Size: {formatFileSize(file.size)}
                       </div>
                     </div>
                     <div className="text-xs text-slate-500 ml-3">
