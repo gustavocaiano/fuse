@@ -2,87 +2,21 @@ import { spawn, type ChildProcess } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 
-export type TranscodeHandle = {
+export type AlwaysRecordingHandle = {
   cameraId: string;
   process: ChildProcess;
-  outputDir: string;
-};
-
-export type RecordingHandle = {
-  cameraId: string;
-  process: ChildProcess;
+  rtspUrl: string;
   currentHourKey: string;
   interval: NodeJS.Timeout;
-  baseDir: string;
-  segmentSeconds: number;
+  recordingBaseDir: string;
+  hlsBaseDir: string;
+  segmentMinutes: number;
+  isStreamingHLS: boolean;
+  hlsOutputDir: string;
 };
 
 class FfmpegManager {
-  private cameraIdToProcess: Map<string, TranscodeHandle> = new Map();
-  private cameraIdToRecording: Map<string, RecordingHandle> = new Map();
-
-  ensureTranscoding(cameraId: string, rtspUrl: string, baseOutputDir: string): TranscodeHandle {
-    const existing = this.cameraIdToProcess.get(cameraId);
-    if (existing) return existing;
-
-    const outputDir = path.join(baseOutputDir, cameraId);
-    fs.mkdirSync(outputDir, { recursive: true });
-
-    const args = [
-      '-rtsp_transport', 'tcp',
-      '-i', rtspUrl,
-      '-fflags', '+genpts+flush_packets',
-      '-flags', 'low_delay',
-      '-probesize', '32',
-      '-analyzeduration', '0',
-      // Ultra-low latency x264 encode
-      '-c:v', 'libx264',
-      '-preset', 'ultrafast',
-      '-tune', 'zerolatency',
-      '-profile:v', 'baseline',
-      '-x264-params', 'keyint=15:min-keyint=15:scenecut=0:bframes=0',
-      // Very small GOP for minimal delay
-      '-g', '15',
-      '-sc_threshold', '0',
-      // drop audio to avoid extra mux/demux latency
-      '-an',
-      // reduce muxing delay
-      '-flush_packets', '1',
-      '-muxdelay', '0.1',
-      '-f', 'hls',
-      // 0.5s segments, 2 in playlist ≈ ~1s window
-      '-hls_time', '0.5',
-      '-hls_list_size', '2',
-      // make segments independently decodable and trim old ones
-      '-hls_flags', 'delete_segments+append_list+independent_segments',
-      '-hls_allow_cache', '0',
-      '-hls_segment_type', 'mpegts',
-      path.join(outputDir, 'index.m3u8')
-    ];
-
-    const child = spawn('ffmpeg', args, { stdio: 'ignore' });
-
-    child.on('exit', () => {
-      this.cameraIdToProcess.delete(cameraId);
-    });
-
-    child.on('error', (err) => {
-      // Simple visibility into spawn failures
-      console.error(`ffmpeg spawn error for camera ${cameraId}:`, err?.message || err);
-      this.cameraIdToProcess.delete(cameraId);
-    });
-
-    const handle: TranscodeHandle = { cameraId, process: child, outputDir };
-    this.cameraIdToProcess.set(cameraId, handle);
-    return handle;
-  }
-
-  stopTranscoding(cameraId: string) {
-    const handle = this.cameraIdToProcess.get(cameraId);
-    if (!handle) return;
-    handle.process.kill('SIGTERM');
-    this.cameraIdToProcess.delete(cameraId);
-  }
+  private cameraIdToHandle: Map<string, AlwaysRecordingHandle> = new Map();
 
   private getMonthShortLower(date: Date): string {
     return date.toLocaleString('en-US', { month: 'short' }).toLowerCase();
@@ -98,113 +32,224 @@ class FfmpegManager {
     return { dir, hourKey };
   }
 
-  ensureRecording(cameraId: string, rtspUrl: string, baseRecordingsDir: string, segmentMinutes: number): RecordingHandle {
-    const existing = this.cameraIdToRecording.get(cameraId);
-    if (existing) return existing;
+  // Main method: Always record, optionally stream HLS
+  ensureAlwaysRecording(
+    cameraId: string,
+    rtspUrl: string,
+    recordingBaseDir: string,
+    hlsBaseDir: string,
+    segmentMinutes: number,
+    enableHLS: boolean = false
+  ): AlwaysRecordingHandle {
+    const existing = this.cameraIdToHandle.get(cameraId);
+    
+    // If exists and HLS state matches, return it
+    if (existing && existing.isStreamingHLS === enableHLS) {
+      return existing;
+    }
+
+    // If exists but HLS state differs, restart with new state
+    if (existing) {
+      this.stopAlwaysRecording(cameraId);
+    }
 
     const segmentSeconds = Math.max(1, Math.floor(segmentMinutes * 60));
+    const hlsOutputDir = path.join(hlsBaseDir, cameraId);
+    
+    // Create directories
+    fs.mkdirSync(recordingBaseDir, { recursive: true });
+    if (enableHLS) {
+      fs.mkdirSync(hlsOutputDir, { recursive: true });
+    }
 
-    const startRecordingProcess = () => {
+    const startProcess = () => {
       const now = new Date();
-      const { dir, hourKey } = this.buildRecordingDir(baseRecordingsDir, cameraId, now);
+      const { dir, hourKey } = this.buildRecordingDir(recordingBaseDir, cameraId, now);
       fs.mkdirSync(dir, { recursive: true });
 
-      const outputPattern = path.join(dir, 'part-%03d.mp4');
-
-      const forceKeyExpr = `expr:gte(t, n_forced*${segmentSeconds})`;
+      const recordingPattern = path.join(dir, 'part-%03d.mp4');
+      const hlsOutput = path.join(hlsOutputDir, 'index.m3u8');
+      
       const args = [
         '-rtsp_transport', 'tcp',
-        // Generate PTS if missing (some RTSP sources)
         '-fflags', '+genpts+flush_packets',
         '-flags', 'low_delay',
         '-probesize', '32',
         '-analyzeduration', '0',
         '-i', rtspUrl,
-        // transcode for compatibility and consistent container
+        // Ultra-low latency encoding
         '-c:v', 'libx264',
         '-preset', 'ultrafast',
         '-tune', 'zerolatency',
         '-profile:v', 'baseline',
-        // consistent GOP to help clean segmenting
+        '-x264-params', 'keyint=15:min-keyint=15:scenecut=0:bframes=0',
         '-g', '15',
         '-sc_threshold', '0',
-        '-x264-params', 'keyint=15:min-keyint=15:scenecut=0:bframes=0',
-        // ensure a keyframe exactly at each segment boundary
-        '-force_key_frames', forceKeyExpr,
-        '-movflags', '+faststart',
-        '-an',
-        '-f', 'segment',
-        '-segment_time', String(segmentSeconds),
-        // cut segments aligned to wall clock (00,10,20,30,40,50)
-        '-segment_atclocktime', '1',
-        '-reset_timestamps', '1',
-        outputPattern
+        '-an', // No audio for simplicity
+        '-f', 'tee'
       ];
 
-      const child = spawn('ffmpeg', args, { stdio: 'ignore' });
+      // Build tee destinations
+      let teeDestinations = `[f=segment:segment_time=${segmentSeconds}:segment_atclocktime=1:reset_timestamps=1]${recordingPattern}`;
+      
+      if (enableHLS) {
+        teeDestinations += `|[f=hls:hls_time=0.5:hls_list_size=2:hls_flags=delete_segments+append_list+independent_segments:hls_allow_cache=0:hls_segment_type=mpegts]${hlsOutput}`;
+      }
 
-      child.on('exit', () => {
-        // noop; supervisor interval will recreate if needed
+      args.push(teeDestinations);
+
+      console.log(`Starting ${enableHLS ? 'recording+streaming' : 'recording-only'} for camera ${cameraId}`);
+      
+      const child = spawn('ffmpeg', args, { stdio: 'ignore' });
+      
+      child.on('error', (err) => {
+        console.error(`FFmpeg error for camera ${cameraId}:`, err?.message || err);
+        this.cameraIdToHandle.delete(cameraId);
+      });
+
+      child.on('exit', (code) => {
+        console.log(`FFmpeg process for camera ${cameraId} exited with code ${code}`);
       });
 
       return { child, hourKey };
     };
 
-    let { child, hourKey } = startRecordingProcess();
-
-    const handle: RecordingHandle = {
+    const initial = startProcess();
+    
+    const handle: AlwaysRecordingHandle = {
       cameraId,
-      process: child,
-      currentHourKey: hourKey,
-      // placeholder; set after creating interval
+      process: initial.child,
+      rtspUrl,
+      currentHourKey: initial.hourKey,
       interval: setInterval(() => {}, 1),
-      baseDir: baseRecordingsDir,
-      segmentSeconds,
+      recordingBaseDir,
+      hlsBaseDir,
+      segmentMinutes,
+      isStreamingHLS: enableHLS,
+      hlsOutputDir,
     };
 
-    // supervise hourly rotation
+    // Supervision interval for hourly rotation
     const interval = setInterval(() => {
       const now = new Date();
-      const { hourKey: newKey } = this.buildRecordingDir(baseRecordingsDir, cameraId, now);
+      const { hourKey: newKey } = this.buildRecordingDir(recordingBaseDir, cameraId, now);
+      
+      // Restart for new hour directory
       if (newKey !== handle.currentHourKey) {
         try { handle.process.kill('SIGTERM'); } catch {}
-        const restarted = startRecordingProcess();
+        const restarted = startProcess();
         handle.process = restarted.child;
         handle.currentHourKey = restarted.hourKey;
+        console.log(`Rotated to new hour: ${newKey} for camera ${cameraId}`);
+        return;
       }
-      // if the child died unexpectedly, restart within the same hour
+      
+      // Restart if process died unexpectedly
       if (handle.process.exitCode !== null) {
-        const restarted = startRecordingProcess();
+        const restarted = startProcess();
         handle.process = restarted.child;
         handle.currentHourKey = restarted.hourKey;
+        console.log(`Restarted failed process for camera ${cameraId}`);
       }
     }, 60 * 1000);
+    
     handle.interval = interval;
-
-    this.cameraIdToRecording.set(cameraId, handle);
+    this.cameraIdToHandle.set(cameraId, handle);
     return handle;
   }
 
-  stopRecording(cameraId: string) {
-    const handle = this.cameraIdToRecording.get(cameraId);
+  stopAlwaysRecording(cameraId: string) {
+    const handle = this.cameraIdToHandle.get(cameraId);
     if (!handle) return;
+    
     try { clearInterval(handle.interval); } catch {}
     try { handle.process.kill('SIGTERM'); } catch {}
-    this.cameraIdToRecording.delete(cameraId);
+    this.cameraIdToHandle.delete(cameraId);
+    console.log(`Stopped always-recording for camera ${cameraId}`);
   }
 
-  // Simplified: manage streaming and recording as separate independent processes
-  // This is more reliable than trying to use tee filter for both outputs
+  // Convenience methods for HLS control
+  enableHLS(cameraId: string): boolean {
+    const handle = this.cameraIdToHandle.get(cameraId);
+    if (!handle) return false;
 
-  getStreamingHandle(cameraId: string): TranscodeHandle | undefined {
-    return this.cameraIdToProcess.get(cameraId);
+    if (handle.isStreamingHLS) return true; // Already enabled
+
+    // Restart with HLS enabled
+    this.ensureAlwaysRecording(
+      cameraId,
+      handle.rtspUrl,
+      handle.recordingBaseDir,
+      handle.hlsBaseDir,
+      handle.segmentMinutes,
+      true
+    );
+    return true;
   }
 
-  getRecordingHandle(cameraId: string): RecordingHandle | undefined {
-    return this.cameraIdToRecording.get(cameraId);
+  disableHLS(cameraId: string): boolean {
+    const handle = this.cameraIdToHandle.get(cameraId);
+    if (!handle) return false;
+
+    if (!handle.isStreamingHLS) return true; // Already disabled
+
+    // Restart without HLS
+    this.ensureAlwaysRecording(
+      cameraId,
+      handle.rtspUrl,
+      handle.recordingBaseDir,
+      handle.hlsBaseDir,
+      handle.segmentMinutes,
+      false
+    );
+    return true;
   }
 
-  // Legacy method for backward compatibility - now just ensures streaming
+  // Getter methods
+  getHandle(cameraId: string): AlwaysRecordingHandle | undefined {
+    return this.cameraIdToHandle.get(cameraId);
+  }
+
+  isRecording(cameraId: string): boolean {
+    return this.cameraIdToHandle.has(cameraId);
+  }
+
+  isStreamingHLS(cameraId: string): boolean {
+    const handle = this.cameraIdToHandle.get(cameraId);
+    return handle?.isStreamingHLS ?? false;
+  }
+
+  // Backward compatibility methods
+  ensureTranscoding(cameraId: string, rtspUrl: string, baseOutputDir: string): AlwaysRecordingHandle {
+    // In the new system, this starts recording+HLS
+    const recordingDir = process.env.RECORDINGS_DIR ? path.resolve(process.env.RECORDINGS_DIR) : path.join(baseOutputDir, '..', 'recordings');
+    return this.ensureAlwaysRecording(cameraId, rtspUrl, recordingDir, baseOutputDir, 10, true);
+  }
+
+  stopTranscoding(cameraId: string) {
+    this.disableHLS(cameraId);
+  }
+
+  ensureRecording(cameraId: string, rtspUrl: string, baseRecordingsDir: string, segmentMinutes: number): AlwaysRecordingHandle {
+    // In the new system, this starts recording-only
+    const hlsDir = process.env.HLS_DIR ? path.resolve(process.env.HLS_DIR) : path.join(baseRecordingsDir, '..', 'hls');
+    return this.ensureAlwaysRecording(cameraId, rtspUrl, baseRecordingsDir, hlsDir, segmentMinutes, false);
+  }
+
+  stopRecording(cameraId: string) {
+    this.stopAlwaysRecording(cameraId);
+  }
+
+  getStreamingHandle(cameraId: string): AlwaysRecordingHandle | undefined {
+    const handle = this.cameraIdToHandle.get(cameraId);
+    return handle?.isStreamingHLS ? handle : undefined;
+  }
+
+  getRecordingHandle(cameraId: string): AlwaysRecordingHandle | undefined {
+    return this.cameraIdToHandle.get(cameraId);
+  }
+
+  // Legacy method for backward compatibility
   ensurePipeline(
     cameraId: string,
     rtspUrl: string,
@@ -212,23 +257,20 @@ class FfmpegManager {
     baseRecordingsDir: string,
     segmentMinutes: number,
     recordingEnabled: boolean
-  ): TranscodeHandle {
-    // Always ensure streaming
-    const streamHandle = this.ensureTranscoding(cameraId, rtspUrl, baseHlsDir);
-    
-    // Handle recording separately
-    if (recordingEnabled && baseRecordingsDir) {
-      this.ensureRecording(cameraId, rtspUrl, baseRecordingsDir, segmentMinutes);
-    } else {
-      this.stopRecording(cameraId);
-    }
-    
-    return streamHandle;
+  ): AlwaysRecordingHandle {
+    // Always record, optionally stream
+    return this.ensureAlwaysRecording(
+      cameraId,
+      rtspUrl,
+      baseRecordingsDir || baseHlsDir,
+      baseHlsDir,
+      segmentMinutes,
+      true // Always enable HLS when someone requests the pipeline
+    );
   }
 
   stopPipeline(cameraId: string) {
-    this.stopTranscoding(cameraId);
-    this.stopRecording(cameraId);
+    this.stopAlwaysRecording(cameraId);
   }
 }
 

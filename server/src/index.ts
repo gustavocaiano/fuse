@@ -45,35 +45,43 @@ const port = Number(process.env.PORT || 4000);
 app.listen(port, () => {
 	console.log(`cam-parser server listening on http://localhost:${port}`);
 
-	// Auto-start streaming for all cameras; start recording for enabled cameras
+	// Auto-start always-recording for all cameras (single stream approach)
 	try {
-		const recordDirEnv = process.env.RECORDINGS_DIR ? path.resolve(process.env.RECORDINGS_DIR) : '';
+		const recordDirEnv = process.env.RECORDINGS_DIR ? path.resolve(process.env.RECORDINGS_DIR) : path.join(__dirname, '..', 'recordings');
 		const recordMinutes = Number(process.env.RECORD_SEGMENT_MINUTES || 10);
+		
+		// Ensure directories exist
 		try { fs.mkdirSync(hlsDir, { recursive: true }); } catch {}
-		if (recordDirEnv) { try { fs.mkdirSync(recordDirEnv, { recursive: true }); } catch {} }
+		try { fs.mkdirSync(recordDirEnv, { recursive: true }); } catch {}
 		
 		const rows = listCamerasStmt.all() as Array<{ id: string; rtsp: string; recordEnabled: number }>;
-		console.log(`Auto-starting ${rows.length} cameras...`);
+		console.log(`🎥 Auto-starting always-recording for ${rows.length} cameras...`);
+		console.log(`📁 Recordings: ${recordDirEnv}`);
+		console.log(`📺 HLS Output: ${hlsDir}`);
 		
 		for (const cam of rows) {
 			try {
-				// Always start streaming
-				ffmpegManager.ensureTranscoding(cam.id, cam.rtsp, hlsDir);
-				console.log(`Started streaming for camera ${cam.id}`);
-				
-				// Start recording if enabled
-				if (cam.recordEnabled && recordDirEnv) {
-					ffmpegManager.ensureRecording(cam.id, cam.rtsp, recordDirEnv, recordMinutes);
-					console.log(`Started recording for camera ${cam.id}`);
-				}
+				// Always start recording-only mode (HLS will be enabled when users start streaming)
+				ffmpegManager.ensureAlwaysRecording(
+					cam.id,
+					cam.rtsp,
+					recordDirEnv,
+					hlsDir,
+					recordMinutes,
+					false // Start with recording-only, HLS on-demand
+				);
+				console.log(`✅ Started always-recording for camera ${cam.id}`);
 			} catch (e) {
 				// eslint-disable-next-line no-console
-				console.error('Auto-start error for camera:', cam.id, e);
+				console.error(`❌ Auto-start error for camera ${cam.id}:`, e);
 			}
 		}
+		
+		console.log(`🚀 Always-recording system active for ${rows.length} cameras`);
+		console.log(`💡 Single RTSP stream per camera - optimal performance!`);
 	} catch (e) {
 		// eslint-disable-next-line no-console
-		console.error('Auto-start supervisor error:', e);
+		console.error('❌ Auto-start supervisor error:', e);
 	}
 });
 

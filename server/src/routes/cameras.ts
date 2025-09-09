@@ -57,16 +57,14 @@ cameraRouter.get('/:id', (req, res) => {
   res.json(cam);
 });
 
-// Delete a camera (stops streaming, removes HLS data, releases resources, deletes DB row)
+// Delete a camera (stops all processes, removes data, releases resources, deletes DB row)
 cameraRouter.delete('/:id', (req, res) => {
   const id = req.params.id;
   const cam = getCameraStmt.get(id) as Camera | undefined;
   if (!cam) return res.status(404).json({ error: 'not found' });
 
-  // Stop streaming and recording processes
-  ffmpegManager.stopTranscoding(id);
-  ffmpegManager.stopRecording(id);
-  ffmpegManager.stopPipeline(id); // For backward compatibility
+  // Stop the always-recording process (includes streaming)
+  ffmpegManager.stopAlwaysRecording(id);
   onvifManager.release(id);
 
   // Remove HLS output directory for this camera
@@ -79,59 +77,49 @@ cameraRouter.delete('/:id', (req, res) => {
 
   // Remove DB record
   deleteCameraStmt.run(id);
-  console.log(`Deleted camera ${id} and cleaned up resources`);
+  console.log(`Deleted camera ${id} and cleaned up all resources`);
   res.status(204).end();
 });
 
-// Toggle recording per camera
+// Note: In the new always-record system, this endpoint doesn't actually toggle recording
+// Recording is always on. This endpoint is kept for backward compatibility
 cameraRouter.post('/:id/recording', (req, res) => {
   const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
   if (!cam) return res.status(404).json({ error: 'not found' });
   const { enabled } = req.body as { enabled: boolean };
   updateCameraRecordingStmt.run(enabled ? 1 : 0, cam.id);
 
-  const recordDir = process.env.RECORDINGS_DIR ? path.resolve(process.env.RECORDINGS_DIR) : '';
-  const recordMinutes = Number(process.env.RECORD_SEGMENT_MINUTES || 10);
-  
-  try {
-    if (enabled && recordDir) {
-      fs.mkdirSync(recordDir, { recursive: true });
-      // Start recording independently
-      ffmpegManager.ensureRecording(cam.id, cam.rtsp, recordDir, recordMinutes);
-      console.log(`Recording started for camera ${cam.id}`);
-    } else {
-      // Stop recording, but keep streaming if active
-      ffmpegManager.stopRecording(cam.id);
-      console.log(`Recording stopped for camera ${cam.id}`);
-    }
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error('Recording toggle error:', e);
-    return res.status(500).json({ error: 'Failed to toggle recording' });
-  }
+  console.log(`Recording preference set to ${enabled} for camera ${cam.id} (always recording in background)`);
 
   const updated = getCameraStmt.get(cam.id) as Camera;
-  res.json({ id: updated.id, recordEnabled: updated.recordEnabled });
+  res.json({ 
+    id: updated.id, 
+    recordEnabled: updated.recordEnabled,
+    note: "Recording is always active in background - this setting is for preference tracking only"
+  });
 });
 
-// Start HLS for camera and return m3u8 URL
+// Start HLS streaming for camera (recording is always active)
 cameraRouter.post('/:id/start', async (req, res) => {
   const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
   if (!cam) return res.status(404).json({ error: 'not found' });
   
   try {
-    fs.mkdirSync(baseHlsDir, { recursive: true });
-    
-    // Start streaming
-    const streamHandle = ffmpegManager.ensureTranscoding(cam.id, cam.rtsp, baseHlsDir);
-    
-    // Start recording if enabled
     const recordDir = process.env.RECORDINGS_DIR ? path.resolve(process.env.RECORDINGS_DIR) : '';
     const recordMinutes = Number(process.env.RECORD_SEGMENT_MINUTES || 10);
-    if (cam.recordEnabled && recordDir) {
-      fs.mkdirSync(recordDir, { recursive: true });
-      ffmpegManager.ensureRecording(cam.id, cam.rtsp, recordDir, recordMinutes);
-    }
+    
+    fs.mkdirSync(baseHlsDir, { recursive: true });
+    fs.mkdirSync(recordDir, { recursive: true });
+    
+    // Ensure camera is always recording and now also streaming HLS
+    const handle = ffmpegManager.ensureAlwaysRecording(
+      cam.id,
+      cam.rtsp,
+      recordDir,
+      baseHlsDir,
+      recordMinutes,
+      true // Enable HLS output
+    );
     
     const playlistUrl = `/hls/${cam.id}/index.m3u8`;
 
@@ -153,14 +141,14 @@ cameraRouter.post('/:id/start', async (req, res) => {
 
     await waitForFile(playlistPath);
 
-    const isRecording = Boolean(cam.recordEnabled && ffmpegManager.getRecordingHandle(cam.id));
-    const isStreaming = Boolean(ffmpegManager.getStreamingHandle(cam.id));
+    console.log(`Started HLS streaming for camera ${cam.id} (always recording in background)`);
 
     res.json({ 
       playlistUrl, 
-      outputDir: streamHandle.outputDir, 
-      recording: isRecording,
-      streaming: isStreaming
+      outputDir: handle.hlsOutputDir,
+      recording: true, // Always recording
+      streaming: handle.isStreamingHLS,
+      note: "Camera is always recording - HLS streaming is now enabled"
     });
   } catch (e) {
     // eslint-disable-next-line no-console
@@ -204,34 +192,59 @@ cameraRouter.post('/:id/ptz/stop', async (req, res) => {
   }
 });
 
-// Get camera status (streaming and recording state)
+// Get camera status (always-recording and streaming state)
 cameraRouter.get('/:id/status', (req, res) => {
   const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
   if (!cam) return res.status(404).json({ error: 'not found' });
 
-  const streamingHandle = ffmpegManager.getStreamingHandle(cam.id);
-  const recordingHandle = ffmpegManager.getRecordingHandle(cam.id);
+  const handle = ffmpegManager.getHandle(cam.id);
 
   const status = {
     cameraId: cam.id,
-    streaming: {
-      active: Boolean(streamingHandle),
-      processId: streamingHandle?.process?.pid || null,
-      outputDir: streamingHandle?.outputDir || null,
+    alwaysRecording: {
+      active: Boolean(handle),
+      processId: handle?.process?.pid || null,
+      currentHour: handle?.currentHourKey || null,
+      recordingDir: handle?.recordingBaseDir || null,
     },
-    recording: {
-      active: Boolean(recordingHandle),
-      processId: recordingHandle?.process?.pid || null,
-      currentHour: recordingHandle?.currentHourKey || null,
-      baseDir: recordingHandle?.baseDir || null,
+    hlsStreaming: {
+      active: Boolean(handle?.isStreamingHLS),
+      outputDir: handle?.hlsOutputDir || null,
+      playlistUrl: handle?.isStreamingHLS ? `/hls/${cam.id}/index.m3u8` : null,
     },
     config: {
-      recordEnabled: Boolean(cam.recordEnabled),
+      recordEnabled: Boolean(cam.recordEnabled), // Preference only
       rtspUrl: cam.rtsp,
+      segmentMinutes: handle?.segmentMinutes || null,
+    },
+    system: {
+      architecture: "always-record + on-demand-hls",
+      singleStream: true,
+      cameraLoad: "minimal - single RTSP connection",
     }
   };
 
   res.json(status);
+});
+
+// Stop HLS streaming for camera (keep recording active)
+cameraRouter.post('/:id/stop', (req, res) => {
+  const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
+  if (!cam) return res.status(404).json({ error: 'not found' });
+
+  const success = ffmpegManager.disableHLS(cam.id);
+  
+  if (success) {
+    console.log(`Stopped HLS streaming for camera ${cam.id} (still recording in background)`);
+    res.json({ 
+      message: 'HLS streaming stopped',
+      recording: true, // Always recording
+      streaming: false,
+      note: "Camera continues recording in background"
+    });
+  } else {
+    res.status(404).json({ error: 'Camera not found or not streaming' });
+  }
 });
 
 
