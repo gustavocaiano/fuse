@@ -63,10 +63,10 @@ cameraRouter.delete('/:id', (req, res) => {
   const cam = getCameraStmt.get(id) as Camera | undefined;
   if (!cam) return res.status(404).json({ error: 'not found' });
 
-  // Stop any active pipelines and release ONVIF resources
-  ffmpegManager.stopPipeline(id);
+  // Stop streaming and recording processes
   ffmpegManager.stopTranscoding(id);
   ffmpegManager.stopRecording(id);
+  ffmpegManager.stopPipeline(id); // For backward compatibility
   onvifManager.release(id);
 
   // Remove HLS output directory for this camera
@@ -79,6 +79,7 @@ cameraRouter.delete('/:id', (req, res) => {
 
   // Remove DB record
   deleteCameraStmt.run(id);
+  console.log(`Deleted camera ${id} and cleaned up resources`);
   res.status(204).end();
 });
 
@@ -91,18 +92,22 @@ cameraRouter.post('/:id/recording', (req, res) => {
 
   const recordDir = process.env.RECORDINGS_DIR ? path.resolve(process.env.RECORDINGS_DIR) : '';
   const recordMinutes = Number(process.env.RECORD_SEGMENT_MINUTES || 10);
+  
   try {
-    fs.mkdirSync(baseHlsDir, { recursive: true });
-    if (enabled) {
-      if (recordDir) fs.mkdirSync(recordDir, { recursive: true });
-      ffmpegManager.ensurePipeline(cam.id, cam.rtsp, baseHlsDir, recordDir, recordMinutes, true);
+    if (enabled && recordDir) {
+      fs.mkdirSync(recordDir, { recursive: true });
+      // Start recording independently
+      ffmpegManager.ensureRecording(cam.id, cam.rtsp, recordDir, recordMinutes);
+      console.log(`Recording started for camera ${cam.id}`);
     } else {
-      // Switch pipeline to HLS-only (if running) or do nothing if idle
-      ffmpegManager.ensurePipeline(cam.id, cam.rtsp, baseHlsDir, '', recordMinutes, false);
+      // Stop recording, but keep streaming if active
+      ffmpegManager.stopRecording(cam.id);
+      console.log(`Recording stopped for camera ${cam.id}`);
     }
   } catch (e) {
     // eslint-disable-next-line no-console
-    console.error('Recording toggle pipeline error:', e);
+    console.error('Recording toggle error:', e);
+    return res.status(500).json({ error: 'Failed to toggle recording' });
   }
 
   const updated = getCameraStmt.get(cam.id) as Camera;
@@ -113,32 +118,55 @@ cameraRouter.post('/:id/recording', (req, res) => {
 cameraRouter.post('/:id/start', async (req, res) => {
   const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
   if (!cam) return res.status(404).json({ error: 'not found' });
-  const recordDir = process.env.RECORDINGS_DIR ? path.resolve(process.env.RECORDINGS_DIR) : '';
-  const recordMinutes = Number(process.env.RECORD_SEGMENT_MINUTES || 10);
-  const handle = ffmpegManager.ensurePipeline(cam.id, cam.rtsp, baseHlsDir, cam.recordEnabled ? recordDir : '', recordMinutes, Boolean(cam.recordEnabled));
-  const playlistUrl = `/hls/${cam.id}/index.m3u8`;
-
-  // Wait briefly for the HLS playlist to appear to avoid an initial 404 in the player
-  const playlistPath = path.join(baseHlsDir, cam.id, 'index.m3u8');
-
-  const waitForFile = async (filePath: string, timeoutMs = 12000, pollMs = 300) => {
-    const start = Date.now();
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      try {
-        fs.accessSync(filePath, fs.constants.F_OK);
-        return true;
-      } catch {}
-      if (Date.now() - start > timeoutMs) return false;
-      await new Promise(r => setTimeout(r, pollMs));
+  
+  try {
+    fs.mkdirSync(baseHlsDir, { recursive: true });
+    
+    // Start streaming
+    const streamHandle = ffmpegManager.ensureTranscoding(cam.id, cam.rtsp, baseHlsDir);
+    
+    // Start recording if enabled
+    const recordDir = process.env.RECORDINGS_DIR ? path.resolve(process.env.RECORDINGS_DIR) : '';
+    const recordMinutes = Number(process.env.RECORD_SEGMENT_MINUTES || 10);
+    if (cam.recordEnabled && recordDir) {
+      fs.mkdirSync(recordDir, { recursive: true });
+      ffmpegManager.ensureRecording(cam.id, cam.rtsp, recordDir, recordMinutes);
     }
-  };
+    
+    const playlistUrl = `/hls/${cam.id}/index.m3u8`;
 
-  await waitForFile(playlistPath);
+    // Wait briefly for the HLS playlist to appear to avoid an initial 404 in the player
+    const playlistPath = path.join(baseHlsDir, cam.id, 'index.m3u8');
 
-  // Pipeline already includes recording if enabled; nothing else to do
+    const waitForFile = async (filePath: string, timeoutMs = 12000, pollMs = 300) => {
+      const start = Date.now();
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        try {
+          fs.accessSync(filePath, fs.constants.F_OK);
+          return true;
+        } catch {}
+        if (Date.now() - start > timeoutMs) return false;
+        await new Promise(r => setTimeout(r, pollMs));
+      }
+    };
 
-  res.json({ playlistUrl, outputDir: (handle as any).hlsDir || path.join(baseHlsDir, cam.id), recording: Boolean(cam.recordEnabled) });
+    await waitForFile(playlistPath);
+
+    const isRecording = Boolean(cam.recordEnabled && ffmpegManager.getRecordingHandle(cam.id));
+    const isStreaming = Boolean(ffmpegManager.getStreamingHandle(cam.id));
+
+    res.json({ 
+      playlistUrl, 
+      outputDir: streamHandle.outputDir, 
+      recording: isRecording,
+      streaming: isStreaming
+    });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error('Start camera error:', e);
+    res.status(500).json({ error: 'Failed to start camera stream' });
+  }
 });
 
 // PTZ move
@@ -174,6 +202,36 @@ cameraRouter.post('/:id/ptz/stop', async (req, res) => {
   } catch (e: any) {
     res.status(500).json({ error: String(e?.message || e) });
   }
+});
+
+// Get camera status (streaming and recording state)
+cameraRouter.get('/:id/status', (req, res) => {
+  const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
+  if (!cam) return res.status(404).json({ error: 'not found' });
+
+  const streamingHandle = ffmpegManager.getStreamingHandle(cam.id);
+  const recordingHandle = ffmpegManager.getRecordingHandle(cam.id);
+
+  const status = {
+    cameraId: cam.id,
+    streaming: {
+      active: Boolean(streamingHandle),
+      processId: streamingHandle?.process?.pid || null,
+      outputDir: streamingHandle?.outputDir || null,
+    },
+    recording: {
+      active: Boolean(recordingHandle),
+      processId: recordingHandle?.process?.pid || null,
+      currentHour: recordingHandle?.currentHourKey || null,
+      baseDir: recordingHandle?.baseDir || null,
+    },
+    config: {
+      recordEnabled: Boolean(cam.recordEnabled),
+      rtspUrl: cam.rtsp,
+    }
+  };
+
+  res.json(status);
 });
 
 

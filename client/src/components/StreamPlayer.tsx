@@ -18,7 +18,7 @@ export default function StreamPlayer({ playlistUrl, title }: Props) {
       hlsRef.current.destroy()
       hlsRef.current = null
     }
-
+ 
     const attachCatchUp = () => {
       const onTimeUpdate = () => {
         const v = videoRef.current

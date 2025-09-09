@@ -45,31 +45,35 @@ const port = Number(process.env.PORT || 4000);
 app.listen(port, () => {
 	console.log(`cam-parser server listening on http://localhost:${port}`);
 
-	// Auto-start combined pipeline for cameras; include recording if enabled
+	// Auto-start streaming for all cameras; start recording for enabled cameras
 	try {
 		const recordDirEnv = process.env.RECORDINGS_DIR ? path.resolve(process.env.RECORDINGS_DIR) : '';
 		const recordMinutes = Number(process.env.RECORD_SEGMENT_MINUTES || 10);
 		try { fs.mkdirSync(hlsDir, { recursive: true }); } catch {}
 		if (recordDirEnv) { try { fs.mkdirSync(recordDirEnv, { recursive: true }); } catch {} }
+		
 		const rows = listCamerasStmt.all() as Array<{ id: string; rtsp: string; recordEnabled: number }>;
+		console.log(`Auto-starting ${rows.length} cameras...`);
+		
 		for (const cam of rows) {
 			try {
-				ffmpegManager.ensurePipeline(
-					cam.id,
-					cam.rtsp,
-					hlsDir,
-					cam.recordEnabled ? recordDirEnv : '',
-					recordMinutes,
-					Boolean(cam.recordEnabled)
-				);
+				// Always start streaming
+				ffmpegManager.ensureTranscoding(cam.id, cam.rtsp, hlsDir);
+				console.log(`Started streaming for camera ${cam.id}`);
+				
+				// Start recording if enabled
+				if (cam.recordEnabled && recordDirEnv) {
+					ffmpegManager.ensureRecording(cam.id, cam.rtsp, recordDirEnv, recordMinutes);
+					console.log(`Started recording for camera ${cam.id}`);
+				}
 			} catch (e) {
 				// eslint-disable-next-line no-console
-				console.error('Auto-start pipeline error:', cam.id, e);
+				console.error('Auto-start error for camera:', cam.id, e);
 			}
 		}
 	} catch (e) {
 		// eslint-disable-next-line no-console
-		console.error('Auto-start pipelines supervisor error:', e);
+		console.error('Auto-start supervisor error:', e);
 	}
 });
 

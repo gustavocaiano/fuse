@@ -17,23 +17,9 @@ export type RecordingHandle = {
   segmentSeconds: number;
 };
 
-export type PipelineHandle = {
-  cameraId: string;
-  process: ChildProcess;
-  hlsBaseDir: string;
-  hlsDir: string;
-  recordBaseDir: string;
-  recordingEnabled: boolean;
-  currentHourKey: string;
-  interval: NodeJS.Timeout;
-  segmentSeconds: number;
-  rtspUrl: string;
-};
-
 class FfmpegManager {
   private cameraIdToProcess: Map<string, TranscodeHandle> = new Map();
   private cameraIdToRecording: Map<string, RecordingHandle> = new Map();
-  private cameraIdToPipeline: Map<string, PipelineHandle> = new Map();
 
   ensureTranscoding(cameraId: string, rtspUrl: string, baseOutputDir: string): TranscodeHandle {
     const existing = this.cameraIdToProcess.get(cameraId);
@@ -207,7 +193,18 @@ class FfmpegManager {
     this.cameraIdToRecording.delete(cameraId);
   }
 
-  // Combined single-pull pipeline for HLS live + segment recordings
+  // Simplified: manage streaming and recording as separate independent processes
+  // This is more reliable than trying to use tee filter for both outputs
+
+  getStreamingHandle(cameraId: string): TranscodeHandle | undefined {
+    return this.cameraIdToProcess.get(cameraId);
+  }
+
+  getRecordingHandle(cameraId: string): RecordingHandle | undefined {
+    return this.cameraIdToRecording.get(cameraId);
+  }
+
+  // Legacy method for backward compatibility - now just ensures streaming
   ensurePipeline(
     cameraId: string,
     rtspUrl: string,
@@ -215,125 +212,23 @@ class FfmpegManager {
     baseRecordingsDir: string,
     segmentMinutes: number,
     recordingEnabled: boolean
-  ): PipelineHandle {
-    const segmentSeconds = Math.max(1, Math.floor(segmentMinutes * 60));
-    const existing = this.cameraIdToPipeline.get(cameraId);
-    if (existing) {
-      const sameRecFlag = existing.recordingEnabled === Boolean(recordingEnabled && baseRecordingsDir);
-      const sameHls = existing.hlsBaseDir === baseHlsDir;
-      const sameRecBase = existing.recordBaseDir === baseRecordingsDir;
-      const sameSeg = existing.segmentSeconds === segmentSeconds;
-      if (sameRecFlag && sameHls && sameRecBase && sameSeg) return existing;
-      try { clearInterval(existing.interval); } catch {}
-      try { existing.process.kill('SIGTERM'); } catch {}
-      this.cameraIdToPipeline.delete(cameraId);
+  ): TranscodeHandle {
+    // Always ensure streaming
+    const streamHandle = this.ensureTranscoding(cameraId, rtspUrl, baseHlsDir);
+    
+    // Handle recording separately
+    if (recordingEnabled && baseRecordingsDir) {
+      this.ensureRecording(cameraId, rtspUrl, baseRecordingsDir, segmentMinutes);
+    } else {
+      this.stopRecording(cameraId);
     }
-
-    const hlsDir = path.join(baseHlsDir, cameraId);
-    fs.mkdirSync(hlsDir, { recursive: true });
-
-    const startProcess = () => {
-      const now = new Date();
-      const { dir, hourKey } = this.buildRecordingDir(baseRecordingsDir, cameraId, now);
-      if (recordingEnabled && baseRecordingsDir) fs.mkdirSync(dir, { recursive: true });
-
-      const forceKeyExpr = `expr:gte(t, n_forced*${segmentSeconds})`;
-      const args: string[] = [
-        '-rtsp_transport', 'tcp',
-        '-fflags', '+genpts+flush_packets',
-        '-flags', 'low_delay',
-        '-probesize', '32',
-        '-analyzeduration', '0',
-        '-i', rtspUrl,
-        '-c:v', 'libx264',
-        '-preset', 'ultrafast',
-        '-tune', 'zerolatency',
-        '-profile:v', 'baseline',
-        '-x264-params', 'keyint=15:min-keyint=15:scenecut=0:bframes=0',
-        '-g', '15',
-        '-sc_threshold', '0',
-        '-an',
-      ];
-
-      if (recordingEnabled && baseRecordingsDir) {
-        const hlsOut = path.join(hlsDir, 'index.m3u8');
-        const segPattern = path.join(dir, 'part-%03d.mp4');
-        const teeDest =
-          `tee:` +
-          `[f=hls:hls_time=0.5:hls_list_size=2:hls_flags=delete_segments+append_list+independent_segments:hls_allow_cache=0:hls_segment_type=mpegts]${hlsOut}` +
-          `|` +
-          `[f=segment:segment_time=${segmentSeconds}:segment_atclocktime=1:reset_timestamps=1]${segPattern}`;
-        args.push(
-          '-force_key_frames', forceKeyExpr,
-          '-f', 'tee', teeDest
-        );
-      } else {
-        args.push(
-          '-flush_packets', '1',
-          '-muxdelay', '0.1',
-          '-f', 'hls',
-          '-hls_time', '0.5',
-          '-hls_list_size', '2',
-          '-hls_flags', 'delete_segments+append_list+independent_segments',
-          '-hls_allow_cache', '0',
-          '-hls_segment_type', 'mpegts',
-          path.join(hlsDir, 'index.m3u8')
-        );
-      }
-
-      const child = spawn('ffmpeg', args, { stdio: 'ignore' });
-      child.on('error', (err) => {
-        console.error(`ffmpeg pipeline spawn error for camera ${cameraId}:`, err?.message || err);
-      });
-      return { child, hourKey };
-    };
-
-    const initial = startProcess();
-    const handle: PipelineHandle = {
-      cameraId,
-      process: initial.child,
-      hlsBaseDir: baseHlsDir,
-      hlsDir,
-      recordBaseDir: baseRecordingsDir,
-      recordingEnabled: Boolean(recordingEnabled && baseRecordingsDir),
-      currentHourKey: initial.hourKey,
-      interval: setInterval(() => {}, 1),
-      segmentSeconds,
-      rtspUrl,
-    };
-
-    const interval = setInterval(() => {
-      // Hourly rotation: restart to write into new hour directory when recording
-      if (handle.recordingEnabled && handle.recordBaseDir) {
-        const now = new Date();
-        const { hourKey: newKey } = this.buildRecordingDir(handle.recordBaseDir, cameraId, now);
-        if (newKey !== handle.currentHourKey) {
-          try { handle.process.kill('SIGTERM'); } catch {}
-          const restarted = startProcess();
-          handle.process = restarted.child;
-          handle.currentHourKey = restarted.hourKey;
-          return;
-        }
-      }
-      // Respawn if exited
-      if (handle.process.exitCode !== null) {
-        const restarted = startProcess();
-        handle.process = restarted.child;
-        handle.currentHourKey = restarted.hourKey;
-      }
-    }, 60 * 1000);
-    handle.interval = interval;
-
-    this.cameraIdToPipeline.set(cameraId, handle);
-    return handle;
+    
+    return streamHandle;
   }
 
   stopPipeline(cameraId: string) {
-    const handle = this.cameraIdToPipeline.get(cameraId);
-    if (!handle) return;
-    try { clearInterval(handle.interval); } catch {}
-    try { handle.process.kill('SIGTERM'); } catch {}
-    this.cameraIdToPipeline.delete(cameraId);
+    this.stopTranscoding(cameraId);
+    this.stopRecording(cameraId);
   }
 }
 
