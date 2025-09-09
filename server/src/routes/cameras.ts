@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import { Camera, insertCamera, listCamerasStmt, getCameraStmt, deleteCameraStmt, updateCameraRecordingStmt, listAccessibleCameraIdsForUserStmt, getUserStmt } from '../db';
 import { ffmpegManager } from '../ffmpegManager';
 import { onvifManager, PtzMovePayload, PtzStopPayload } from '../onvifManager';
@@ -10,6 +11,39 @@ export const cameraRouter = Router();
 
 const baseHlsDir = process.env.HLS_DIR ? path.resolve(process.env.HLS_DIR) : path.resolve(path.join(__dirname, '..', 'hls'));
 fs.mkdirSync(baseHlsDir, { recursive: true });
+
+// Video access token system
+const VIDEO_TOKEN_SECRET = process.env.VIDEO_TOKEN_SECRET || 'cam-parser-video-secret-key';
+const VIDEO_TOKEN_EXPIRY = 3600000; // 1 hour in milliseconds
+
+function generateVideoToken(userId: string, cameraId: string, filePath: string): string {
+  const payload = {
+    userId,
+    cameraId, 
+    filePath,
+    exp: Date.now() + VIDEO_TOKEN_EXPIRY
+  };
+  const token = Buffer.from(JSON.stringify(payload)).toString('base64');
+  const signature = crypto.createHmac('sha256', VIDEO_TOKEN_SECRET).update(token).digest('hex');
+  return `${token}.${signature}`;
+}
+
+function validateVideoToken(token: string): { userId: string; cameraId: string; filePath: string } | null {
+  try {
+    const [tokenData, signature] = token.split('.');
+    if (!tokenData || !signature) return null;
+    
+    const expectedSignature = crypto.createHmac('sha256', VIDEO_TOKEN_SECRET).update(tokenData).digest('hex');
+    if (signature !== expectedSignature) return null;
+    
+    const payload = JSON.parse(Buffer.from(tokenData, 'base64').toString());
+    if (payload.exp < Date.now()) return null; // Token expired
+    
+    return { userId: payload.userId, cameraId: payload.cameraId, filePath: payload.filePath };
+  } catch {
+    return null;
+  }
+}
 
 // Attach user from x-user-id header
 cameraRouter.use((req, _res, next) => {
@@ -408,15 +442,66 @@ cameraRouter.get('/:id/recordings/:year/:month/:day/:hour/files', (req, res) => 
   }
 });
 
+// Generate video access token
+cameraRouter.post('/:id/recordings/:year/:month/:day/:hour/token/:filename', (req, res) => {
+  const user = (req as any).user as { id?: string; role?: string } | undefined;
+  const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
+  if (!cam) return res.status(404).json({ error: 'not found' });
+  if (!user) return res.status(401).json({ error: 'unauthorized' });
+
+  // Check permissions
+  if (user.role !== 'admin') {
+    const allowedIds = user.id ? (listAccessibleCameraIdsForUserStmt.all(user.id) as Array<{ cameraId: string }>).map(r => r.cameraId) : [];
+    if (!allowedIds.includes(cam.id)) return res.status(403).json({ error: 'forbidden' });
+  }
+
+  try {
+    const recordingsDir = process.env.RECORDINGS_DIR || path.join(__dirname, '..', '..', 'recordings');
+    const filePath = path.join(recordingsDir, cam.id, req.params.year, req.params.month, req.params.day, req.params.hour, req.params.filename);
+
+    // Verify file exists
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: 'file not found' });
+    }
+
+    const token = generateVideoToken(user.id!, cam.id, filePath);
+    res.json({ token, expiresIn: VIDEO_TOKEN_EXPIRY });
+  } catch (e) {
+    console.error('Error generating video token:', e);
+    res.status(500).json({ error: 'Failed to generate token' });
+  }
+});
+
 // Serve recorded video files
 cameraRouter.get('/:id/recordings/:year/:month/:day/:hour/file/:filename', (req, res) => {
   const user = (req as any).user as { id?: string; role?: string } | undefined;
   const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
   if (!cam) return res.status(404).json({ error: 'not found' });
 
+  // Check authentication - either x-user-id header OR video token
+  const videoToken = req.query.token as string;
+  let authenticatedUser: { id?: string; role?: string } | null = user || null;
+  
+  if (!authenticatedUser && videoToken) {
+    // Try token authentication
+    const tokenData = validateVideoToken(videoToken);
+    if (tokenData && tokenData.cameraId === cam.id) {
+      // Get user from token
+      const tokenUser = getUserStmt.get(tokenData.userId) as any;
+      if (tokenUser) {
+        authenticatedUser = tokenUser;
+        console.log(`Video access via token - User: ${tokenUser.id}, Camera: ${cam.id}`);
+      }
+    }
+  }
+
+  if (!authenticatedUser) {
+    return res.status(401).json({ error: 'unauthorized' });
+  }
+
   // Check permissions
-  if (!user || user.role !== 'admin') {
-    const allowedIds = user && user.id ? (listAccessibleCameraIdsForUserStmt.all(user.id) as Array<{ cameraId: string }>).map(r => r.cameraId) : [];
+  if (authenticatedUser.role !== 'admin') {
+    const allowedIds = authenticatedUser.id ? (listAccessibleCameraIdsForUserStmt.all(authenticatedUser.id) as Array<{ cameraId: string }>).map(r => r.cameraId) : [];
     if (!allowedIds.includes(cam.id)) return res.status(403).json({ error: 'forbidden' });
   }
 

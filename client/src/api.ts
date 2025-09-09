@@ -138,8 +138,15 @@ export async function getRecordingFiles(cameraId: string, year: string, month: s
   return data;
 }
 
-export function getRecordingFileUrl(cameraId: string, year: string, month: string, day: string, hour: string, filename: string): string {
-  return `${API_BASE}/cameras/${cameraId}/recordings/${year}/${month}/${day}/${hour}/file/${filename}`;
+// Generate video access token
+export async function generateVideoToken(cameraId: string, year: string, month: string, day: string, hour: string, filename: string): Promise<string> {
+  const { data } = await axios.post(`${API_BASE}/cameras/${cameraId}/recordings/${year}/${month}/${day}/${hour}/token/${filename}`);
+  return data.token;
+}
+
+export function getRecordingFileUrl(cameraId: string, year: string, month: string, day: string, hour: string, filename: string, token?: string): string {
+  const baseUrl = `${API_BASE}/cameras/${cameraId}/recordings/${year}/${month}/${day}/${hour}/file/${filename}`;
+  return token ? `${baseUrl}?token=${encodeURIComponent(token)}` : baseUrl;
 }
 
 

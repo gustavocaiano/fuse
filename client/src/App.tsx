@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Routes, Route, Link, useNavigate, useParams, Navigate } from 'react-router-dom'
-import { type Camera, createCamera, listCameras, startCamera, deleteCamera, getCamera, setRecording, getMe, setAuthUser, type User, listUsers, createUser, listUsersWithAccess, grantAccess, revokeAccess, getRecordingYears, getRecordingMonths, getRecordingDays, getRecordingHours, getRecordingFiles, getRecordingFileUrl, type RecordingFile } from './api'
+import { type Camera, createCamera, listCameras, startCamera, deleteCamera, getCamera, setRecording, getMe, setAuthUser, type User, listUsers, createUser, listUsersWithAccess, grantAccess, revokeAccess, getRecordingYears, getRecordingMonths, getRecordingDays, getRecordingHours, getRecordingFiles, getRecordingFileUrl, generateVideoToken, type RecordingFile } from './api'
 import StreamPlayer from './components/StreamPlayer'
 
 export default function App() {
@@ -433,7 +433,9 @@ function Playback() {
   const [selectedHour, setSelectedHour] = useState<string>('')
   const [files, setFiles] = useState<RecordingFile[]>([])
   const [selectedFile, setSelectedFile] = useState<RecordingFile | null>(null)
+  const [videoToken, setVideoToken] = useState<string>('')
   const [loading, setLoading] = useState(false)
+  const [tokenLoading, setTokenLoading] = useState(false)
 
   useEffect(() => {
     listCameras().then(setCameras)
@@ -500,6 +502,26 @@ function Playback() {
       .then(setFiles)
       .finally(() => setLoading(false))
   }, [selectedCamera, selectedYear, selectedMonth, selectedDay, selectedHour])
+
+  // Generate video token when file is selected
+  useEffect(() => {
+    if (!selectedFile || !selectedCamera || !selectedYear || !selectedMonth || !selectedDay || !selectedHour) {
+      setVideoToken('')
+      return
+    }
+    
+    setTokenLoading(true)
+    generateVideoToken(selectedCamera, selectedYear, selectedMonth, selectedDay, selectedHour, selectedFile.filename)
+      .then(token => {
+        setVideoToken(token)
+        setTokenLoading(false)
+      })
+      .catch(error => {
+        console.error('Failed to generate video token:', error)
+        setVideoToken('')
+        setTokenLoading(false)
+      })
+  }, [selectedFile, selectedCamera, selectedYear, selectedMonth, selectedDay, selectedHour])
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes'
@@ -652,15 +674,27 @@ function Playback() {
             </div>
             
             <div className="flex-1 flex flex-col">
-              <div className="bg-black rounded-lg overflow-hidden flex-1">
-                <video
-                  src={getRecordingFileUrl(selectedCamera, selectedYear, selectedMonth, selectedDay, selectedHour, selectedFile.filename)}
-                  controls
-                  className="w-full h-full object-contain"
-                  style={{ maxHeight: '70vh' }}
-                >
-                  Your browser does not support the video tag.
-                </video>
+              <div className="bg-black rounded-lg overflow-hidden flex-1 flex items-center justify-center">
+                {tokenLoading ? (
+                  <div className="text-center">
+                    <div className="w-8 h-8 border-2 border-purple-500/30 border-t-purple-500 rounded-full animate-spin mx-auto mb-3"></div>
+                    <div className="text-lg text-slate-400">Preparing video...</div>
+                  </div>
+                ) : videoToken ? (
+                  <video
+                    src={getRecordingFileUrl(selectedCamera, selectedYear, selectedMonth, selectedDay, selectedHour, selectedFile.filename, videoToken)}
+                    controls
+                    className="w-full h-full object-contain"
+                    style={{ maxHeight: '70vh' }}
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  <div className="text-center">
+                    <div className="text-lg text-red-400 mb-2">⚠️ Failed to load video</div>
+                    <div className="text-sm text-slate-400">Could not generate access token</div>
+                  </div>
+                )}
               </div>
               
               <div className="mt-4 p-3 bg-slate-700 rounded-lg">
