@@ -120,9 +120,8 @@ export default function StreamPlayer({ playlistUrl, title }: Props) {
       {/* Clean video display - no controls */}
       <video 
         ref={videoRef} 
-        className="block w-full aspect-video object-cover touch-manipulation"
+        className="block w-full aspect-video object-cover"
         muted 
-        playsInline 
         disablePictureInPicture
         style={{ background: 'black' }}
       />
