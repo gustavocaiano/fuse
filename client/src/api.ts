@@ -167,32 +167,16 @@ export interface CleanupResult {
 }
 
 export async function getStorageInfo(): Promise<StorageInfo> {
-  const response = await fetch(`${API_BASE}/cameras/storage/info`, {
-    headers: { 'x-user-id': authUserId || '' }
-  });
-  
-  if (!response.ok) {
-    throw new Error(`Storage info failed: ${response.status}`);
-  }
-  
-  return response.json();
+  const { data } = await axios.get(`${API_BASE}/cameras/storage/info`);
+  return data;
 }
 
 export async function performCleanup(maxAgeDays: number = 7, emergencyCleanup: boolean = false): Promise<CleanupResult> {
-  const response = await fetch(`${API_BASE}/cameras/storage/cleanup`, {
-    method: 'POST',
-    headers: { 
-      'Content-Type': 'application/json',
-      'x-user-id': authUserId || '' 
-    },
-    body: JSON.stringify({ maxAgeDays, emergencyCleanup })
+  const { data } = await axios.post(`${API_BASE}/cameras/storage/cleanup`, {
+    maxAgeDays,
+    emergencyCleanup
   });
-  
-  if (!response.ok) {
-    throw new Error(`Cleanup failed: ${response.status}`);
-  }
-  
-  return response.json();
+  return data;
 }
 
 
