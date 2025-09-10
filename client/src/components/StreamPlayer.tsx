@@ -122,6 +122,7 @@ export default function StreamPlayer({ playlistUrl, title }: Props) {
         ref={videoRef} 
         className="block w-full aspect-video object-cover"
         muted 
+        playsInline 
         disablePictureInPicture
         style={{ background: 'black' }}
       />
