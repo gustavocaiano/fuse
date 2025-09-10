@@ -120,7 +120,7 @@ export default function StreamPlayer({ playlistUrl, title }: Props) {
       {/* Clean video display - no controls */}
       <video 
         ref={videoRef} 
-        className="block w-full aspect-video object-cover"
+        className="block w-full aspect-video object-cover touch-manipulation"
         muted 
         playsInline 
         disablePictureInPicture
@@ -142,9 +142,9 @@ export default function StreamPlayer({ playlistUrl, title }: Props) {
         </div>
       ) : null}
       
-      {/* Hover controls overlay */}
-      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-        <div className="flex items-center gap-3">
+      {/* Hover controls overlay - Touch-friendly on mobile */}
+      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 lg:transition-opacity lg:duration-200 flex items-center justify-center touch-manipulation">
+        <div className="flex items-center gap-4 lg:gap-3">
           {/* Mute/Unmute toggle */}
           <button 
             onClick={() => {
@@ -154,15 +154,15 @@ export default function StreamPlayer({ playlistUrl, title }: Props) {
                 setIsMuted(newMuted)
               }
             }}
-            className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors backdrop-blur-sm"
+            className="p-3 lg:p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors backdrop-blur-sm touch-manipulation"
             title={isMuted ? "Unmute" : "Mute"}
           >
             {isMuted ? (
-              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-5 h-5 lg:w-4 lg:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z" clipRule="evenodd" />
               </svg>
             ) : (
-              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-5 h-5 lg:w-4 lg:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.983 5.983 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.984 3.984 0 00-1.172-2.828 1 1 0 010-1.415z" clipRule="evenodd" />
               </svg>
             )}
@@ -177,10 +177,10 @@ export default function StreamPlayer({ playlistUrl, title }: Props) {
                 videoRef.current?.parentElement?.requestFullscreen()
               }
             }}
-            className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors backdrop-blur-sm"
+            className="p-3 lg:p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors backdrop-blur-sm touch-manipulation"
             title="Fullscreen"
           >
-            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-5 h-5 lg:w-4 lg:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 01-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4zm9 1a1 1 0 010-2h4a1 1 0 011 1v4a1 1 0 01-2 0V6.414l-2.293 2.293a1 1 0 01-1.414-1.414L13.586 5H12zm-9 7a1 1 0 012 0v1.586l2.293-2.293a1 1 0 111.414 1.414L6.414 15H8a1 1 0 010 2H4a1 1 0 01-1-1v-4zm13-1a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 010-2h1.586l-2.293-2.293a1 1 0 111.414-1.414L15 13.586V12a1 1 0 011-1z" clipRule="evenodd" />
             </svg>
           </button>

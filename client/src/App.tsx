@@ -6,13 +6,13 @@ import StreamPlayer from './components/StreamPlayer'
 export default function App() {
   return (
     <div className="fixed inset-0 bg-slate-900 text-white flex flex-col">
-      <header className="border-b border-slate-700 bg-slate-800 px-6 py-4 flex items-center justify-between flex-shrink-0">
-        <Link to="/" className="text-xl font-bold text-emerald-400 hover:text-emerald-300 transition-colors">
+      <header className="border-b border-slate-700 bg-slate-800 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between flex-shrink-0">
+        <Link to="/" className="text-lg sm:text-xl font-bold text-emerald-400 hover:text-emerald-300 transition-colors">
           🎥 cam-parser
         </Link>
         <AuthStatus />
       </header>
-      <main className="flex-1 p-6 overflow-auto min-h-0">
+      <main className="flex-1 p-3 sm:p-6 overflow-auto min-h-0">
         <Routes>
           <Route path="/" element={<RequireAuth><Home /></RequireAuth>} />
           <Route path="/login" element={<Login />} />
@@ -59,23 +59,66 @@ function RequireAdmin({ children }: { children: React.ReactNode }) {
 
 function AuthStatus() {
   const [me, setMe] = useState<User | null>(null)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  
   useEffect(() => {
     const saved = localStorage.getItem('userId')
     setAuthUser(saved)
     getMe().then(setMe)
   }, [])
+  
   return (
     <div className="text-sm text-slate-300">
       {me ? (
-        <span className="flex items-center gap-3">
-          <span>Signed in as <span className="font-semibold">{me.name}</span> ({me.role})</span>
-          <div className="flex gap-2">
-            <Link to="/playback" className="px-3 py-1 rounded bg-indigo-600 hover:bg-indigo-500 transition-colors text-xs">Playback</Link>
-            {me.role === 'admin' ? (
-              <Link to="/admin" className="px-3 py-1 rounded bg-slate-700 hover:bg-slate-600 transition-colors text-xs">Admin</Link>
-            ) : null}
+        <div className="flex items-center gap-3">
+          {/* Desktop View */}
+          <div className="hidden md:flex items-center gap-3">
+            <span>Signed in as <span className="font-semibold">{me.name}</span> ({me.role})</span>
+            <div className="flex gap-2">
+              <Link to="/playback" className="px-3 py-1 rounded bg-indigo-600 hover:bg-indigo-500 transition-colors text-xs">Playback</Link>
+              {me.role === 'admin' ? (
+                <Link to="/admin" className="px-3 py-1 rounded bg-slate-700 hover:bg-slate-600 transition-colors text-xs">Admin</Link>
+              ) : null}
+            </div>
           </div>
-        </span>
+          
+          {/* Mobile View */}
+          <div className="md:hidden relative">
+            <button 
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="flex items-center gap-2 px-3 py-2 rounded hover:bg-slate-700 transition-colors"
+            >
+              <span className="font-semibold">{me.name}</span>
+              <svg className={`w-4 h-4 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+            
+            {isMenuOpen && (
+              <div className="absolute right-0 top-full mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-lg py-2 min-w-48 z-50">
+                <div className="px-4 py-2 text-xs text-slate-400 border-b border-slate-600">
+                  {me.name} ({me.role})
+                </div>
+                <Link 
+                  to="/playback" 
+                  className="flex items-center px-4 py-2 hover:bg-slate-700 transition-colors text-sm"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  🎬 Playback
+                </Link>
+                {me.role === 'admin' && (
+                  <Link 
+                    to="/admin" 
+                    className="flex items-center px-4 py-2 hover:bg-slate-700 transition-colors text-sm"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    ⚙️ Admin
+                  </Link>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       ) : (
         <Link to="/login" className="px-3 py-2 rounded hover:bg-slate-700 text-slate-300 hover:text-white transition-colors">Sign in</Link>
       )}
@@ -194,6 +237,7 @@ function Home() {
   const [rtsp, setRtsp] = useState('')
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [me, setMe] = useState<User | null>(null)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -220,9 +264,25 @@ function Home() {
   }
 
   return (
-    <div className="h-full flex gap-6">
+    <div className="h-full flex flex-col lg:flex-row gap-3 lg:gap-6">
+      {/* Mobile Header with Toggle */}
+      <div className="lg:hidden flex items-center justify-between mb-4">
+        <button 
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="flex items-center gap-2 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition-colors"
+        >
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+          </svg>
+          <span className="text-sm font-medium">Cameras ({cameras.length})</span>
+        </button>
+        <div className="text-sm text-slate-400">
+          {selectedIds.length} selected
+        </div>
+      </div>
+
       {/* Left Sidebar */}
-      <div className="w-80 flex-shrink-0 space-y-4 overflow-y-auto">
+      <div className={`${sidebarOpen ? 'block' : 'hidden'} lg:block w-full lg:w-80 lg:flex-shrink-0 space-y-4 overflow-y-auto max-h-96 lg:max-h-none`}>
         {/* Add Camera Card (admin only) */}
         {me?.role === 'admin' ? (
           <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
@@ -271,11 +331,11 @@ function Home() {
               <p className="text-sm">No cameras added yet</p>
             </div>
           ) : (
-            <div className="space-y-2 max-h-96 overflow-y-auto">
+            <div className="space-y-2 max-h-96 lg:max-h-96 overflow-y-auto">
               {cameras.map(c => (
                 <div key={c.id} className="group border border-slate-600 rounded-lg bg-slate-800 hover:bg-slate-750 hover:border-slate-500 transition-all">
                   {/* Top section - Camera info and checkbox */}
-                  <div className="p-4">
+                  <div className="p-3 lg:p-4">
                     <div className="flex items-center gap-3">
                       <input 
                         type="checkbox" 
@@ -286,13 +346,13 @@ function Home() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-lg">📹</span>
-                          <h3 className="font-semibold text-white text-lg truncate">{c.name}</h3>
+                          <h3 className="font-semibold text-white text-base lg:text-lg truncate">{c.name}</h3>
                         </div>
                         <div className="flex items-center gap-2 mb-2">
                           <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
                           <span className="text-xs text-emerald-400 font-medium">Always Recording</span>
                         </div>
-                        <div className="text-xs text-slate-400 font-mono bg-slate-700 px-2 py-1 rounded text-ellipsis">
+                        <div className="text-xs text-slate-400 font-mono bg-slate-700 px-2 py-1 rounded truncate">
                           {c.rtsp}
                         </div>
                       </div>
@@ -301,13 +361,13 @@ function Home() {
                   
                   {/* Bottom section - Admin controls */}
                   {me?.role === 'admin' && (
-                    <div className="px-4 pb-4 pt-2 border-t border-slate-600 opacity-60 group-hover:opacity-100 transition-opacity">
+                    <div className="px-3 lg:px-4 pb-3 lg:pb-4 pt-2 border-t border-slate-600 opacity-60 group-hover:opacity-100 transition-opacity">
                       <div className="flex justify-end gap-2">
                         <button 
                           onClick={() => navigate(`/ptz/${c.id}`)} 
-                          className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded text-white text-sm font-medium transition-colors flex items-center gap-1"
+                          className="px-2 lg:px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded text-white text-xs lg:text-sm font-medium transition-colors flex items-center gap-1"
                         >
-                          🎮 Control
+                          🎮 <span className="hidden sm:inline">Control</span>
                         </button>
                         <button
                           onClick={async () => {
@@ -316,9 +376,9 @@ function Home() {
                             setSelectedIds(prev => prev.filter(x => x !== c.id))
                             await refresh()
                           }}
-                          className="px-3 py-1.5 bg-red-600 hover:bg-red-500 rounded text-white text-sm font-medium transition-colors flex items-center gap-1"
+                          className="px-2 lg:px-3 py-1.5 bg-red-600 hover:bg-red-500 rounded text-white text-xs lg:text-sm font-medium transition-colors flex items-center gap-1"
                         >
-                          🗑️ Delete
+                          🗑️ <span className="hidden sm:inline">Delete</span>
                         </button>
                       </div>
                     </div>
@@ -332,9 +392,9 @@ function Home() {
       
       {/* Main Content Area */}
       <div className="flex-1 min-w-0">
-        <div className="bg-slate-800 border border-slate-700 rounded-lg p-4 h-full flex flex-col">
+        <div className="bg-slate-800 border border-slate-700 rounded-lg p-3 lg:p-4 h-full flex flex-col">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-purple-400">Live Streams</h2>
+            <h2 className="text-base lg:text-lg font-semibold text-purple-400">Live Streams</h2>
             <span className="text-xs px-2 py-1 bg-slate-700 rounded text-slate-400">
               {selectedIds.length} active
             </span>
@@ -344,13 +404,16 @@ function Home() {
             {selectedIds.length === 0 ? (
               <div className="flex items-center justify-center h-full text-slate-500">
                 <div className="text-center">
-                  <div className="text-6xl mb-4">📺</div>
-                  <p className="text-lg mb-2">No cameras selected</p>
-                  <p className="text-sm">Check cameras from the list to start streaming</p>
+                  <div className="text-4xl lg:text-6xl mb-4">📺</div>
+                  <p className="text-base lg:text-lg mb-2">No cameras selected</p>
+                  <p className="text-sm">
+                    <span className="hidden lg:inline">Check cameras from the list to start streaming</span>
+                    <span className="lg:hidden">Select cameras above to start streaming</span>
+                  </p>
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 h-full overflow-y-auto p-0.5 items-start">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 lg:gap-4 h-full overflow-y-auto p-0.5 items-start">
                 {selectedIds.map(id => {
                   const cam = cameras.find(c => c.id === id)
                   if (!cam) return null
@@ -398,21 +461,27 @@ function MultiStream({ camera, isAdmin }: { camera: Camera; isAdmin?: boolean })
   return (
     <div className="group rounded-xl overflow-hidden border border-slate-700 bg-slate-800/40 backdrop-blur-sm hover:border-slate-500 transition-colors">
       <StreamPlayer playlistUrl={playlistUrl} title={camera.name} />
-      <div className="flex items-center justify-between px-3 py-2 bg-slate-900/70 border-t border-slate-700">
-        <div className="min-w-0">
+      <div className="flex items-center justify-between px-2 lg:px-3 py-2 bg-slate-900/70 border-t border-slate-700">
+        <div className="min-w-0 flex-1">
           <div className="text-xs text-slate-300 truncate">{camera.name}</div>
           <div className="text-[10px] text-slate-500 font-mono truncate">{camera.rtsp}</div>
         </div>
-        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1 lg:gap-2 opacity-70 lg:opacity-0 group-hover:opacity-100 transition-opacity">
           <button 
             onClick={() => window.open(playlistUrl, '_blank')}
-            className="text-xs px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-200"
-          >Open HLS</button>
+            className="text-[10px] lg:text-xs px-1.5 lg:px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-200"
+          >
+            <span className="lg:hidden">📺</span>
+            <span className="hidden lg:inline">Open HLS</span>
+          </button>
           {isAdmin ? (
             <button 
               onClick={() => navigator.clipboard.writeText(camera.rtsp!)}
-              className="text-xs px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-200"
-            >Copy RTSP</button>
+              className="text-[10px] lg:text-xs px-1.5 lg:px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-200"
+            >
+              <span className="lg:hidden">📋</span>
+              <span className="hidden lg:inline">Copy RTSP</span>
+            </button>
           ) : null}
         </div>
       </div>
@@ -545,9 +614,9 @@ function Playback() {
   }
 
   return (
-    <div className="h-full flex gap-6">
+    <div className="h-full flex flex-col lg:flex-row gap-3 lg:gap-6">
       {/* Left Navigation Panel */}
-      <div className="w-80 flex-shrink-0 space-y-4 overflow-y-auto">
+      <div className="w-full lg:w-80 lg:flex-shrink-0 space-y-4 overflow-y-auto max-h-96 lg:max-h-none">
         {/* Camera Selector */}
         <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
           <h2 className="text-lg font-semibold text-indigo-400 mb-3">📹 Select Camera</h2>
@@ -616,7 +685,7 @@ function Playback() {
               {days.length > 0 && (
                 <div>
                   <label className="block text-xs text-slate-400 mb-1">Day</label>
-                  <div className="grid grid-cols-7 gap-1">
+                  <div className="grid grid-cols-5 sm:grid-cols-7 gap-1">
                     {days.map(day => (
                       <button
                         key={day}
@@ -638,7 +707,7 @@ function Playback() {
               {hours.length > 0 && (
                 <div>
                   <label className="block text-xs text-slate-400 mb-1">Hour</label>
-                  <div className="grid grid-cols-6 gap-1">
+                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-1">
                     {hours.map(hour => (
                       <button
                         key={hour}
@@ -695,6 +764,7 @@ function Playback() {
                     controls
                     className="w-full h-full object-contain"
                     style={{ maxHeight: '70vh' }}
+                    playsInline
                   >
                     Your browser does not support the video tag.
                   </video>
@@ -707,8 +777,8 @@ function Playback() {
               </div>
               
               <div className="mt-4 p-3 bg-slate-700 rounded-lg">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-4 text-sm">
+                  <div className="break-all">
                     <span className="text-slate-400">File:</span>
                     <span className="ml-2 text-white font-mono">{selectedFile.filename}</span>
                   </div>
@@ -716,11 +786,11 @@ function Playback() {
                     <span className="text-slate-400">Size:</span>
                     <span className="ml-2 text-white">{formatFileSize(selectedFile.size)}</span>
                   </div>
-                  <div>
+                  <div className="break-all">
                     <span className="text-slate-400">Created:</span>
                     <span className="ml-2 text-white">{formatDate(selectedFile.created)}</span>
                   </div>
-                  <div>
+                  <div className="break-all">
                     <span className="text-slate-400">Modified:</span>
                     <span className="ml-2 text-white">{formatDate(selectedFile.modified)}</span>
                   </div>
@@ -830,15 +900,15 @@ function PTZControl() {
   }
 
   return (
-    <div className="h-full flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+    <div className="h-full flex flex-col gap-4 lg:gap-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <button 
           onClick={() => navigate(-1)} 
-          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded text-sm transition-colors"
+          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded text-sm transition-colors self-start"
         >
           ← Back to Dashboard
         </button>
-        <div className="text-right">
+        <div className="text-left sm:text-right">
           <div className="text-lg font-semibold text-emerald-400">
             {camera ? camera.name : 'Loading...'}
           </div>
@@ -846,11 +916,11 @@ function PTZControl() {
         </div>
       </div>
 
-      <div className="flex-1 flex gap-6 min-h-0">
+      <div className="flex-1 flex flex-col lg:flex-row gap-4 lg:gap-6 min-h-0">
         {/* Video Stream */}
-        <div className="flex-1">
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-4 h-full flex flex-col">
-            <h3 className="text-lg font-semibold text-red-400 mb-4">Live Stream</h3>
+        <div className="flex-1 order-2 lg:order-1">
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-3 lg:p-4 h-full flex flex-col">
+            <h3 className="text-base lg:text-lg font-semibold text-red-400 mb-3 lg:mb-4">Live Stream</h3>
             <div className="flex-1">
               {playlistUrl ? (
                 <StreamPlayer playlistUrl={playlistUrl} title={camera?.name} />
@@ -868,41 +938,41 @@ function PTZControl() {
         </div>
         
         {/* PTZ Controls */}
-        <div className="w-80">
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 h-full">
+        <div className="w-full lg:w-80 order-1 lg:order-2">
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-4 lg:p-6 h-full">
             <h3 className="text-lg font-semibold text-indigo-400 mb-6">PTZ Controls</h3>
             {camera ? (
               <div className="space-y-6">
                 {/* Pan/Tilt Controls */}
                 <div className="text-center">
                   <div className="text-xs text-slate-400 mb-3 font-medium">PAN & TILT</div>
-                  <div className="grid grid-cols-3 gap-2 w-32 mx-auto">
+                  <div className="grid grid-cols-3 gap-2 w-40 lg:w-32 mx-auto">
                     <div />
                     <button 
-                      className="w-8 h-8 rounded bg-slate-700 hover:bg-slate-600 transition-colors flex items-center justify-center" 
+                      className="w-10 h-10 lg:w-8 lg:h-8 rounded bg-slate-700 hover:bg-slate-600 transition-colors flex items-center justify-center text-lg lg:text-base touch-manipulation" 
                       {...hold(() => import('./api').then(m => m.ptzMove(camera.id, { type: 'continuous', pan: 0, tilt: 1, speed: 0.5 })), () => import('./api').then(m => m.ptzStop(camera.id)))}
                     >
                       ▲
                     </button>
                     <div />
                     <button 
-                      className="w-8 h-8 rounded bg-slate-700 hover:bg-slate-600 transition-colors flex items-center justify-center" 
+                      className="w-10 h-10 lg:w-8 lg:h-8 rounded bg-slate-700 hover:bg-slate-600 transition-colors flex items-center justify-center text-lg lg:text-base touch-manipulation" 
                       {...hold(() => import('./api').then(m => m.ptzMove(camera.id, { type: 'continuous', pan: -1, tilt: 0, speed: 0.5 })), () => import('./api').then(m => m.ptzStop(camera.id)))}
                     >
                       ◀
                     </button>
-                    <div className="w-8 h-8 rounded bg-slate-600 border border-slate-500 flex items-center justify-center">
+                    <div className="w-10 h-10 lg:w-8 lg:h-8 rounded bg-slate-600 border border-slate-500 flex items-center justify-center">
                       <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
                     </div>
                     <button 
-                      className="w-8 h-8 rounded bg-slate-700 hover:bg-slate-600 transition-colors flex items-center justify-center" 
+                      className="w-10 h-10 lg:w-8 lg:h-8 rounded bg-slate-700 hover:bg-slate-600 transition-colors flex items-center justify-center text-lg lg:text-base touch-manipulation" 
                       {...hold(() => import('./api').then(m => m.ptzMove(camera.id, { type: 'continuous', pan: 1, tilt: 0, speed: 0.5 })), () => import('./api').then(m => m.ptzStop(camera.id)))}
                     >
                       ▶
                     </button>
                     <div />
                     <button 
-                      className="w-8 h-8 rounded bg-slate-700 hover:bg-slate-600 transition-colors flex items-center justify-center" 
+                      className="w-10 h-10 lg:w-8 lg:h-8 rounded bg-slate-700 hover:bg-slate-600 transition-colors flex items-center justify-center text-lg lg:text-base touch-manipulation" 
                       {...hold(() => import('./api').then(m => m.ptzMove(camera.id, { type: 'continuous', pan: 0, tilt: -1, speed: 0.5 })), () => import('./api').then(m => m.ptzStop(camera.id)))}
                     >
                       ▼
@@ -914,15 +984,15 @@ function PTZControl() {
                 {/* Zoom Controls */}
                 <div className="text-center">
                   <div className="text-xs text-slate-400 mb-3 font-medium">ZOOM</div>
-                  <div className="flex items-center justify-center gap-3">
+                  <div className="flex items-center justify-center gap-4">
                     <button 
-                      className="px-4 py-2 rounded bg-red-600 hover:bg-red-500 transition-colors font-bold" 
+                      className="px-5 py-3 lg:px-4 lg:py-2 rounded bg-red-600 hover:bg-red-500 transition-colors font-bold text-lg lg:text-base touch-manipulation min-w-[3rem]" 
                       {...hold(() => import('./api').then(m => m.ptzMove(camera.id, { type: 'continuous', zoom: -1, speed: 0.6 })), () => import('./api').then(m => m.ptzStop(camera.id, { zoom: true })))}
                     >
                       －
                     </button>
                     <button 
-                      className="px-4 py-2 rounded bg-emerald-600 hover:bg-emerald-500 transition-colors font-bold" 
+                      className="px-5 py-3 lg:px-4 lg:py-2 rounded bg-emerald-600 hover:bg-emerald-500 transition-colors font-bold text-lg lg:text-base touch-manipulation min-w-[3rem]" 
                       {...hold(() => import('./api').then(m => m.ptzMove(camera.id, { type: 'continuous', zoom: 1, speed: 0.6 })), () => import('./api').then(m => m.ptzStop(camera.id, { zoom: true })))}
                     >
                       ＋
