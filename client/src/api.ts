@@ -149,4 +149,50 @@ export function getRecordingFileUrl(cameraId: string, year: string, month: strin
   return token ? `${baseUrl}?token=${encodeURIComponent(token)}` : baseUrl;
 }
 
+// Storage Management API
+export interface StorageInfo {
+  totalFiles: number;
+  totalSizeBytes: number;
+  oldestFile: string | null;
+  newestFile: string | null;
+  availableSpaceBytes: number;
+  usedSpaceBytes: number;
+}
+
+export interface CleanupResult {
+  success: boolean;
+  deletedFiles: number;
+  freedBytes: number;
+  freedSize: string;
+}
+
+export async function getStorageInfo(): Promise<StorageInfo> {
+  const response = await fetch(`${API_BASE}/cameras/storage/info`, {
+    headers: { 'x-user-id': authUserId || '' }
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Storage info failed: ${response.status}`);
+  }
+  
+  return response.json();
+}
+
+export async function performCleanup(maxAgeDays: number = 7, emergencyCleanup: boolean = false): Promise<CleanupResult> {
+  const response = await fetch(`${API_BASE}/cameras/storage/cleanup`, {
+    method: 'POST',
+    headers: { 
+      'Content-Type': 'application/json',
+      'x-user-id': authUserId || '' 
+    },
+    body: JSON.stringify({ maxAgeDays, emergencyCleanup })
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Cleanup failed: ${response.status}`);
+  }
+  
+  return response.json();
+}
+
 

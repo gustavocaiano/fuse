@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Routes, Route, Link, useNavigate, useParams, Navigate } from 'react-router-dom'
-import { type Camera, createCamera, listCameras, startCamera, deleteCamera, getCamera, getMe, setAuthUser, type User, listUsers, createUser, listUsersWithAccess, grantAccess, revokeAccess, getRecordingYears, getRecordingMonths, getRecordingDays, getRecordingHours, getRecordingFiles, getRecordingFileUrl, generateVideoToken, type RecordingFile } from './api'
+import { type Camera, createCamera, listCameras, startCamera, deleteCamera, getCamera, getMe, setAuthUser, type User, listUsers, createUser, listUsersWithAccess, grantAccess, revokeAccess, getRecordingYears, getRecordingMonths, getRecordingDays, getRecordingHours, getRecordingFiles, getRecordingFileUrl, generateVideoToken, type RecordingFile, getStorageInfo, performCleanup, type StorageInfo } from './api'
 import StreamPlayer from './components/StreamPlayer'
 
 export default function App() {
@@ -165,10 +165,13 @@ function Admin() {
   const [accessUserIds, setAccessUserIds] = useState<string[]>([])
   const [name, setName] = useState('')
   const [role, setRole] = useState<'admin' | 'user'>('user')
+  const [storageInfo, setStorageInfo] = useState<StorageInfo | null>(null)
+  const [cleanupLoading, setCleanupLoading] = useState(false)
 
   useEffect(() => {
     listUsers().then(setUsers).catch(() => setUsers([]))
     listCameras().then(setCameras)
+    loadStorageInfo()
   }, [])
 
   useEffect(() => {
@@ -176,8 +179,42 @@ function Admin() {
     listUsersWithAccess(selectedCam).then(rows => setAccessUserIds(rows.map(u => u.id))).catch(() => setAccessUserIds([]))
   }, [selectedCam])
 
+  const loadStorageInfo = async () => {
+    try {
+      const info = await getStorageInfo()
+      setStorageInfo(info)
+    } catch (error) {
+      console.error('Failed to load storage info:', error)
+    }
+  }
+
+  const handleCleanup = async (emergencyCleanup: boolean = false) => {
+    setCleanupLoading(true)
+    try {
+      const result = await performCleanup(7, emergencyCleanup)
+      alert(`Cleanup completed!\nDeleted: ${result.deletedFiles} files\nFreed: ${result.freedSize}`)
+      await loadStorageInfo() // Refresh storage info
+    } catch (error) {
+      alert('Cleanup failed: ' + error)
+    }
+    setCleanupLoading(false)
+  }
+
+  const formatBytes = (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  const getUsagePercent = (): number => {
+    if (!storageInfo) return 0;
+    return (storageInfo.usedSpaceBytes / (storageInfo.availableSpaceBytes + storageInfo.usedSpaceBytes)) * 100;
+  }
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
       <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
         <h2 className="text-lg font-semibold mb-3">Create User</h2>
         <form className="flex gap-2" onSubmit={async (e) => {
@@ -225,6 +262,87 @@ function Admin() {
           </div>
         ) : (
           <div className="text-slate-400 text-sm">Select a camera to manage access</div>
+        )}
+      </div>
+      
+      {/* Storage Management Card */}
+      <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold text-orange-400">💾 Storage</h2>
+          <button 
+            onClick={loadStorageInfo}
+            className="text-xs px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded transition-colors"
+          >
+            🔄 Refresh
+          </button>
+        </div>
+        
+        {storageInfo ? (
+          <div className="space-y-3">
+            {/* Storage Overview */}
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <span className="text-slate-400">Files:</span>
+                <span className="ml-2 text-white font-medium">{storageInfo.totalFiles.toLocaleString()}</span>
+              </div>
+              <div>
+                <span className="text-slate-400">Used:</span>
+                <span className="ml-2 text-white font-medium">{formatBytes(storageInfo.totalSizeBytes)}</span>
+              </div>
+              <div>
+                <span className="text-slate-400">Available:</span>
+                <span className="ml-2 text-white font-medium">{formatBytes(storageInfo.availableSpaceBytes)}</span>
+              </div>
+              <div>
+                <span className="text-slate-400">Usage:</span>
+                <span className="ml-2 text-white font-medium">{getUsagePercent().toFixed(1)}%</span>
+              </div>
+            </div>
+
+            {/* Usage Bar */}
+            <div className="w-full bg-slate-700 rounded-full h-2">
+              <div 
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  getUsagePercent() > 90 ? 'bg-red-500' : 
+                  getUsagePercent() > 75 ? 'bg-yellow-500' : 'bg-emerald-500'
+                }`}
+                style={{ width: `${Math.min(getUsagePercent(), 100)}%` }}
+              />
+            </div>
+
+            {/* Date Range */}
+            {storageInfo.oldestFile && (
+              <div className="text-xs text-slate-400">
+                <div>Oldest: {new Date(storageInfo.oldestFile).toLocaleDateString()}</div>
+                <div>Newest: {storageInfo.newestFile ? new Date(storageInfo.newestFile).toLocaleDateString() : 'N/A'}</div>
+              </div>
+            )}
+
+            {/* Cleanup Actions */}
+            <div className="flex gap-2 pt-2 border-t border-slate-600">
+              <button
+                onClick={() => handleCleanup(false)}
+                disabled={cleanupLoading}
+                className="flex-1 px-3 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-600 rounded text-sm font-medium transition-colors"
+              >
+                {cleanupLoading ? '🧹 Cleaning...' : '🧹 Clean Old (7d)'}
+              </button>
+              {getUsagePercent() > 80 && (
+                <button
+                  onClick={() => handleCleanup(true)}
+                  disabled={cleanupLoading}
+                  className="flex-1 px-3 py-2 bg-red-600 hover:bg-red-500 disabled:bg-slate-600 rounded text-sm font-medium transition-colors"
+                >
+                  {cleanupLoading ? '🚨 Cleaning...' : '🚨 Emergency'}
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-4 text-slate-400">
+            <div className="text-2xl mb-2">⏳</div>
+            <div className="text-sm">Loading storage info...</div>
+          </div>
         )}
       </div>
     </div>
@@ -352,7 +470,7 @@ function Home() {
                           <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
                           <span className="text-xs text-emerald-400 font-medium">Always Recording</span>
                         </div>
-                        <div className="text-xs text-slate-400 font-mono bg-slate-700 px-2 py-1 rounded truncate">
+                        <div className="text-xs text-slate-400 font-mono bg-slate-700 px-2 py-1 rounded">
                           {c.rtsp}
                         </div>
                       </div>

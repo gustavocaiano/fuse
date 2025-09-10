@@ -6,11 +6,18 @@ import crypto from 'crypto';
 import { Camera, insertCamera, listCamerasStmt, getCameraStmt, deleteCameraStmt, updateCameraRecordingStmt, listAccessibleCameraIdsForUserStmt, getUserStmt } from '../db';
 import { ffmpegManager } from '../ffmpegManager';
 import { onvifManager, PtzMovePayload, PtzStopPayload } from '../onvifManager';
+import { StorageManager } from '../storageManager';
 
 export const cameraRouter = Router();
 
 const baseHlsDir = process.env.HLS_DIR ? path.resolve(process.env.HLS_DIR) : path.resolve(path.join(__dirname, '..', 'hls'));
 fs.mkdirSync(baseHlsDir, { recursive: true });
+
+const baseRecordingsDir = process.env.RECORDINGS_DIR ? path.resolve(process.env.RECORDINGS_DIR) : path.resolve(path.join(__dirname, '..', 'recordings'));
+fs.mkdirSync(baseRecordingsDir, { recursive: true });
+
+// Initialize storage manager
+const storageManager = new StorageManager(baseRecordingsDir);
 
 // Video access token system
 const VIDEO_TOKEN_SECRET = process.env.VIDEO_TOKEN_SECRET || 'cam-parser-video-secret-key';
@@ -573,6 +580,60 @@ cameraRouter.post('/:id/stop', (req, res) => {
     });
   } else {
     res.status(404).json({ error: 'Camera not found or not streaming' });
+  }
+});
+
+// Storage Management Endpoints (Admin only)
+cameraRouter.get('/storage/info', async (req, res) => {
+  try {
+    const userId = req.headers['x-user-id'] as string;
+    if (!userId) {
+      return res.status(401).json({ error: 'Missing user ID' });
+    }
+
+    const user = getUserStmt.get(userId) as { id: string; role: string } | undefined;
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const info = await storageManager.getStorageInfo();
+    res.json(info);
+  } catch (error) {
+    console.error('Error getting storage info:', error);
+    res.status(500).json({ error: 'Failed to get storage information' });
+  }
+});
+
+cameraRouter.post('/storage/cleanup', async (req, res) => {
+  try {
+    const userId = req.headers['x-user-id'] as string;
+    if (!userId) {
+      return res.status(401).json({ error: 'Missing user ID' });
+    }
+
+    const user = getUserStmt.get(userId) as { id: string; role: string } | undefined;
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const { maxAgeDays = 7, emergencyCleanup = false } = req.body;
+
+    let result;
+    if (emergencyCleanup) {
+      result = await storageManager.emergencyCleanup(20); // Keep 20% free
+    } else {
+      result = await storageManager.cleanupOldFiles(maxAgeDays);
+    }
+
+    res.json({
+      success: true,
+      deletedFiles: result.deletedFiles,
+      freedBytes: result.freedBytes,
+      freedSize: storageManager.formatBytes(result.freedBytes)
+    });
+  } catch (error) {
+    console.error('Error during cleanup:', error);
+    res.status(500).json({ error: 'Failed to perform cleanup' });
   }
 });
 

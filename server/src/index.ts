@@ -7,6 +7,7 @@ import { cameraRouter } from './routes/cameras';
 import { userRouter } from './routes';
 import { listCamerasStmt } from './db';
 import { ffmpegManager } from './ffmpegManager';
+import { StorageManager } from './storageManager';
 
 dotenv.config();
 
@@ -54,6 +55,9 @@ app.listen(port, () => {
 		try { fs.mkdirSync(hlsDir, { recursive: true }); } catch {}
 		try { fs.mkdirSync(recordDirEnv, { recursive: true }); } catch {}
 		
+		// Initialize storage manager
+		const storageManager = new StorageManager(recordDirEnv);
+		
 		const rows = listCamerasStmt.all() as Array<{ id: string; rtsp: string; recordEnabled: number }>;
 		console.log(`🎥 Auto-starting always-recording for ${rows.length} cameras...`);
 		console.log(`📁 Recordings: ${recordDirEnv}`);
@@ -77,12 +81,62 @@ app.listen(port, () => {
 			}
 		}
 		
-		console.log(`🚀 Always-recording system active for ${rows.length} cameras`);
-		console.log(`💡 Single RTSP stream per camera - optimal performance!`);
-	} catch (e) {
-		// eslint-disable-next-line no-console
-		console.error('❌ Auto-start supervisor error:', e);
-	}
+	console.log(`🚀 Always-recording system active for ${rows.length} cameras`);
+	console.log(`💡 Single RTSP stream per camera - optimal performance!`);
+	
+	// Setup storage management
+	console.log('💾 Setting up storage management...');
+	
+	// Initial storage info
+	storageManager.getStorageInfo().then(info => {
+		console.log(storageManager.formatStorageInfo(info));
+	});
+	
+	// Schedule daily cleanup at 2 AM
+	const scheduleCleanup = () => {
+		const now = new Date();
+		const tomorrow2AM = new Date(now);
+		tomorrow2AM.setDate(now.getDate() + 1);
+		tomorrow2AM.setHours(2, 0, 0, 0);
+		
+		const msUntil2AM = tomorrow2AM.getTime() - now.getTime();
+		
+		setTimeout(async () => {
+			console.log('🧹 Running scheduled cleanup...');
+			try {
+				// Regular 7-day cleanup
+				await storageManager.cleanupOldFiles(7);
+				
+				// Check if we need emergency cleanup (if disk is >80% full)
+				const info = await storageManager.getStorageInfo();
+				const usagePercent = info.usedSpaceBytes / (info.availableSpaceBytes + info.usedSpaceBytes) * 100;
+				
+				if (usagePercent > 80) {
+					console.log('🚨 Disk usage > 80%, running emergency cleanup...');
+					await storageManager.emergencyCleanup(20); // Keep 20% free space
+				}
+				
+				// Log final storage status
+				const finalInfo = await storageManager.getStorageInfo();
+				console.log(storageManager.formatStorageInfo(finalInfo));
+				
+			} catch (error) {
+				console.error('❌ Cleanup error:', error);
+			}
+			
+			// Schedule next cleanup
+			scheduleCleanup();
+		}, msUntil2AM);
+		
+		console.log(`⏰ Next cleanup scheduled for: ${tomorrow2AM.toISOString()}`);
+	};
+	
+	scheduleCleanup();
+	
+} catch (e) {
+	// eslint-disable-next-line no-console
+	console.error('❌ Auto-start supervisor error:', e);
+}
 });
 
 
