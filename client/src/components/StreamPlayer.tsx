@@ -73,7 +73,7 @@ export default function StreamPlayer({ playlistUrl, title }: Props) {
         fragLoadingTimeOut: 8000,
         fragLoadingMaxRetry: 3,
         // Additional proxy-friendly settings
-        xhrSetup: function(xhr, url) {
+        xhrSetup: function(xhr) {
           // Add headers to bypass proxy caching
           xhr.setRequestHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
           xhr.setRequestHeader('Pragma', 'no-cache');
