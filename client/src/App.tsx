@@ -836,7 +836,7 @@ function Playback() {
                             : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                         }`}
                       >
-                        {hour}:00
+                        { parseInt(hour) + 1 }:00
                       </button>
                     ))}
                   </div>
