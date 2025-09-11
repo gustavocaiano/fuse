@@ -149,4 +149,34 @@ export function getRecordingFileUrl(cameraId: string, year: string, month: strin
   return token ? `${baseUrl}?token=${encodeURIComponent(token)}` : baseUrl;
 }
 
+// Storage Management API
+export interface StorageInfo {
+  totalFiles: number;
+  totalSizeBytes: number;
+  oldestFile: string | null;
+  newestFile: string | null;
+  availableSpaceBytes: number;
+  usedSpaceBytes: number;
+}
+
+export interface CleanupResult {
+  success: boolean;
+  deletedFiles: number;
+  freedBytes: number;
+  freedSize: string;
+}
+
+export async function getStorageInfo(): Promise<StorageInfo> {
+  const { data } = await axios.get(`${API_BASE}/cameras/storage/info`);
+  return data;
+}
+
+export async function performCleanup(maxAgeDays: number = 7, emergencyCleanup: boolean = false): Promise<CleanupResult> {
+  const { data } = await axios.post(`${API_BASE}/cameras/storage/cleanup`, {
+    maxAgeDays,
+    emergencyCleanup
+  });
+  return data;
+}
+
 
