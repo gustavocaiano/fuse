@@ -1,0 +1,50 @@
+# MediaMTX configuration file
+
+# Log level
+logLevel: info
+
+# Log destinations
+logDestinations: [stdout]
+
+# Log file path (used only if enabled in destinations)
+logFile: /var/log/mediamtx.log
+
+# API server configuration
+api: yes
+apiAddress: :9997
+
+# Metrics configuration
+metrics: no
+metricsAddress: :9998
+
+# RTSP server configuration
+rtsp: yes
+rtspAddress: :8554
+
+# RTMP server configuration
+rtmp: yes
+rtmpAddress: :1935
+
+# HLS server configuration
+hls: yes
+hlsAddress: :8888
+hlsDirectory: /tmp/hls
+
+# WebRTC server configuration
+webrtc: yes
+webrtcAddress: :8189
+
+# Path settings
+paths:
+  # All paths (catch-all)
+  ~^.*$:
+    # Source can be 'publisher' or 'redirect'
+    source: publisher
+    
+    # Recording (disabled by default)
+    record: no
+    recordPath: /recordings/%path/%Y-%m-%d_%H-%M-%S-%f
+    recordFormat: fmp4
+    recordPartDuration: 1s
+    recordSegmentDuration: 1h
+    recordDeleteAfter: 24h
