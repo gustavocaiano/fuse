@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
-import { Camera, insertCamera, listCamerasStmt, getCameraStmt, deleteCameraStmt, updateCameraRecordingStmt, listAccessibleCameraIdsForUserStmt, getUserStmt } from '../db';
+import { Camera, insertCamera, listCameras, getCamera, deleteCamera, updateCameraRecording, listAccessibleCameraIdsForUser, getUser } from '../db';
 import { ffmpegManager } from '../ffmpegManager';
 import { onvifManager, PtzMovePayload, PtzStopPayload } from '../onvifManager';
 import { StorageManager } from '../storageManager';
@@ -53,20 +53,20 @@ function validateVideoToken(token: string): { userId: string; cameraId: string; 
 }
 
 // Attach user from x-user-id header
-cameraRouter.use((req, _res, next) => {
+cameraRouter.use(async (req, _res, next) => {
   const userId = (req.headers['x-user-id'] as string) || '';
-  const user = userId ? (getUserStmt.get(userId) as any) : null;
+  const user = userId ? await getUser(userId) : null;
   (req as any).user = user || null;
   next();
 });
 
 // List cameras (filter by access for non-admin)
-cameraRouter.get('/', (req, res) => {
+cameraRouter.get('/', async (req, res) => {
   const user = (req as any).user as { id?: string; role?: string } | undefined;
-  const rows = listCamerasStmt.all() as Camera[];
+  const rows = await listCameras();
   if (!user || user.role !== 'admin') {
     // if user is not provided, treat as no access
-    const allowedIds = user && user.id ? (listAccessibleCameraIdsForUserStmt.all(user.id) as Array<{ cameraId: string }>).map(r => r.cameraId) : [];
+    const allowedIds = user && user.id ? await listAccessibleCameraIdsForUser(user.id) : [];
     const filtered = rows.map(c => ({ ...c, rtsp: undefined as any })).filter(c => allowedIds.includes(c.id));
     return res.json(filtered);
   }
@@ -74,23 +74,23 @@ cameraRouter.get('/', (req, res) => {
 });
 
 // Create camera
-cameraRouter.post('/', (req, res) => {
+cameraRouter.post('/', async (req, res) => {
   const { name, rtsp, recordEnabled } = req.body as Partial<Camera>;
   if (!name || !rtsp) return res.status(400).json({ error: 'name and rtsp are required' });
 
   const id = uuidv4();
   const cam: Camera = { id, name, rtsp, createdAt: new Date().toISOString(), recordEnabled: recordEnabled ? 1 : 0 } as any;
-  insertCamera.run(cam);
+  await insertCamera(cam);
   res.status(201).json(cam);
 });
 
 // Get a camera (hide rtsp for non-admin)
-cameraRouter.get('/:id', (req, res) => {
+cameraRouter.get('/:id', async (req, res) => {
   const user = (req as any).user as { id?: string; role?: string } | undefined;
-  const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
+  const cam = await getCamera(req.params.id);
   if (!cam) return res.status(404).json({ error: 'not found' });
   if (!user || user.role !== 'admin') {
-    const allowedIds = user && user.id ? (listAccessibleCameraIdsForUserStmt.all(user.id) as Array<{ cameraId: string }>).map(r => r.cameraId) : [];
+    const allowedIds = user && user.id ? await listAccessibleCameraIdsForUser(user.id) : [];
     if (!allowedIds.includes(cam.id)) return res.status(403).json({ error: 'forbidden' });
     const { rtsp, ...rest } = cam as any;
     return res.json(rest);
@@ -99,9 +99,9 @@ cameraRouter.get('/:id', (req, res) => {
 });
 
 // Delete a camera (stops all processes, removes data, releases resources, deletes DB row)
-cameraRouter.delete('/:id', (req, res) => {
+cameraRouter.delete('/:id', async (req, res) => {
   const id = req.params.id;
-  const cam = getCameraStmt.get(id) as Camera | undefined;
+  const cam = await getCamera(id);
   if (!cam) return res.status(404).json({ error: 'not found' });
 
   // Stop the always-recording process (includes streaming)
@@ -117,32 +117,32 @@ cameraRouter.delete('/:id', (req, res) => {
   }
 
   // Remove DB record
-  deleteCameraStmt.run(id);
+  await deleteCamera(id);
   console.log(`Deleted camera ${id} and cleaned up all resources`);
   res.status(204).end();
 });
 
 // Note: In the new always-record system, this endpoint doesn't actually toggle recording
 // Recording is always on. This endpoint is kept for backward compatibility
-cameraRouter.post('/:id/recording', (req, res) => {
-  const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
+cameraRouter.post('/:id/recording', async (req, res) => {
+  const cam = await getCamera(req.params.id);
   if (!cam) return res.status(404).json({ error: 'not found' });
   const { enabled } = req.body as { enabled: boolean };
-  updateCameraRecordingStmt.run(enabled ? 1 : 0, cam.id);
+  await updateCameraRecording(cam.id, enabled ? 1 : 0);
 
   console.log(`Recording preference set to ${enabled} for camera ${cam.id} (always recording in background)`);
 
-  const updated = getCameraStmt.get(cam.id) as Camera;
+  const updated = await getCamera(cam.id);
   res.json({ 
-    id: updated.id, 
-    recordEnabled: updated.recordEnabled,
+    id: updated!.id, 
+    recordEnabled: updated!.recordEnabled,
     note: "Recording is always active in background - this setting is for preference tracking only"
   });
 });
 
 // Start HLS streaming for camera (recording is always active)
 cameraRouter.post('/:id/start', async (req, res) => {
-  const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
+  const cam = await getCamera(req.params.id);
   if (!cam) return res.status(404).json({ error: 'not found' });
   
   try {
@@ -200,7 +200,7 @@ cameraRouter.post('/:id/start', async (req, res) => {
 
 // PTZ move
 cameraRouter.post('/:id/ptz/move', async (req, res) => {
-  const camRow = getCameraStmt.get(req.params.id) as Camera | undefined;
+  const camRow = await getCamera(req.params.id);
   if (!camRow) return res.status(404).json({ error: 'not found' });
   const payload = req.body as PtzMovePayload;
   if (!payload || (payload.type !== 'continuous' && payload.type !== 'relative')) {
@@ -221,7 +221,7 @@ cameraRouter.post('/:id/ptz/move', async (req, res) => {
 
 // PTZ stop
 cameraRouter.post('/:id/ptz/stop', async (req, res) => {
-  const camRow = getCameraStmt.get(req.params.id) as Camera | undefined;
+  const camRow = await getCamera(req.params.id);
   if (!camRow) return res.status(404).json({ error: 'not found' });
   const payload = req.body as PtzStopPayload;
   try {
@@ -234,8 +234,8 @@ cameraRouter.post('/:id/ptz/stop', async (req, res) => {
 });
 
 // Get camera status (always-recording and streaming state)
-cameraRouter.get('/:id/status', (req, res) => {
-  const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
+cameraRouter.get('/:id/status', async (req, res) => {
+  const cam = await getCamera(req.params.id);
   if (!cam) return res.status(404).json({ error: 'not found' });
 
   const handle = ffmpegManager.getHandle(cam.id);
@@ -269,16 +269,16 @@ cameraRouter.get('/:id/status', (req, res) => {
 });
 
 // Get available recording years for a camera
-cameraRouter.get('/:id/recordings/years', (req, res) => {
+cameraRouter.get('/:id/recordings/years', async (req, res) => {
   const user = (req as any).user as { id?: string; role?: string } | undefined;
-  const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
+  const cam = await getCamera(req.params.id);
   if (!cam) return res.status(404).json({ error: 'not found' });
 
   console.log(`Recordings years request - User: ${user?.id} (${user?.role}), Camera: ${cam.id}`);
 
   // Check permissions (same as camera access)
   if (!user || user.role !== 'admin') {
-    const allowedIds = user && user.id ? (listAccessibleCameraIdsForUserStmt.all(user.id) as Array<{ cameraId: string }>).map(r => r.cameraId) : [];
+    const allowedIds = user && user.id ? await listAccessibleCameraIdsForUser(user.id) : [];
     if (!allowedIds.includes(cam.id)) {
       console.log(`Access denied - User ${user?.id} not in allowed IDs: ${allowedIds.join(', ')}`);
       return res.status(403).json({ error: 'forbidden' });
@@ -307,14 +307,14 @@ cameraRouter.get('/:id/recordings/years', (req, res) => {
 });
 
 // Get available recording months for a camera/year
-cameraRouter.get('/:id/recordings/:year/months', (req, res) => {
+cameraRouter.get('/:id/recordings/:year/months', async (req, res) => {
   const user = (req as any).user as { id?: string; role?: string } | undefined;
-  const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
+  const cam = await getCamera(req.params.id);
   if (!cam) return res.status(404).json({ error: 'not found' });
 
   // Check permissions
   if (!user || user.role !== 'admin') {
-    const allowedIds = user && user.id ? (listAccessibleCameraIdsForUserStmt.all(user.id) as Array<{ cameraId: string }>).map(r => r.cameraId) : [];
+    const allowedIds = user && user.id ? await listAccessibleCameraIdsForUser(user.id) : [];
     if (!allowedIds.includes(cam.id)) return res.status(403).json({ error: 'forbidden' });
   }
 
@@ -341,14 +341,14 @@ cameraRouter.get('/:id/recordings/:year/months', (req, res) => {
 });
 
 // Get available recording days for a camera/year/month
-cameraRouter.get('/:id/recordings/:year/:month/days', (req, res) => {
+cameraRouter.get('/:id/recordings/:year/:month/days', async (req, res) => {
   const user = (req as any).user as { id?: string; role?: string } | undefined;
-  const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
+  const cam = await getCamera(req.params.id);
   if (!cam) return res.status(404).json({ error: 'not found' });
 
   // Check permissions
   if (!user || user.role !== 'admin') {
-    const allowedIds = user && user.id ? (listAccessibleCameraIdsForUserStmt.all(user.id) as Array<{ cameraId: string }>).map(r => r.cameraId) : [];
+    const allowedIds = user && user.id ? await listAccessibleCameraIdsForUser(user.id) : [];
     if (!allowedIds.includes(cam.id)) return res.status(403).json({ error: 'forbidden' });
   }
 
@@ -374,14 +374,14 @@ cameraRouter.get('/:id/recordings/:year/:month/days', (req, res) => {
 });
 
 // Get available recording hours for a camera/year/month/day
-cameraRouter.get('/:id/recordings/:year/:month/:day/hours', (req, res) => {
+cameraRouter.get('/:id/recordings/:year/:month/:day/hours', async (req, res) => {
   const user = (req as any).user as { id?: string; role?: string } | undefined;
-  const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
+  const cam = await getCamera(req.params.id);
   if (!cam) return res.status(404).json({ error: 'not found' });
 
   // Check permissions
   if (!user || user.role !== 'admin') {
-    const allowedIds = user && user.id ? (listAccessibleCameraIdsForUserStmt.all(user.id) as Array<{ cameraId: string }>).map(r => r.cameraId) : [];
+    const allowedIds = user && user.id ? await listAccessibleCameraIdsForUser(user.id) : [];
     if (!allowedIds.includes(cam.id)) return res.status(403).json({ error: 'forbidden' });
   }
 
@@ -407,14 +407,14 @@ cameraRouter.get('/:id/recordings/:year/:month/:day/hours', (req, res) => {
 });
 
 // Get recording files for a specific camera/year/month/day/hour
-cameraRouter.get('/:id/recordings/:year/:month/:day/:hour/files', (req, res) => {
+cameraRouter.get('/:id/recordings/:year/:month/:day/:hour/files', async (req, res) => {
   const user = (req as any).user as { id?: string; role?: string } | undefined;
-  const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
+  const cam = await getCamera(req.params.id);
   if (!cam) return res.status(404).json({ error: 'not found' });
 
   // Check permissions
   if (!user || user.role !== 'admin') {
-    const allowedIds = user && user.id ? (listAccessibleCameraIdsForUserStmt.all(user.id) as Array<{ cameraId: string }>).map(r => r.cameraId) : [];
+    const allowedIds = user && user.id ? await listAccessibleCameraIdsForUser(user.id) : [];
     if (!allowedIds.includes(cam.id)) return res.status(403).json({ error: 'forbidden' });
   }
 
@@ -450,15 +450,15 @@ cameraRouter.get('/:id/recordings/:year/:month/:day/:hour/files', (req, res) => 
 });
 
 // Generate video access token
-cameraRouter.post('/:id/recordings/:year/:month/:day/:hour/token/:filename', (req, res) => {
+cameraRouter.post('/:id/recordings/:year/:month/:day/:hour/token/:filename', async (req, res) => {
   const user = (req as any).user as { id?: string; role?: string } | undefined;
-  const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
+  const cam = await getCamera(req.params.id);
   if (!cam) return res.status(404).json({ error: 'not found' });
   if (!user) return res.status(401).json({ error: 'unauthorized' });
 
   // Check permissions
   if (user.role !== 'admin') {
-    const allowedIds = user.id ? (listAccessibleCameraIdsForUserStmt.all(user.id) as Array<{ cameraId: string }>).map(r => r.cameraId) : [];
+    const allowedIds = user.id ? await listAccessibleCameraIdsForUser(user.id) : [];
     if (!allowedIds.includes(cam.id)) return res.status(403).json({ error: 'forbidden' });
   }
 
@@ -480,9 +480,9 @@ cameraRouter.post('/:id/recordings/:year/:month/:day/:hour/token/:filename', (re
 });
 
 // Serve recorded video files
-cameraRouter.get('/:id/recordings/:year/:month/:day/:hour/file/:filename', (req, res) => {
+cameraRouter.get('/:id/recordings/:year/:month/:day/:hour/file/:filename', async (req, res) => {
   const user = (req as any).user as { id?: string; role?: string } | undefined;
-  const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
+  const cam = await getCamera(req.params.id);
   if (!cam) return res.status(404).json({ error: 'not found' });
 
   // Check authentication - either x-user-id header OR video token
@@ -494,7 +494,7 @@ cameraRouter.get('/:id/recordings/:year/:month/:day/:hour/file/:filename', (req,
     const tokenData = validateVideoToken(videoToken);
     if (tokenData && tokenData.cameraId === cam.id) {
       // Get user from token
-      const tokenUser = getUserStmt.get(tokenData.userId) as any;
+      const tokenUser = await getUser(tokenData.userId);
       if (tokenUser) {
         authenticatedUser = tokenUser;
         console.log(`Video access via token - User: ${tokenUser.id}, Camera: ${cam.id}`);
@@ -508,7 +508,7 @@ cameraRouter.get('/:id/recordings/:year/:month/:day/:hour/file/:filename', (req,
 
   // Check permissions
   if (authenticatedUser.role !== 'admin') {
-    const allowedIds = authenticatedUser.id ? (listAccessibleCameraIdsForUserStmt.all(authenticatedUser.id) as Array<{ cameraId: string }>).map(r => r.cameraId) : [];
+    const allowedIds = authenticatedUser.id ? await listAccessibleCameraIdsForUser(authenticatedUser.id) : [];
     if (!allowedIds.includes(cam.id)) return res.status(403).json({ error: 'forbidden' });
   }
 
@@ -564,8 +564,8 @@ cameraRouter.get('/:id/recordings/:year/:month/:day/:hour/file/:filename', (req,
 });
 
 // Stop HLS streaming for camera (keep recording active)
-cameraRouter.post('/:id/stop', (req, res) => {
-  const cam = getCameraStmt.get(req.params.id) as Camera | undefined;
+cameraRouter.post('/:id/stop', async (req, res) => {
+  const cam = await getCamera(req.params.id);
   if (!cam) return res.status(404).json({ error: 'not found' });
 
   const success = ffmpegManager.disableHLS(cam.id);
@@ -591,7 +591,7 @@ cameraRouter.get('/storage/info', async (req, res) => {
       return res.status(401).json({ error: 'Missing user ID' });
     }
 
-    const user = getUserStmt.get(userId) as { id: string; role: string } | undefined;
+    const user = await getUser(userId);
     if (!user || user.role !== 'admin') {
       return res.status(403).json({ error: 'Admin access required' });
     }
@@ -611,7 +611,7 @@ cameraRouter.post('/storage/cleanup', async (req, res) => {
       return res.status(401).json({ error: 'Missing user ID' });
     }
 
-    const user = getUserStmt.get(userId) as { id: string; role: string } | undefined;
+    const user = await getUser(userId);
     if (!user || user.role !== 'admin') {
       return res.status(403).json({ error: 'Admin access required' });
     }

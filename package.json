@@ -6,7 +6,12 @@
     "dev": "bash ./dev.sh",
     "dev:server": "npm --prefix server run dev",
     "dev:client": "npm --prefix client run dev",
-    "start": "concurrently -n \"server,client\" -c \"green,blue\" \"npm --prefix server run dev\" \"npm --prefix client run dev\""
+    "start": "concurrently -n \"server,client\" -c \"green,blue\" \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:restart": "docker-compose restart"
   },
   "devDependencies": {
     "concurrently": "^9.2.0"

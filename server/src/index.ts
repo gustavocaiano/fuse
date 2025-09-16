@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import { cameraRouter } from './routes/cameras';
 import { userRouter } from './routes';
-import { listCamerasStmt } from './db';
+import { initializeDatabase, listCameras } from './db';
 import { ffmpegManager } from './ffmpegManager';
 import { StorageManager } from './storageManager';
 
@@ -43,11 +43,19 @@ app.use('/hls', express.static(hlsDir, {
 }));
 
 const port = Number(process.env.PORT || 4000);
-app.listen(port, () => {
-	console.log(`cam-parser server listening on http://localhost:${port}`);
 
-	// Auto-start always-recording for all cameras (single stream approach)
+// Initialize database and start server
+const startServer = async () => {
 	try {
+		// Initialize MySQL database
+		await initializeDatabase();
+		console.log('✅ Database initialized successfully');
+
+		app.listen(port, async () => {
+			console.log(`cam-parser server listening on http://localhost:${port}`);
+
+			// Auto-start always-recording for all cameras (single stream approach)
+			try {
 		const recordDirEnv = process.env.RECORDINGS_DIR ? path.resolve(process.env.RECORDINGS_DIR) : path.join(__dirname, '..', 'recordings');
 		const recordMinutes = Number(process.env.RECORD_SEGMENT_MINUTES || 10);
 		
@@ -58,7 +66,7 @@ app.listen(port, () => {
 		// Initialize storage manager
 		const storageManager = new StorageManager(recordDirEnv);
 		
-		const rows = listCamerasStmt.all() as Array<{ id: string; rtsp: string; recordEnabled: number }>;
+		const rows = await listCameras();
 		console.log(`🎥 Auto-starting always-recording for ${rows.length} cameras...`);
 		console.log(`📁 Recordings: ${recordDirEnv}`);
 		console.log(`📺 HLS Output: ${hlsDir}`);
@@ -137,6 +145,13 @@ app.listen(port, () => {
 	// eslint-disable-next-line no-console
 	console.error('❌ Auto-start supervisor error:', e);
 }
-});
+		});
+	} catch (error) {
+		console.error('❌ Failed to start server:', error);
+		process.exit(1);
+	}
+};
+
+startServer();
 
 
