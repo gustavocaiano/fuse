@@ -1,6 +1,6 @@
 <?php
 
-namespace Traits;
+namespace App\Http\Traits;
 
 use app\Actions\CamNotification;
 use app\Models\User;

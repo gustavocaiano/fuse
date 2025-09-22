@@ -3,7 +3,7 @@
 namespace app\Concerns;
 
 use Symfony\Component\HttpFoundation\Exception\UnexpectedValueException;
-use Traits\NotifierTrait;
+use App\Http\Traits\NotifierTrait;
 use ValueError;
 
 trait HasFromOr

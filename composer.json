@@ -45,7 +45,7 @@
             "App\\": "app/",
             "App\\PTZ\\": "app/PTZ/",
             "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "../cam-parser-no-breeze/database/seeders/"
+            "Database\\Seeders\\": "database/seeders/"
         }
     },
     "autoload-dev": {
