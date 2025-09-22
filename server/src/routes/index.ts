@@ -1,2 +1,0 @@
-export { userRouter } from './users';
-
