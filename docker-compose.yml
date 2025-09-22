@@ -1,68 +1,82 @@
-version: '3.8'
-
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: cam-parser-mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-cam_parser}
-      MYSQL_USER: ${MYSQL_USER:-camuser}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-campassword}
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./server/init.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
-    networks:
-      - cam-parser-network
-
-  server:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
-    container_name: cam-parser-server
-    restart: unless-stopped
-    environment:
-      NODE_ENV: production
-      PORT: 3000
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_NAME: ${MYSQL_DATABASE:-cam_parser}
-      DB_USER: ${MYSQL_USER:-camuser}
-      DB_PASSWORD: ${MYSQL_PASSWORD:-campassword}
-      TZ: Europe/Lisbon
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./server/recordings:/app/recordings
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - cam-parser-network
-
-  client:
-    build:
-      context: ./client
-      dockerfile: Dockerfile
-    container_name: cam-parser-client
-    restart: unless-stopped
-    ports:
-      - "80:80"
-    depends_on:
-      - server
-    networks:
-      - cam-parser-network
-
-volumes:
-  mysql_data:
-
+    cam-parser:
+        build:
+            context: ./docker/8.4
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP}'
+        image: sail-8.4/app
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        ports:
+            - '${APP_PORT:-80}:80'
+            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
+            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+            IGNITION_LOCAL_SITES_PATH: '${PWD}'
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            - mysql
+            - mailpit
+            - mediamtx
+    mediamtx:
+        image: 'bluenviron/mediamtx:latest'
+        container_name: mediamtx
+        restart: unless-stopped
+        ports:
+            - '8554:8554'
+            - '1935:1935'
+            - '8888:8888'
+            - '8189:8189/udp'
+            - '9997:9997'
+        volumes:
+            - './mediamtx.yml:/mediamtx.yml'
+            - './recordings:/recordings'
+        environment:
+            - MTX_RTSPTRANSPORTS=tcp
+        networks:
+            - sail
+    mysql:
+        image: 'mysql/mysql-server:8.0'
+        ports:
+            - '${FORWARD_DB_PORT:-3306}:3306'
+        environment:
+            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ROOT_HOST: '%'
+            MYSQL_DATABASE: '${DB_DATABASE}'
+            MYSQL_USER: '${DB_USERNAME}'
+            MYSQL_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ALLOW_EMPTY_PASSWORD: 1
+            MYSQL_EXTRA_OPTIONS: '${MYSQL_EXTRA_OPTIONS}'
+        volumes:
+            - 'sail-mysql:/var/lib/mysql'
+            - './docker/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
+        networks:
+            - sail
+        healthcheck:
+            test:
+                - CMD
+                - mysqladmin
+                - ping
+                - '-p${DB_PASSWORD}'
+            retries: 3
+            timeout: 5s
+    mailpit:
+        image: 'axllent/mailpit:latest'
+        ports:
+            - '${FORWARD_MAILPIT_PORT:-1025}:1025'
+            - '${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}:8025'
+        networks:
+            - sail
 networks:
-  cam-parser-network:
-    driver: bridge
+    sail:
+        driver: bridge
+volumes:
+    sail-mysql:
+        driver: local

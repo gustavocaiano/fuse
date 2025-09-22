@@ -1,0 +1,38 @@
+# MediaMTX configuration file
+
+# Log level
+logLevel: info
+
+# Log destinations
+logDestinations: [stdout]
+
+# Log file path (used only if enabled in destinations)
+logFile: /var/log/mediamtx.log
+
+# API server configuration
+api: yes
+apiAddress: :9997
+
+authInternalUsers:
+  - user: any
+    pass:
+    ips: []
+    permissions:
+      - action: api
+        path:
+      - action: read
+        path:
+
+# Metrics configuration
+metrics: no
+metricsAddress: :9998
+
+
+# HLS server configuration
+hls: yes
+hlsAddress: :8888
+hlsDirectory: /tmp/hls
+
+
+# Path settings
+paths:
