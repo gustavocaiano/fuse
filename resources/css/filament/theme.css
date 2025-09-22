@@ -1,0 +1,62 @@
+@import '../../../vendor/filament/filament/resources/css/theme.css';
+
+
+@source '../../../app/Filament';
+@source '../../../resources/views/filament';
+
+.fi-body:has(.fi-simple-layout):before {
+    content: '';
+    position: absolute;
+    top: 11.75vh;
+    left: 29.75vw;
+    width: 40.5vw;
+    height: 76.5vh;
+    background-image: url('./../../../public/logos/nf-logo-red-stroke.svg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: -1;
+}
+
+/*table having the header sticky*/
+/*div.fi-ta-content{*/
+/*    @apply*/
+/*    h-[calc(100vh-43vh)]*/
+/*    overflow-y-scroll;*/
+/*}*/
+
+/*table.fi-ta-table th{*/
+/*    @apply  sticky top-0 bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700;*/
+/*}*/
+
+
+.dark .fi-body:has(.fi-simple-layout):before {
+    background-image: url('./../../../public/logos/vortex.svg');
+}
+
+.groupBorderTop {
+    @apply border-t border-primary-700 dark:border-primary-100 py-6;
+}
+
+
+
+.centered {
+    @apply flex items-center justify-center min-h-full  ;
+}
+
+.fi-simple-layout {
+    max-width: 50vw;
+    margin-left: 25%;
+    margin-right: 25%;
+}
+
+@media (max-width: 1024px) {
+    .fi-body:has(.fi-simple-layout)::before {
+        width: 100vw;
+    }
+
+    .fi-simple-layout {
+        max-width: unset;
+        margin-left: 0;
+    }
+}

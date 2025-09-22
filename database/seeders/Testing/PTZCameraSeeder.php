@@ -15,7 +15,7 @@ class PTZCameraSeeder extends Seeder
     {
         $this->command->info('🎥 Creating PTZ test cameras...');
 
-       Camera::create([
+        Camera::create([
             'name' => 'ONVIF PTZ Camera',
             'ip_address' => '192.168.16.100',
             'user' => 'admin',
@@ -24,7 +24,6 @@ class PTZCameraSeeder extends Seeder
             'port' => '554',
             'path' => '/h264',
         ]);
-
 
     }
 }

@@ -2,8 +2,8 @@
 
 namespace app\Concerns;
 
-use Symfony\Component\HttpFoundation\Exception\UnexpectedValueException;
 use App\Http\Traits\NotifierTrait;
+use Symfony\Component\HttpFoundation\Exception\UnexpectedValueException;
 use ValueError;
 
 trait HasFromOr
