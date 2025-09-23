@@ -7,7 +7,7 @@
 .fi-body:has(.fi-simple-layout):before {
     content: '';
     position: absolute;
-    top: 11.75vh;
+    top: 13vh;
     left: 29.75vw;
     width: 40.5vw;
     height: 76.5vh;
@@ -16,6 +16,10 @@
     background-position: center;
     background-repeat: no-repeat;
     z-index: -1;
+}
+
+.fi-logo{
+    @apply items-center justify-center flex;
 }
 
 /*table having the header sticky*/
@@ -31,12 +35,15 @@
 
 
 .dark .fi-body:has(.fi-simple-layout):before {
-    background-image: url('./../../../public/logos/vortex.svg');
+    background-image: url('./../../../public/logos/nf-logo-red-stroke.svg');
 }
 
 .groupBorderTop {
     @apply border-t border-primary-700 dark:border-primary-100 py-6;
 }
+
+
+
 
 
 
