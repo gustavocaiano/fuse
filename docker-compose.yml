@@ -1,12 +1,12 @@
 services:
-    cam-parser:
+    fuse-app:
         build:
             context: ./docker/8.4
             dockerfile: Dockerfile
             args:
                 WWWGROUP: '${WWWGROUP}'
         image: sail-8.4/app
-        container_name: cam-app
+        container_name: fuse-app
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:
@@ -21,14 +21,14 @@ services:
         volumes:
             - '.:/var/www/html'
         networks:
-            - cam-network
+            - fuse-network
         depends_on:
             - mysql
             - mailpit
             - mediamtx
     mediamtx:
         image: 'bluenviron/mediamtx:latest'
-        container_name: cam-mediamtx
+        container_name: fuse-mediamtx
         restart: unless-stopped
         ports:
             - '8554:8554'
@@ -42,10 +42,10 @@ services:
         environment:
             - MTX_RTSPTRANSPORTS=tcp
         networks:
-            - cam-network
+            - fuse-network
     mysql:
         image: 'mysql/mysql-server:8.0'
-        container_name: cam-mysql
+        container_name: fuse-mysql
         ports:
             - '${FORWARD_DB_PORT:-3306}:3306'
         environment:
@@ -60,7 +60,7 @@ services:
             - 'sail-mysql:/var/lib/mysql'
             - './docker/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
         networks:
-            - cam-network
+            - fuse-network
         healthcheck:
             test:
                 - CMD
@@ -71,16 +71,16 @@ services:
             timeout: 5s
     mailpit:
         image: 'axllent/mailpit:latest'
-        container_name: cam-mailpit
+        container_name: fuse-mailpit
         ports:
             - '${FORWARD_MAILPIT_PORT:-1025}:1025'
             - '${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}:8025'
         networks:
-            - cam-network
+            - fuse-network
 networks:
-    cam-network:
+    fuse-network:
         driver: bridge
-        name: cam-network
+        name: fuse-network
 volumes:
     sail-mysql:
         driver: local
