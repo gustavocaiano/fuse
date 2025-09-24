@@ -12,16 +12,17 @@
         "php": "^8.3",
         "ext-fileinfo": "*",
         "filament/filament": "^4.0",
-        "lorisleiva/laravel-actions": "^2.9",
-        "marvinlabs/laravel-luhn": "^1.0",
-        "owen-it/laravel-auditing": "^14.0",
-        "spatie/laravel-data": "^4.15",
-        "spatie/laravel-permission": "^6.17",
-        "staudenmeir/eloquent-has-many-deep": "^1.21",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
+        "lorisleiva/laravel-actions": "^2.9",
+        "marvinlabs/laravel-luhn": "^1.0",
+        "owen-it/laravel-auditing": "^14.0",
+        "podium/podium": "*",
+        "spatie/laravel-data": "^4.15",
+        "spatie/laravel-permission": "^6.17",
+        "staudenmeir/eloquent-has-many-deep": "^1.21",
         "tightenco/ziggy": "^2.0"
     },
     "require-dev": {
@@ -43,7 +44,6 @@
     "autoload": {
         "psr-4": {
             "App\\": "app/",
-            "App\\PTZ\\": "app/PTZ/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         }
@@ -94,6 +94,15 @@
             "php-http/discovery": true
         }
     },
-    "minimum-stability": "stable",
-    "prefer-stable": true
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "repositories": {
+        "podium": {
+            "type": "path",
+            "url": "/Users/gustavocaiano/www/podium",
+            "options": {
+                "symlink": true
+            }
+        }
+    }
 }

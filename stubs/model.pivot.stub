@@ -1,0 +1,17 @@
+<?php
+
+namespace {{ namespace }};
+
+use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Podium\Laravel\Concerns\ResetsTaggedCache;
+use Podium\Laravel\Concerns\Userstamps;
+use Podium\Laravel\Contracts\Userstampable;
+
+class {{ class }} extends Pivot implements Userstampable
+{
+    use HasAudits;
+    use ResetsTaggedCache;
+    use SoftDeletes;
+    use Userstamps;
+}

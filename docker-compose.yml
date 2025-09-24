@@ -20,6 +20,7 @@ services:
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
         volumes:
             - '.:/var/www/html'
+            - '/Users/gustavocaiano/www/podium:/Users/gustavocaiano/www/podium:ro'
         networks:
             - fuse-network
         depends_on:
@@ -39,6 +40,7 @@ services:
         volumes:
             - './mediamtx.yml:/mediamtx.yml'
             - './recordings:/recordings'
+
         environment:
             - MTX_RTSPTRANSPORTS=tcp
         networks:

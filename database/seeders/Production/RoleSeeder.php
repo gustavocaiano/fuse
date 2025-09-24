@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Database\Seeders\Production;
 
-use app\Enums\Action;
-use app\Models\Permission;
-use App\Models\Process;
-use app\Models\Role;
-use app\Models\User;
+use app\Models\Camera;
+use App\Models\Permission;
+use App\Models\PermissionModel;
+use App\Models\Role;
+use App\Models\RoleModel;
 use Database\Seeders\Helpers\PermissionHelper;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Arr;
+use Podium\Support\Enums\Action;
 
 class RoleSeeder extends Seeder
 {
@@ -29,14 +30,14 @@ class RoleSeeder extends Seeder
              * - 'role' => ['models' => [...], 'custom' => [...]]
              *
              * @var array{
-             *     models?: array<Model::class, Action[]>,
+             *     models?: array<Model::class, \Podium\Support\Enums\Action[]>,
              *     custom?: string[]
              *         }|string $definition
              */
-            $role = Role::findOrCreate($roleName, 'web');
+            $role = RoleModel::findOrCreate($roleName, 'web');
 
             if ($definition === 'all') {
-                $role->syncPermissions(Permission::all());
+                $role->syncPermissions(PermissionModel::all());
 
                 continue;
             }
@@ -67,7 +68,7 @@ class RoleSeeder extends Seeder
                 continue;
             }
 
-            $permissions = Permission::query()
+            $permissions = PermissionModel::query()
                 ->whereIn('name', $permissionNames)
                 ->get();
 
@@ -89,8 +90,7 @@ class RoleSeeder extends Seeder
             self::sa() => 'all',
             self::operator() => [
                 'models' => [
-                    User::class => [Action::viewAny, Action::view],
-                    Process::class => [Action::viewAny, Action::view],
+                    Camera::class => [Action::VIEW_ANY, Action::VIEW],
                 ],
             ],
         ];
@@ -99,11 +99,6 @@ class RoleSeeder extends Seeder
     public static function sa(): string
     {
         return __('System Admin');
-    }
-
-    public static function delegate(): string
-    {
-        return __('Delegate');
     }
 
     public static function operator(): string
