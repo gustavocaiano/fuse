@@ -1,0 +1,55 @@
+\documentclass[12pt,a4paper]{report}
+
+% Encoding and language
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english,portuguese]{babel}
+
+% Layout and utilities
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath,amssymb}
+\usepackage{hyperref}
+\IfFileExists{csquotes.sty}{\usepackage{csquotes}}{}
+
+% Define frontmatter/mainmatter for classes without them (e.g., report)
+\makeatletter
+\providecommand{\frontmatter}{\cleardoublepage\pagenumbering{roman}}
+\providecommand{\mainmatter}{\cleardoublepage\pagenumbering{arabic}}
+% Minimal fallback if csquotes is unavailable
+\@ifundefined{enquote}{\newcommand{\enquote}[1]{``#1''}}{}
+\makeatother
+
+\title{Título da Tese}
+\author{Autor}
+\date{\today}
+
+\begin{document}
+\selectlanguage{portuguese}
+
+\maketitle
+
+\frontmatter
+\addto\captionsportuguese{\renewcommand{\abstractname}{Abstract}}
+\include{frontmatter/abstract}
+\include{frontmatter/acknowledgements}
+
+\tableofcontents
+\listoffigures
+\listoftables
+
+\mainmatter
+\include{chapters/introduction}
+% \include{chapters/conclusion}
+
+\appendix
+% \include{chapters/appendixA}
+
+\bibliographystyle{ieeetr}
+\bibliography{references/references}
+
+\end{document}
+
+
