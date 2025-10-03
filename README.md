@@ -39,8 +39,6 @@ A centralized and adaptable engine designed to unify, parse, and normalize CCTV 
 
 <p><img src="README-ER.svg" width="100%"></p>
 
-**(DEV: To update it: ```php artisan generate:erd README-ER.svg --format=svg```)**
-
 
 ## Security
 
