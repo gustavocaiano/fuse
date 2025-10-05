@@ -1,0 +1,112 @@
+\glsdefs@newdocentry{RTS}%
+{%
+name={\acronymfont {\glsentryshort {RTS}}},%
+sort={RTS},%
+type={acronym},%
+first={RTS},%
+firstplural={RTSs},%
+text={RTS},%
+plural={RTSs},%
+description={Real-Time System},%
+descriptionplural={Real-Time System},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Real-Time System},%
+longplural={Real-Time Systems},%
+short={RTS},%
+shortplural={RTSs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{GPOS}%
+{%
+name={\acronymfont {\glsentryshort {GPOS}}},%
+sort={GPOS},%
+type={acronym},%
+first={GPOS},%
+firstplural={GPOSs},%
+text={GPOS},%
+plural={GPOSs},%
+description={General Purpose Operating System},%
+descriptionplural={General Purpose Operating System},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={General Purpose Operating System},%
+longplural={General Purpose Operating Systems},%
+short={GPOS},%
+shortplural={GPOSs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{RTOS}%
+{%
+name={\acronymfont {\glsentryshort {RTOS}}},%
+sort={RTOS},%
+type={acronym},%
+first={RTOS},%
+firstplural={RTOSs},%
+text={RTOS},%
+plural={RTOSs},%
+description={Real-Time Operating System},%
+descriptionplural={Real-Time Operating System},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Real-Time Operating System},%
+longplural={Real-Time Operating Systems},%
+short={RTOS},%
+shortplural={RTOSs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{PGF}%
+{%
+name={\acronymfont {\glsentryshort {PGF}}},%
+sort={PGF},%
+type={acronym},%
+first={PGF},%
+firstplural={PGFs},%
+text={PGF},%
+plural={PGFs},%
+description={Portable Graphics Format},%
+descriptionplural={Portable Graphics Format},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Portable Graphics Format},%
+longplural={Portable Graphics Formats},%
+short={PGF},%
+shortplural={PGFs},%
+counter={page},%
+parent={},%
+%
+}%
+
