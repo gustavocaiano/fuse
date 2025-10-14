@@ -1,8 +1,8 @@
 # FUSE
 
-<p align="center">
-  <img src="public/logos/nf-logo-red-stroke.svg" alt="vortex Logo" width="200"/>
-</p>
+[//]: # <p align="center">
+[//]: #   <img src="public/logos/nf-logo-red-stroke.svg" alt="vortex Logo" width="200"/>
+[//]: # </p>
 
 ## 🌩️ FUSE
 
