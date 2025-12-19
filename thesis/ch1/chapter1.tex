@@ -1,35 +1,60 @@
 % Chapter 1
 % 
-\chapter{Thesis Structure} % Main chapter title
-\label{chap:Chapter1} % For referencing the chapter elsewhere, use Chapter~\ref{Chapter1}
+\chapter{Introdução} % Main chapter title
+\label{chap:introducao}
 
+\section{Introdução e Enquadramento}
+\label{sec:enquadramento}
 
-%-------------------------------------------------------------------------------
-%---------
-%
-\section{Introduction} 
-\label{sec:chap1_introduction} %For referencing this section elsewhere, use Section~\ref{sec:chap1_introduction}
+No panorama atual dos sistemas de videovigilância verifica-se uma grande dependência de hardware, como \glspl{NVR} para agregar várias câmaras e disponibilizar streaming da sua imagem. A maioria destes dispositivos também possibilita o playback e exportação de vídeos gravados, sendo que alguns controlam ainda os acessos de utilizadores. A detecção de movimentos ou objetos é uma feature de apenas alguns modelos apesar de que, ultimamente, se têm verificado um grande crescimento e aposta tecnológica nesta área \cite{ieeexplore_6491471}. Assim, os \glspl{NVR}, embora raramente reúnam individualmente todas estas funcionalidades num dispositivo só \cite{univates_2389}, são a peça central do processo de videovigilância dentro de uma rede controlada.
 
-The goal of a Master dissertation is to document the work developed and highlight its importance. Firstly, the author should aim to follow the best practices in terms of writing style and organise the contents such that the message is clear. The language style used should be clear, and avoid colloquial expressions.
+Em determinados cenários \cite{sciencedirect_S1439179124000458}, existe a impossibilidade destas câmaras serem inseridas todas numa determinada \gls{LAN} privada. Por este motivo e por estarem numa outra rede não controlada, é necessário aceder via Internet, que origina alguns problemas, tais como:
 
-Please use an automated spell checker during the writing of your work.
+\begin{itemize}
+    \item Incompatibilidade entre câmaras de diferentes fornecedores, obrigando muitas vezes à utilização de mais do que um software, já que nem todas são totalmente compatíveis com a mesma aplicação.
+    \item Falta de segurança e de privacidade dos dados, uma vez que muitas destas câmaras recorrem a conexões \gls{P2P} quando acedidas fora da \gls{LAN}. Este mecanismo depende, geralmente, de servidores do fornecedor, sobre os quais não existe controlo nem garantia de proteção dos dados \cite{nozominetworks_reolink}. Além disso, a comunicação entre a aplicação e a câmara é frequentemente pouco segura e não encriptada, expondo a stream de vídeo e as credenciais a potenciais ataques.
+    \item Falta de controlo de acessos e gestão de utilizadores, pois a maior parte das aplicações de acesso remoto a \gls{CCTV} são desenvolvidas para cenários onde estas atividades não são a prioridade \cite{mdpi_23041805}, priorizando o acesso intuitivo e rápido.
+\end{itemize}
 
-This chapter provides some brief recommendations for the writing of your dissertation. 
+Para além destas barreiras técnicas e de segurança, emerge um desafio operacional extremamente relevante, particularmente no contexto da segurança pública. Entidades como os \glspl{OPC} dependem de videovigilância para a obtenção de provas. O processo atual, contudo, assenta frequentemente na revisão humana através da visualização integral contínua das gravações efetuadas, distribuindo muitas vezes intervalos de tempo por vários agentes para que seja facilitada. Esta informação foi obtida através de um questionário/entrevista, realizado em conjunto com agentes da investigação criminal da \gls{GNR} e da \gls{PSP}, no qual o objetivo principal seria a validação da existência deste problema. O mesmo pode ser consultado no ANEXO A. Ainda assim, este processo torna-se demorado e intensivo, recorrendo a uma enorme quantidade de recursos humanos e tempo, que são valiosos e, infelizmente, escassos \cite{dn_falta_policias}.
 
-\section{Structure}
+Uma vez que estes problemas trazem insegurança e ineficiência, resolvê-los é uma preocupação do encarregado de segurança e \gls{CCTV} de uma entidade pública ou privada, tal como dos agentes encarregues pela obtenção de prova sob videovigilância dentro das polícias de investigação criminal. É neste contexto de múltiplos desafios que surge a proposta deste trabalho: o desenvolvimento do \gls{FUSE}. O \gls{FUSE} é idealizado como uma plataforma de software que centraliza e organiza sistemas de videovigilância heterogéneos e geograficamente dispersos, com um foco integrado na segurança dos dados, na automatização da análise de vídeo, e na manutenção de registos de auditoria e gestão de utilizadores.
 
-The structure of the document can be divided in three major parts: Introduction, Body and Conclusions.
+Importa ressalvar que o presente trabalho decorre em contexto empresarial, sendo acolhido pela empresa StabilityBubble, Lda. O \gls{FUSE} não se configura apenas como um exercício académico teórico, mas sim como a proposta de uma plataforma comercial destinada a responder a lacunas de mercado identificadas pela empresa. Assim, esta dissertação visa conciliar o rigor da investigação científica com os requisitos práticos e operacionais de um produto de software real, tirando partido da infraestrutura e know-how da entidade de acolhimento.
 
-The introduction includes, at least, a statement of what was the work developed; a brief, focused, state of the art; an explanation of how the work fits into the current state of the art, and how it contributes to it; a description of the structure of the document.
+\section{Pergunta de Investigação}
+\label{sec:pergunta_investigacao}
 
-The Body of the dissertation should include a literature review (in one or more chapters) and one or more chapters that describe the work developed and the results, justifying them adequately.
+A proposta desta plataforma levanta a seguinte pergunta principais de investigação:
 
-The conclusions make a final balance of the work, highlighting the main aspects of the work and making critical judgments about what was accomplished, and providing suggestions for future work, if appropriate. 
+\textbf{RQ1:} De que forma pode ser desenhada/projetada uma solução de software que permita aceder seguramente a câmaras \gls{CCTV}, localizadas em redes externas não controladas, caracterizadas por uma elevada diversidade de arquiteturas, padrões tecnológicos e origem de fabrico?
 
-\section{Formatting}
+Decompondo esta pergunta para uma melhor e mais estruturada compreensão, a investigação será guiada pelas seguintes sub-perguntas operacionais:
 
-The document can be written in Portuguese or English. The minimum number of pages is 60 and the maximum is 120 (not counting the Annexes). Small deviations are allowed. Please follow the margins and fonts  defined in this template. The font size should be 11pt. The document should be printed double sided.
+\textbf{RQ1.1:} Como pode ser desenhada uma camada de abstração de software que normalize as funcionalidades (visualização, controlo, gravação) de câmaras de diferentes interfaces e especificações técnicas distintas, garantindo a extensibilidade futura do sistema?
 
-Note that the graphical aspect of the thesis is important, but does not replace a well-written and well-organised presentation of ideas.
+\textbf{RQ1.2:} Que mecanismos de rede e protocolos de comunicação são mais eficazes para garantir a confidencialidade e integridade da comunicação com câmaras localizadas em redes não fidedignas, sem introduzir vulnerabilidades na rede de destino e agregação das várias streams?
 
-Please refer to Chapter~\ref{chap:Chapter2} and Chapter~\ref{chap:Chapter3} for details about this template, how to format the document and insert citations, figures, tables, equations and other elements.
+\textbf{RQ1.3:} Em que medida a integração de modelos de visão computacional para a automatização da deteção de eventos pode validar a utilização da plataforma proposta para otimização de processos de investigação criminal?
+
+A resposta à questão central de investigação (RQ1) será materializada através da implementação e validação experimental da plataforma \gls{FUSE}. Todo o processo encontra-se detalhado no capítulo 5 referente à Metodologia. No entanto, para fundamentar as decisões técnicas necessárias na implementação do \gls{MVP} analisar-se-ão as sub-questões operacionais, no capítulo 4 do Estudo do Estado da Arte.
+
+\section{Objetivos}
+\label{sec:objetivos}
+
+Foram definidos o seguintes objetivos para o desenvolvimento e validação do \gls{FUSE}:
+
+\begin{itemize}
+    \item Desenvolver uma arquitetura de software extensível que, através de uma camada de abstração, normalize a comunicação com câmaras de diferentes fornecedores. O sistema deverá suportar um protocolo base de streaming como o \gls{RTSP} e centralizar as funcionalidades de visualização em tempo real, gravação, e playback numa interface unificada.
+    \item Implementar um modelo de comunicação seguro, Secured By Design, que utilize túneis \gls{VPN} para isolar e criptografar a comunicação entre as câmaras externas e o servidor de implementação da aplicação.
+    \item Desenvolver um sistema de controlo de acessos baseado em ações (modelo \gls{ABAC}) para gerir as permissões de utilizadores de forma granular e garantir a auditoria das ações.
+    \item Integrar um módulo de análise de vídeo para a deteção automatizada de eventos complexos, implementando um pipeline de processamento progressivo em três fases:
+    \begin{itemize}
+        \item Fase 1 (Deteção de Atividade): Identificação de movimento e atividade relevante nos streams de vídeo para filtrar segmentos de interesse.
+        \item Fase 2 (Classificação de Objetos): Análise dos segmentos filtrados para detectar e classificar objetos de categorias pré-definidas (e.g., humanos, veículos, animais).
+        \item Fase 3 (Extração de Atributos): Análise aprofundada dos objetos classificados para extrair características específicas e customizáveis, como matrículas e cores de veículos, ou atributos de vestuário e acessórios de pessoas, que servirão de base para a pesquisa de eventos complexos.
+    \end{itemize}
+    \item Validar a viabilidade da arquitetura através de um protótipo funcional (\gls{MVP}) que demonstre a integração bem-sucedida de, no mínimo, duas/três (DECIDIR AINDA) câmaras tecnologicamente diferentes, a segurança da comunicação e a eficácia da deteção de eventos num cenário simulado, pelo menos até à Fase 2 anteriormente mencionada.
+\end{itemize}
+
+Quanto aos principais contributos deste trabalho, espera-se que do ponto de vista técnico-científico surja uma arquitetura referência para integração segura e inteligente de sistemas \gls{CCTV} distribuídos, principalmente quando há a presença de interoperabilidade entre redes não controladas e controladas. Por outro lado, do ponto de vista social e operacional, tenciona-se validar a ferramenta para que esta possa vir a aumentar significativamente a eficiência e eficácia da investigação criminal dos \gls{OPC}, otimizando a alocação de recursos e reduzindo o tempo de análise manual do vídeo.

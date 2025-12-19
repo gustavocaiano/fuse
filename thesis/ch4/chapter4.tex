@@ -1,0 +1,79 @@
+% Chapter 4
+
+\chapter{Planeamento de Trabalho}
+\label{chap:planeamento}
+
+Este capítulo descreve o planeamento deste projeto, que foi estruturado para garantir a exequibilidade dos objetivos propostos dentro do prazo académico estipulado. A organização das atividades divide-se entre a fase de preparação (unidade curricular de \gls{PREPD}) e a fase de execução e escrita da dissertação (unidade curricular de \gls{DIMEI}).
+
+\section{Definição do Âmbito e Entregáveis}
+\label{sec:ambito_entregaveis}
+
+O âmbito deste projeto foi decomposto através de um \gls{WBS}. Pelo mesmo, ilustrado na Figura \ref{fig:wbs}, estão organizados os entregáveis previstos por cinco fases principais, sendo estas:
+
+\begin{enumerate}
+    \item \textbf{Planeamento e Análise:} Focada na definição do problema e estado da arte. Inclui entregáveis como o Project Charter, o próprio \gls{WBS}, um Gantt Chart, um questionário e respetivas respostas dos \glspl{OPC}, este Extended Abstract e a revisão da literatura incluída no mesmo.
+    \item \textbf{Design:} Dedicada à modelação da solução. Os principais entregáveis previstos são a documentação da Arquitetura de Software (Vistas 4+1) e o Modelo de Domínio, assegurando que a estrutura do \gls{FUSE} é robusta antes da implementação.
+    \item \textbf{Desenvolvimento:} Fase central do projeto, onde será implementado o código da aplicação. Divide-se em três módulos críticos: Comunicações Seguras, Camada de Abstração e Módulo de Análise de Vídeo.
+    \item \textbf{Testes:} Validação da solução através de testes unitários e funcionais, em conjunto com a validação do protótipo em ambiente controlado ou cenário real.
+    \item \textbf{Conclusões:} Considerações finais do projeto, incluindo a redação final da dissertação, a interpretação dos resultados e a apresentação final.
+\end{enumerate}
+
+\begin{figure}[h]
+\centering
+% \includegraphics[width=\textwidth]{ch4/assets/wbs} % Placeholder
+\caption{WBS do projeto.}
+\label{fig:wbs}
+\end{figure}
+
+\section{Plano de Trabalho}
+\label{sec:plano_trabalho}
+
+O objetivo desta secção é ilustrar e descrever a calendarização das entregas dos respetivos entregáveis mencionados anteriormente, garantindo um acompanhamento rigoroso do progresso do projeto. O planeamento temporal encontra-se representado no diagrama de Gantt, Figura \ref{fig:gantt}.
+
+\begin{figure}[h]
+\centering
+% \includegraphics[width=\textwidth]{ch4/assets/gantt} % Placeholder
+\caption{Gantt Chart do projeto.}
+\label{fig:gantt}
+\end{figure}
+
+A execução do cronograma inicia-se com um primeiro marco de controlo a 15 de dezembro de 2025. O encerramento da fase de planeamento (\gls{PREPD}) está estipulado para 7 de janeiro de 2026. O segundo grande bloco temporal, referente à unidade curricular de \gls{DIMEI}, tem como data-alvo de entrega final o dia 22 de junho de 2026.
+
+\section{Project Charter e Gestão de Riscos}
+\label{sec:gestao_riscos}
+
+O Project Charter constituiu o artefacto inicial deste projeto, servindo como primeiro documento para a formalização da proposta de dissertação. A Tabela \ref{tab:stakeholders} apresenta o mapeamento dos Stakeholders, classificados quanto ao seu poder de influência e nível de interesse no sucesso do projeto, utilizando como base a ``Mendelow's Matrix'' \cite{mendelow_matrix}.
+
+\begin{table}[h]
+\centering
+\caption{Stakeholders identificados}
+\label{tab:stakeholders}
+\begin{tabular}{|l|l|l|p{6cm}|}
+\hline
+\textbf{Nome} & \textbf{Poder} & \textbf{Interesse} & \textbf{Justificação} \\ \hline
+StabilityBubble & Alto & Alto & Entidade promotora e futura fornecedora/exploradora comercial da solução \gls{FUSE}. \\ \hline
+\glspl{OPC} & Alto & Alto & Utilizadores finais críticos; o seu feedback valida a utilidade operacional e requisitos forenses. \\ \hline
+Paulo Baltarejo Sousa & Alto & Médio & Orientação académica e validação científica da metodologia e resultados. \\ \hline
+Francisco Loureiro & Alto & Alto & Supervisão empresarial e alinhamento do produto com a estratégia de mercado. \\ \hline
+Gestores de Segurança & Médio & Médio & Potenciais clientes empresariais que beneficiam da centralização de sistemas \gls{CCTV}. \\ \hline
+\end{tabular}
+\end{table}
+
+Relativamente à gestão de riscos, a Tabela \ref{tab:riscos} consolida os riscos identificados, atribuindo-lhes uma probabilidade e um impacto seguindo uma escala de Likert \cite{psycnet_likert} de 1 a 5.
+
+\begin{table}[h]
+\centering
+\caption{Identificação e gestão de riscos associados ao projeto}
+\label{tab:riscos}
+\begin{tabular}{|l|p{4cm}|p{1cm}|p{1cm}|p{1cm}|p{5cm}|}
+\hline
+\textbf{ID} & \textbf{Descrição} & \textbf{P} & \textbf{I} & \textbf{P*I} & \textbf{Resposta} \\ \hline
+1 & Indisponibilidade de Hardware (\gls{GPU}) & 3 & 4 & 12 & Mitigar: Garantir integração modular e desacoplada. \\ \hline
+2 & Incompatibilidade de Protocolos & 2 & 2 & 4 & Aceitar: Focar o \gls{MVP} na compatibilidade estrita com \gls{RTSP}. \\ \hline
+3 & Falsos Positivos na Deteção & 3 & 3 & 9 & Mitigar: Implementar sistema de ajuste de sensibilidade configurável. \\ \hline
+4 & Atraso no Cronograma & 3 & 5 & 15 & Mitigar: Adotar abordagem de desenvolvimento incremental. \\ \hline
+\end{tabular}
+\end{table}
+
+Pela análise à Tabela \ref{tab:riscos}, destaca-se os riscos 1 e 4 como os mais elevados. A estratégia de mitigação assenta fundamentalmente na modularidade e no desenvolvimento incremental.
+

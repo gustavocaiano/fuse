@@ -344,7 +344,7 @@ KOMA-script documentation for details.}]{fancyhdr}
 \newcommand{\maketitlepage}{
 	\checktoopen
 	\begin{titlepage}
-	{\centering \includegraphics[width=3in]{/frontmatter/assets/isep_logo.pdf} \\}
+	{\centering \includegraphics[width=3in]{frontmatter/assets/isep_logo.pdf} \\}
 	\null\vfill
 	\begin{center}
 	{\Huge \bfseries \ttitle}\\ % Thesis title

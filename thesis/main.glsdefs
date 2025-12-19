@@ -1,3 +1,815 @@
+\glsdefs@newdocentry{NVR}%
+{%
+name={\acronymfont {\glsentryshort {NVR}}},%
+sort={NVR},%
+type={acronym},%
+first={NVR},%
+firstplural={NVRs},%
+text={NVR},%
+plural={NVRs},%
+description={Network Video Recorder},%
+descriptionplural={Network Video Recorder},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Network Video Recorder},%
+longplural={Network Video Recorders},%
+short={NVR},%
+shortplural={NVRs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{LAN}%
+{%
+name={\acronymfont {\glsentryshort {LAN}}},%
+sort={LAN},%
+type={acronym},%
+first={LAN},%
+firstplural={LANs},%
+text={LAN},%
+plural={LANs},%
+description={Local Area Network},%
+descriptionplural={Local Area Network},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Local Area Network},%
+longplural={Local Area Networks},%
+short={LAN},%
+shortplural={LANs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{P2P}%
+{%
+name={\acronymfont {\glsentryshort {P2P}}},%
+sort={P2P},%
+type={acronym},%
+first={P2P},%
+firstplural={P2Ps},%
+text={P2P},%
+plural={P2Ps},%
+description={Peer-to-Peer},%
+descriptionplural={Peer-to-Peer},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Peer-to-Peer},%
+longplural={Peer-to-Peers},%
+short={P2P},%
+shortplural={P2Ps},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{CCTV}%
+{%
+name={\acronymfont {\glsentryshort {CCTV}}},%
+sort={CCTV},%
+type={acronym},%
+first={CCTV},%
+firstplural={CCTVs},%
+text={CCTV},%
+plural={CCTVs},%
+description={Closed Circuit Television},%
+descriptionplural={Closed Circuit Television},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Closed Circuit Television},%
+longplural={Closed Circuit Televisions},%
+short={CCTV},%
+shortplural={CCTVs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{OPC}%
+{%
+name={\acronymfont {\glsentryshort {OPC}}},%
+sort={OPC},%
+type={acronym},%
+first={OPC},%
+firstplural={OPCs},%
+text={OPC},%
+plural={OPCs},%
+description={Órgão de Polícia Criminal},%
+descriptionplural={Órgão de Polícia Criminal},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Órgão de Polícia Criminal},%
+longplural={Órgão de Polícia Criminals},%
+short={OPC},%
+shortplural={OPCs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{GNR}%
+{%
+name={\acronymfont {\glsentryshort {GNR}}},%
+sort={GNR},%
+type={acronym},%
+first={GNR},%
+firstplural={GNRs},%
+text={GNR},%
+plural={GNRs},%
+description={Guarda Nacional Republicana},%
+descriptionplural={Guarda Nacional Republicana},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Guarda Nacional Republicana},%
+longplural={Guarda Nacional Republicanas},%
+short={GNR},%
+shortplural={GNRs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{PSP}%
+{%
+name={\acronymfont {\glsentryshort {PSP}}},%
+sort={PSP},%
+type={acronym},%
+first={PSP},%
+firstplural={PSPs},%
+text={PSP},%
+plural={PSPs},%
+description={Polícia de Segurança Pública},%
+descriptionplural={Polícia de Segurança Pública},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Polícia de Segurança Pública},%
+longplural={Polícia de Segurança Públicas},%
+short={PSP},%
+shortplural={PSPs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{FUSE}%
+{%
+name={\acronymfont {\glsentryshort {FUSE}}},%
+sort={FUSE},%
+type={acronym},%
+first={FUSE},%
+firstplural={FUSEs},%
+text={FUSE},%
+plural={FUSEs},%
+description={Flexible Universal Stream Engine},%
+descriptionplural={Flexible Universal Stream Engine},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Flexible Universal Stream Engine},%
+longplural={Flexible Universal Stream Engines},%
+short={FUSE},%
+shortplural={FUSEs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{MVP}%
+{%
+name={\acronymfont {\glsentryshort {MVP}}},%
+sort={MVP},%
+type={acronym},%
+first={MVP},%
+firstplural={MVPs},%
+text={MVP},%
+plural={MVPs},%
+description={Minimum Viable Product},%
+descriptionplural={Minimum Viable Product},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Minimum Viable Product},%
+longplural={Minimum Viable Products},%
+short={MVP},%
+shortplural={MVPs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{RTSP}%
+{%
+name={\acronymfont {\glsentryshort {RTSP}}},%
+sort={RTSP},%
+type={acronym},%
+first={RTSP},%
+firstplural={RTSPs},%
+text={RTSP},%
+plural={RTSPs},%
+description={Real Time Streaming Protocol},%
+descriptionplural={Real Time Streaming Protocol},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Real Time Streaming Protocol},%
+longplural={Real Time Streaming Protocols},%
+short={RTSP},%
+shortplural={RTSPs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{VPN}%
+{%
+name={\acronymfont {\glsentryshort {VPN}}},%
+sort={VPN},%
+type={acronym},%
+first={VPN},%
+firstplural={VPNs},%
+text={VPN},%
+plural={VPNs},%
+description={Virtual Private Network},%
+descriptionplural={Virtual Private Network},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Virtual Private Network},%
+longplural={Virtual Private Networks},%
+short={VPN},%
+shortplural={VPNs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{ABAC}%
+{%
+name={\acronymfont {\glsentryshort {ABAC}}},%
+sort={ABAC},%
+type={acronym},%
+first={ABAC},%
+firstplural={ABACs},%
+text={ABAC},%
+plural={ABACs},%
+description={Action/Attribute Based Access Control},%
+descriptionplural={Action/Attribute Based Access Control},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Action/Attribute Based Access Control},%
+longplural={Action/Attribute Based Access Controls},%
+short={ABAC},%
+shortplural={ABACs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{IoT}%
+{%
+name={\acronymfont {\glsentryshort {IoT}}},%
+sort={IoT},%
+type={acronym},%
+first={IoT},%
+firstplural={IoTs},%
+text={IoT},%
+plural={IoTs},%
+description={Internet of Things},%
+descriptionplural={Internet of Things},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Internet of Things},%
+longplural={Internet of Thingss},%
+short={IoT},%
+shortplural={IoTs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{ONVIF}%
+{%
+name={\acronymfont {\glsentryshort {ONVIF}}},%
+sort={ONVIF},%
+type={acronym},%
+first={ONVIF},%
+firstplural={ONVIFs},%
+text={ONVIF},%
+plural={ONVIFs},%
+description={Open Network Video Interface Forum},%
+descriptionplural={Open Network Video Interface Forum},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Open Network Video Interface Forum},%
+longplural={Open Network Video Interface Forums},%
+short={ONVIF},%
+shortplural={ONVIFs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{NAT}%
+{%
+name={\acronymfont {\glsentryshort {NAT}}},%
+sort={NAT},%
+type={acronym},%
+first={NAT},%
+firstplural={NATs},%
+text={NAT},%
+plural={NATs},%
+description={Network Address Translation},%
+descriptionplural={Network Address Translation},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Network Address Translation},%
+longplural={Network Address Translations},%
+short={NAT},%
+shortplural={NATs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{LRRQ}%
+{%
+name={\acronymfont {\glsentryshort {LRRQ}}},%
+sort={LRRQ},%
+type={acronym},%
+first={LRRQ},%
+firstplural={LRRQs},%
+text={LRRQ},%
+plural={LRRQs},%
+description={Literature Review Research Question},%
+descriptionplural={Literature Review Research Question},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Literature Review Research Question},%
+longplural={Literature Review Research Questions},%
+short={LRRQ},%
+shortplural={LRRQs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{VLM}%
+{%
+name={\acronymfont {\glsentryshort {VLM}}},%
+sort={VLM},%
+type={acronym},%
+first={VLM},%
+firstplural={VLMs},%
+text={VLM},%
+plural={VLMs},%
+description={Vision-Language Model},%
+descriptionplural={Vision-Language Model},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Vision-Language Model},%
+longplural={Vision-Language Models},%
+short={VLM},%
+shortplural={VLMs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{WBS}%
+{%
+name={\acronymfont {\glsentryshort {WBS}}},%
+sort={WBS},%
+type={acronym},%
+first={WBS},%
+firstplural={WBSs},%
+text={WBS},%
+plural={WBSs},%
+description={Work Breakdown Structure},%
+descriptionplural={Work Breakdown Structure},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Work Breakdown Structure},%
+longplural={Work Breakdown Structures},%
+short={WBS},%
+shortplural={WBSs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{PRISMA}%
+{%
+name={\acronymfont {\glsentryshort {PRISMA}}},%
+sort={PRISMA},%
+type={acronym},%
+first={PRISMA},%
+firstplural={PRISMAs},%
+text={PRISMA},%
+plural={PRISMAs},%
+description={Preferred Reporting Items for Systematic reviews and Meta-Analysis},%
+descriptionplural={Preferred Reporting Items for Systematic reviews and Meta-Analysis},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Preferred Reporting Items for Systematic reviews and Meta-Analysis},%
+longplural={Preferred Reporting Items for Systematic reviews and Meta-Analysiss},%
+short={PRISMA},%
+shortplural={PRISMAs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{PREPD}%
+{%
+name={\acronymfont {\glsentryshort {PREPD}}},%
+sort={PREPD},%
+type={acronym},%
+first={PREPD},%
+firstplural={PREPDs},%
+text={PREPD},%
+plural={PREPDs},%
+description={Preparação de Dissertação},%
+descriptionplural={Preparação de Dissertação},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Preparação de Dissertação},%
+longplural={Preparação de Dissertaçãos},%
+short={PREPD},%
+shortplural={PREPDs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{DIMEI}%
+{%
+name={\acronymfont {\glsentryshort {DIMEI}}},%
+sort={DIMEI},%
+type={acronym},%
+first={DIMEI},%
+firstplural={DIMEIs},%
+text={DIMEI},%
+plural={DIMEIs},%
+description={Dissertação/Projeto/Estágio},%
+descriptionplural={Dissertação/Projeto/Estágio},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Dissertação/Projeto/Estágio},%
+longplural={Dissertação/Projeto/Estágios},%
+short={DIMEI},%
+shortplural={DIMEIs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{PICOCS}%
+{%
+name={\acronymfont {\glsentryshort {PICOCS}}},%
+sort={PICOCS},%
+type={acronym},%
+first={PICOCS},%
+firstplural={PICOCSs},%
+text={PICOCS},%
+plural={PICOCSs},%
+description={Population, Intervention, Comparison, Outcomes, Context, Study},%
+descriptionplural={Population, Intervention, Comparison, Outcomes, Context, Study},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Population, Intervention, Comparison, Outcomes, Context, Study},%
+longplural={Population, Intervention, Comparison, Outcomes, Context, Studys},%
+short={PICOCS},%
+shortplural={PICOCSs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{CNN}%
+{%
+name={\acronymfont {\glsentryshort {CNN}}},%
+sort={CNN},%
+type={acronym},%
+first={CNN},%
+firstplural={CNNs},%
+text={CNN},%
+plural={CNNs},%
+description={Convolutional Neural Network},%
+descriptionplural={Convolutional Neural Network},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Convolutional Neural Network},%
+longplural={Convolutional Neural Networks},%
+short={CNN},%
+shortplural={CNNs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{YOLO}%
+{%
+name={\acronymfont {\glsentryshort {YOLO}}},%
+sort={YOLO},%
+type={acronym},%
+first={YOLO},%
+firstplural={YOLOs},%
+text={YOLO},%
+plural={YOLOs},%
+description={You Only Look Once},%
+descriptionplural={You Only Look Once},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={You Only Look Once},%
+longplural={You Only Look Onces},%
+short={YOLO},%
+shortplural={YOLOs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{ACM}%
+{%
+name={\acronymfont {\glsentryshort {ACM}}},%
+sort={ACM},%
+type={acronym},%
+first={ACM},%
+firstplural={ACMs},%
+text={ACM},%
+plural={ACMs},%
+description={Association for Computing Machinery},%
+descriptionplural={Association for Computing Machinery},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Association for Computing Machinery},%
+longplural={Association for Computing Machinerys},%
+short={ACM},%
+shortplural={ACMs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{IEEE-CS}%
+{%
+name={\acronymfont {\glsentryshort {IEEE-CS}}},%
+sort={IEEE-CS},%
+type={acronym},%
+first={IEEE-CS},%
+firstplural={IEEE-CSs},%
+text={IEEE-CS},%
+plural={IEEE-CSs},%
+description={IEEE Computer Society},%
+descriptionplural={IEEE Computer Society},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={IEEE Computer Society},%
+longplural={IEEE Computer Societys},%
+short={IEEE-CS},%
+shortplural={IEEE-CSs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{GPU}%
+{%
+name={\acronymfont {\glsentryshort {GPU}}},%
+sort={GPU},%
+type={acronym},%
+first={GPU},%
+firstplural={GPUs},%
+text={GPU},%
+plural={GPUs},%
+description={Graphics Processing Unit},%
+descriptionplural={Graphics Processing Unit},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Graphics Processing Unit},%
+longplural={Graphics Processing Units},%
+short={GPU},%
+shortplural={GPUs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{CPU}%
+{%
+name={\acronymfont {\glsentryshort {CPU}}},%
+sort={CPU},%
+type={acronym},%
+first={CPU},%
+firstplural={CPUs},%
+text={CPU},%
+plural={CPUs},%
+description={Central Processing Unit},%
+descriptionplural={Central Processing Unit},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Central Processing Unit},%
+longplural={Central Processing Units},%
+short={CPU},%
+shortplural={CPUs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{AI}%
+{%
+name={\acronymfont {\glsentryshort {AI}}},%
+sort={AI},%
+type={acronym},%
+first={AI},%
+firstplural={AIs},%
+text={AI},%
+plural={AIs},%
+description={Artificial Intelligence},%
+descriptionplural={Artificial Intelligence},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Artificial Intelligence},%
+longplural={Artificial Intelligences},%
+short={AI},%
+shortplural={AIs},%
+counter={page},%
+parent={},%
+%
+}%
+
 \glsdefs@newdocentry{RTS}%
 {%
 name={\acronymfont {\glsentryshort {RTS}}},%

@@ -1,0 +1,21 @@
+% Chapter 5
+
+\chapter{Ética}
+\label{chap:etica}
+
+A realização deste trabalho rege-se pelos princípios de integridade, responsabilidade e rigor científico descritos no Código de Boas Práticas e de Conduta do P.PORTO \cite{ipp_etica}.
+
+Do ponto de vista profissional, o trabalho enquadra-se nos princípios estruturantes da engenharia de software, alinhados com referências internacionais como o Software Engineering Code of Ethics and Professional Practice, desenvolvido em conjunto pela \gls{ACM} e pela \gls{IEEE-CS} \cite{acm_ethics}. A conformidade com estes princípios garante a qualidade e segurança dos sistemas desenvolvidos, a responsabilidade perante clientes e utilizadores, e a honestidade na comunicação de resultados, limitações e riscos associados às soluções tecnológicas.
+
+O \gls{FUSE} envolve uma pipeline de análise automática aplicada a contextos de videovigilância, potencialmente incidindo sobre a obtenção de dados pessoais identificáveis. Estes dados sensíveis apenas serão obtidos num contexto de validação do \gls{MVP} em cenário real, que estará sempre salvaguardado por requerimento de despacho judicial para fornecimento de meios técnicos e respetiva autorização de captação de imagem. Ainda assim, a pipeline é desenhada em estrita observância do EU AI Act \cite{eu_ai_act}, garantindo que o sistema não incorre em ``Unacceptable risks''. O sistema não se destina, nem permite, práticas proibidas tais como:
+
+\begin{itemize}
+    \item Social scoring ou manipulação comportamental;
+    \item Recolha indiscriminada (untargeted scraping) de imagens de \gls{CCTV} para criação de bases de dados de reconhecimento facial;
+    \item Identificação biométrica remota em tempo real em espaços públicos para fins policiais (real-time remote biometric identification).
+\end{itemize}
+
+No âmbito do último ponto, apesar do alvo ser legislar o reconhecimento biométrico em tempo-real, justifica-se a conformidade pela natureza da análise automática, que será realizada sob gravações dos eventos, e não sob o próprio streaming.
+
+A análise focada na ``Fase 3'' da pipeline de deteção automática restringe-se à classificação de características objetivas (e.g., cor de vestuário, tipo de veículo) para auxiliar a pesquisa forense, mantendo sempre o princípio da validação humana, onde a decisão final cabe ao agente humano e não ao algoritmo.
+
