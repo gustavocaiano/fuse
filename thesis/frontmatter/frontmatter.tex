@@ -36,26 +36,22 @@ The dedicatory is optional. Below is an example of a humorous dedication.
 
 % here you put the abstract in the main language of the work.
 
-This document explains the main formatting rules to apply to a TMDEI Master Dissertation work for the MSc in Computer Engineering of the Computer Engineering Department (DEI) of the School of Engineering (ISEP) of the Polytechnic of Porto (IPP).
+O presente trabalho de dissertação propõe o desenvolvimento do \gls{FUSE}, uma plataforma de software inovadora concebida para centralizar e organizar sistemas de videovigilância heterogéneos, geograficamente dispersos e situados em redes não controladas. Esta investigação surge em resposta a desafios críticos identificados na segurança pública e privada, nomeadamente a fragmentação tecnológica, as vulnerabilidades de segurança inerentes às comunicações \gls{P2P} e a ineficiência operacional enfrentada por entidades como os \glspl{OPC} na análise forense de vídeo.
 
-The rules here presented are a set of recommended good practices for formatting the disseration work. Please note that this document does not have definite hard rules, and the discussion of these and other aspects of the development of the work should be discussed with the respective supervisor(s).
+A arquitetura proposta integra uma camada de abstração de hardware que normaliza a comunicação com câmaras de diversos fabricantes através do protocolo \gls{RTSP}, garantindo a interoperabilidade. A segurança das comunicações é assegurada através de túneis \gls{VPN} que protegem a integridade e confidencialidade dos dados em redes hostis, complementada por um modelo de controlo de acessos \gls{ABAC}. Adicionalmente, o sistema incorpora um módulo de visão computacional progressivo, estruturado em três fases: deteção de atividade para filtragem temporal, classificação de objetos (e.g., humanos, veículos) e extração de atributos específicos, visando a automatização da análise forense e a redução significativa da carga de trabalho manual.
 
-This document is based on a previous document prepared by Dr. Fátima Rodrigues (DEI/ISEP).
+A metodologia adotada segue o paradigma de "Design and Creation", com a validação da solução a ser realizada através de um protótipo funcional (\gls{MVP}) em cenários simulados e reais. Os resultados esperados centram-se na demonstração da eficácia da integração segura de dispositivos, na robustez da proteção de dados e na otimização dos processos de investigação criminal, sempre em estrita observância dos princípios éticos e regulamentares, como o EU AI Act.
 
-The abstract should usually not exceed 200 words, or one page. When the work is written in Portuguese, it should have an abstract in English.
-
-Please define up to 6 keywords that better describe your work, in the \emph{THESIS INFORMATION} block of the \file{main.tex} file.
 
 \end{abstract}
 
 \begin{abstractotherlanguage}
 % here you put the abstract in the "other language": English, if the work is written in Portuguese; Portuguese, if the work is written in English.
 
-Trabalhos escritos em língua Inglesa devem incluir um resumo alargado com cerca de 1000 palavras, ou duas páginas.
+This dissertation presents the development of \gls{FUSE}, a software platform designed to unify and secure heterogeneous video surveillance systems dispersed across uncontrolled networks. Addressing the challenges of technological fragmentation and security vulnerabilities in current \gls{CCTV} infrastructures, \gls{FUSE} provides a centralized solution for entities such as \glspl{LEA}
 
-Se o trabalho estiver escrito em Português, este resumo deveria ser em língua Inglesa, com cerca de 200 palavras, ou uma página.
+The proposed architecture features a hardware abstraction layer for normalizing camera communications via \gls{RTSP} and secures data transmission through VPN tunneling. It implements \gls{ABAC} as an access control method, and integrates a three-stage computer vision pipeline for automated activity detection, object classification, and attribute extraction. This approach aims to enhance interoperability, data security, and forensic analysis efficiency, adhering to ethical standards like the EU AI Act.
 
-Para alterar a língua basta ir às configurações do documento no ficheiro \file{main.tex} e alterar para a língua desejada ('english' ou 'portuguese')\footnote{Alterar a língua requer apagar alguns ficheiros temporários; O target \keyword{clean} do \keyword{Makefile} incluído pode ser utilizado para este propósito.}. Isto fará com que os cabeçalhos incluídos no template sejam traduzidos para a respetiva língua.
 
 \end{abstractotherlanguage}
 

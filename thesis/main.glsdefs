@@ -54,6 +54,34 @@ parent={},%
 %
 }%
 
+\glsdefs@newdocentry{LEA}%
+{%
+name={\acronymfont {\glsentryshort {LEA}}},%
+sort={LEA},%
+type={acronym},%
+first={LEA},%
+firstplural={LEAs},%
+text={LEA},%
+plural={LEAs},%
+description={Law Enforcement Agencies},%
+descriptionplural={Law Enforcement Agencies},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Law Enforcement Agencies},%
+longplural={Law Enforcement Agenciess},%
+short={LEA},%
+shortplural={LEAs},%
+counter={page},%
+parent={},%
+%
+}%
+
 \glsdefs@newdocentry{P2P}%
 {%
 name={\acronymfont {\glsentryshort {P2P}}},%
@@ -539,8 +567,8 @@ first={PREPD},%
 firstplural={PREPDs},%
 text={PREPD},%
 plural={PREPDs},%
-description={Preparação de Dissertação},%
-descriptionplural={Preparação de Dissertação},%
+description={Preparação para Dissertação},%
+descriptionplural={Preparação para Dissertação},%
 symbol={\relax },%
 symbolplural={\relax },%
 user1={},%
@@ -549,8 +577,8 @@ user3={},%
 user4={},%
 user5={},%
 user6={},%
-long={Preparação de Dissertação},%
-longplural={Preparação de Dissertaçãos},%
+long={Preparação para Dissertação},%
+longplural={Preparação para Dissertaçãos},%
 short={PREPD},%
 shortplural={PREPDs},%
 counter={page},%
@@ -567,8 +595,8 @@ first={DIMEI},%
 firstplural={DIMEIs},%
 text={DIMEI},%
 plural={DIMEIs},%
-description={Dissertação/Projeto/Estágio},%
-descriptionplural={Dissertação/Projeto/Estágio},%
+description={Dissertação do Mestrado em Engenharia Informática},%
+descriptionplural={Dissertação do Mestrado em Engenharia Informática},%
 symbol={\relax },%
 symbolplural={\relax },%
 user1={},%
@@ -577,8 +605,8 @@ user3={},%
 user4={},%
 user5={},%
 user6={},%
-long={Dissertação/Projeto/Estágio},%
-longplural={Dissertação/Projeto/Estágios},%
+long={Dissertação do Mestrado em Engenharia Informática},%
+longplural={Dissertação do Mestrado em Engenharia Informáticas},%
 short={DIMEI},%
 shortplural={DIMEIs},%
 counter={page},%
@@ -917,6 +945,34 @@ long={Portable Graphics Format},%
 longplural={Portable Graphics Formats},%
 short={PGF},%
 shortplural={PGFs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{ZTNA}%
+{%
+name={\acronymfont {\glsentryshort {ZTNA}}},%
+sort={ZTNA},%
+type={acronym},%
+first={ZTNA},%
+firstplural={ZTNAs},%
+text={ZTNA},%
+plural={ZTNAs},%
+description={Zero Trust Network Access},%
+descriptionplural={Zero Trust Network Access},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Zero Trust Network Access},%
+longplural={Zero Trust Network Accesss},%
+short={ZTNA},%
+shortplural={ZTNAs},%
 counter={page},%
 parent={},%
 %
