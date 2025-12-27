@@ -28,6 +28,34 @@ Cada questão de pesquisa será enquadrada de acordo com o modelo \gls{PICOCS} \
 
 Como fator inclusivo de seleção, selecionou-se, por exemplo, a data de publicação posterior a 2018. A escolha deste intervalo visa garantir que as arquiteturas, frameworks e algoritmos analisados representam o atual estado da arte, evitando a adoção de paradigmas que, embora válidos no passado, não refletem as necessidades de desempenho e escalabilidade dos sistemas modernos. Foram privilegiados artigos revistos por pares, normas técnicas e literatura técnica amplamente reconhecida. Excluíram-se estudos puramente teóricos sem aplicação prática ao domínio da videovigilância ou da integração de dispositivos, tal como trabalhos relativos a soluções proprietárias fechadas sem documentação técnica pública suficiente.
 
+
+\section{LRRQ1 - Arquiteturas de Abstração e Interoperabilidade IoT}
+\label{sec:lrrq1_iot}
+
+Nesta secção, a literatura é revista de forma a responder à questão de investigação "Quais são as arquiteturas de referência e padrões de design de software descritos na literatura para a abstração e interoperabilidade de dispositivos IoT heterogéneos?".
+
+\subsection{Processo de Pesquisa}
+
+A questão de investigação foi estruturada de acordo com o modelo PICOCS apresentado na Tabela \ref{tab:lrrq1_picocs}.
+
+\begin{table}[H]
+	\centering
+	\caption{Modelo PICOCS para a LRRQ1}
+	\label{tab:lrrq1_picocs}
+	\begin{tabular}{|p{0.15\linewidth}|p{0.35\linewidth}|p{0.2\linewidth}|p{0.2\linewidth}|}
+		\hline
+		\textbf{PICOCS} & \textbf{Parte da RQ} & \textbf{I/E} & \textbf{Sub string} \\ \hline
+		\textbf{P}  & Estudos envolvendo dispositivos IoT heterogéneos e CCTV & I - Estudos que considerem heterogeneidade \newline E - Anteriores a 2018 & >=2018; IoT; Heterogeneous; CCTV \\ \hline
+		\textbf{I}  & Arquiteturas de software, Middleware e Camadas de Abstração & I - Estudos sobre padrões de design e abstração \newline E - Soluções proprietárias fechadas & Software Architecture; Middleware; Abstraction Layer; Design Patterns \\ \hline
+		\textbf{C}  & --- & --- & --- \\ \hline
+		\textbf{O} & Arquiteturas de referência e interoperabilidade & I - Estudos que propõem ou validam arquiteturas & Architecture; Interoperability; Framework \\ \hline
+		\textbf{C} & Engenharia de Software e Sistemas Distribuídos & I - Académico \newline I - Indústria & Software Engineering; Distributed Systems \\ \hline
+		\textbf{S}  & Estudos de caso e Propostas de Arquitetura & I - Case Studies \newline I - System Proposals \newline E - Opiniões sem validação & Case study; Proposal; Prototype \\ \hline
+	\end{tabular}
+\end{table}
+
+A tabela inclui os critérios de inclusão e exclusão (I/E) relacionados com cada parte da questão de investigação, bem como as possíveis sub strings utilizadas para conduzir a pesquisa nas bases de dados científicas. Apenas estudos de 2018 em diante que contemplem arquiteturas de software ou middleware para integração de dispositivos heterogéneos foram considerados.
+
 \section{Estado da Arte em Visão Computacional}
 \label{sec:estado_arte_visao}
 
