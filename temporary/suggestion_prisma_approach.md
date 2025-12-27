@@ -264,3 +264,4 @@ Este guia deve ser adaptado conforme a pesquisa avança. É normal ajustar keywo
 
 **Lembrete:** O objetivo não é ter o maior número de artigos, mas sim ter os artigos mais relevantes e de qualidade para responder à LRRQ1.
 
+

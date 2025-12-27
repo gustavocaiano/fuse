@@ -18,9 +18,9 @@ O âmbito deste projeto foi decomposto através de um \gls{WBS}. Pelo mesmo, ilu
     \item \textbf{Conclusões:} Considerações finais do projeto, incluindo a redação final da dissertação, a interpretação dos resultados e a apresentação final.
 \end{enumerate}
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
-% \includegraphics[width=\textwidth]{ch4/assets/wbs} % Placeholder
+\includegraphics[width=\textwidth]{ch4/assets/WBS.png} % Placeholder
 \caption{WBS do projeto.}
 \label{fig:wbs}
 \end{figure}
@@ -30,48 +30,62 @@ O âmbito deste projeto foi decomposto através de um \gls{WBS}. Pelo mesmo, ilu
 
 O objetivo desta secção é ilustrar e descrever a calendarização das entregas dos respetivos entregáveis mencionados anteriormente, garantindo um acompanhamento rigoroso do progresso do projeto. O planeamento temporal encontra-se representado no diagrama de Gantt, Figura \ref{fig:gantt}.
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
-% \includegraphics[width=\textwidth]{ch4/assets/gantt} % Placeholder
+\includegraphics[width=\textwidth]{ch4/assets/gantt-labeled.png} % Placeholder
 \caption{Gantt Chart do projeto.}
 \label{fig:gantt}
 \end{figure}
 
-A execução do cronograma inicia-se com um primeiro marco de controlo a 15 de dezembro de 2025. O encerramento da fase de planeamento (\gls{PREPD}) está estipulado para 7 de janeiro de 2026. O segundo grande bloco temporal, referente à unidade curricular de \gls{DIMEI}, tem como data-alvo de entrega final o dia 22 de junho de 2026.
+A execução do cronograma inicia-se com um primeiro marco de controlo a 15 de dezembro de 2025. O encerramento da fase de planeamento (\gls{PREPD}) está estipulado para 22 de janeiro de 2026. O segundo grande bloco temporal, referente à unidade curricular de \gls{DIMEI}, tem como data-alvo de entrega final o dia 22 de junho de 2026.
+
+O diagrama de Gantt ilustra a distribuição temporal das atividades ao longo de aproximadamente 220 dias úteis, desde o início do projeto em outubro de 2025 até agosto de 2026. A fase de \textbf{Planeamento e Análise}, com duração prevista de 65 dias, concentra-se nos primeiros meses do projeto e inclui a elaboração do Extended Abstract, do Project Charter, do \gls{WBS}, bem como a realização do estudo do estado da arte e a aplicação de questionários junto dos \glspl{OPC}. Esta fase culmina com a produção do próprio Gantt Chart, que depende da conclusão do \gls{WBS}.
+
+A fase de \textbf{Design}, com duração de 17 dias, inicia-se imediatamente após o término do planeamento, em janeiro de 2026. Esta fase contempla a documentação da Arquitetura de Software através das Vistas 4+1 e a modelação do Domínio, estabelecendo as bases arquiteturais para o desenvolvimento subsequente.
+
+O \textbf{Desenvolvimento}, a fase mais extensa com 85 dias de duração, estende-se de fevereiro a junho de 2026. Esta fase estrutura-se em três componentes principais que se desenvolvem de forma parcialmente paralela: as Comunicações Seguras (30 dias), a Camada de Abstração de Câmaras (30 dias) e o Módulo de Análise Automática de Vídeo (45 dias). O módulo de análise de vídeo, por sua vez, divide-se em duas etapas sequenciais: a implementação de uma pipeline bi-fásica (20 dias) seguida da evolução para uma pipeline tri-fásica (25 dias), permitindo uma abordagem incremental na integração das funcionalidades de deteção e classificação.
+
+A fase de \textbf{Testes} inicia-se em paralelo com o desenvolvimento, em abril de 2026, e prolonga-se até ao final do projeto. Esta fase compreende a execução de testes unitários e funcionais durante 43 dias, seguida de um período de validação do protótipo em ambiente real que se estende por 60 dias, permitindo a recolha de feedback dos utilizadores finais e a produção do respetivo relatório.
+
+Como se observa na Figura \ref{fig:gantt}, após a data de entrega da unidade curricular de \gls{DIMEI} a 22 de junho de 2026, ainda existe trabalho planeado que se estende até final de agosto de 2026. Esta extensão temporal deve-se ao facto de a validação do protótipo estar desde já expectada a requerer um período mais alargado do que o estipulado para o término formal da dissertação. Embora o início da fase de validação esteja previsto dentro do prazo académico, a sua conclusão completa poderá estender-se para além da data de entrega da dissertação. O feedback que for possível adquirir durante o período de validação será anexado ao relatório final, permitindo documentar os resultados obtidos e as observações recolhidas junto dos utilizadores finais, mesmo que o processo de validação se prolongue para além do término formal do trabalho académico.
 
 \section{Project Charter e Gestão de Riscos}
 \label{sec:gestao_riscos}
 
 O Project Charter constituiu o artefacto inicial deste projeto, servindo como primeiro documento para a formalização da proposta de dissertação. A Tabela \ref{tab:stakeholders} apresenta o mapeamento dos Stakeholders, classificados quanto ao seu poder de influência e nível de interesse no sucesso do projeto, utilizando como base a ``Mendelow's Matrix'' \cite{Mendelow1981}.
 
-\begin{table}[h]
+\begin{table}[H]
 \centering
 \caption{Stakeholders identificados}
 \label{tab:stakeholders}
-\begin{tabular}{|l|l|l|p{6cm}|}
-\hline
-\textbf{Nome} & \textbf{Poder} & \textbf{Interesse} & \textbf{Justificação} \\ \hline
-StabilityBubble & Alto & Alto & Entidade promotora e futura fornecedora/exploradora comercial da solução \gls{FUSE}. \\ \hline
-\glspl{OPC} & Alto & Alto & Utilizadores finais críticos; o seu feedback valida a utilidade operacional e requisitos forenses. \\ \hline
-Paulo Baltarejo Sousa & Alto & Médio & Orientação académica e validação científica da metodologia e resultados. \\ \hline
-Francisco Loureiro & Alto & Alto & Supervisão empresarial e alinhamento do produto com a estratégia de mercado. \\ \hline
-Gestores de Segurança & Médio & Médio & Potenciais clientes empresariais que beneficiam da centralização de sistemas \gls{CCTV}. \\ \hline
+\begin{tabular}{lllp{6cm}}
+\toprule
+\textbf{Nome} & \textbf{Poder} & \textbf{Interesse} & \textbf{Justificação} \\
+\midrule
+StabilityBubble & Alto & Alto & Entidade promotora e futura fornecedora/exploradora comercial da solução \gls{FUSE}. \\
+\glspl{OPC} & Alto & Alto & Utilizadores finais críticos; o seu feedback valida a utilidade operacional e requisitos forenses. \\
+Paulo Baltarejo Sousa & Alto & Médio & Orientação académica e validação científica da metodologia e resultados. \\
+Francisco Loureiro & Alto & Alto & Supervisão empresarial e alinhamento do produto com a estratégia de mercado. \\
+Gestores de Segurança & Médio & Médio & Potenciais clientes empresariais que beneficiam da centralização de sistemas \gls{CCTV}. \\
+\bottomrule
 \end{tabular}
 \end{table}
 
 Relativamente à gestão de riscos, a Tabela \ref{tab:riscos} consolida os riscos identificados, atribuindo-lhes uma probabilidade e um impacto seguindo uma escala de Likert \cite{Likert1932} de 1 a 5.
 
-\begin{table}[h]
+\begin{table}[H]
 \centering
 \caption{Identificação e gestão de riscos associados ao projeto}
 \label{tab:riscos}
-\begin{tabular}{|l|p{4cm}|p{1cm}|p{1cm}|p{1cm}|p{5cm}|}
-\hline
-\textbf{ID} & \textbf{Descrição} & \textbf{P} & \textbf{I} & \textbf{P*I} & \textbf{Resposta} \\ \hline
-1 & Indisponibilidade de Hardware (\gls{GPU}) & 3 & 4 & 12 & Mitigar: Garantir integração modular e desacoplada. \\ \hline
-2 & Incompatibilidade de Protocolos & 2 & 2 & 4 & Aceitar: Focar o \gls{MVP} na compatibilidade estrita com \gls{RTSP}. \\ \hline
-3 & Falsos Positivos na Deteção & 3 & 3 & 9 & Mitigar: Implementar sistema de ajuste de sensibilidade configurável. \\ \hline
-4 & Atraso no Cronograma & 3 & 5 & 15 & Mitigar: Adotar abordagem de desenvolvimento incremental. \\ \hline
+\begin{tabular}{lp{4cm}cccp{5cm}}
+\toprule
+\textbf{ID} & \textbf{Descrição} & \textbf{P} & \textbf{I} & \textbf{P*I} & \textbf{Resposta} \\
+\midrule
+1 & Indisponibilidade de Hardware (\gls{GPU}) & 3 & 4 & 12 & Mitigar: Garantir integração modular e desacoplada. \\
+2 & Incompatibilidade de Protocolos & 2 & 2 & 4 & Aceitar: Focar o \gls{MVP} na compatibilidade estrita com \gls{RTSP}. \\
+3 & Falsos Positivos na Deteção & 3 & 3 & 9 & Mitigar: Implementar sistema de ajuste de sensibilidade configurável. \\
+4 & Atraso no Cronograma & 3 & 5 & 15 & Mitigar: Adotar abordagem de desenvolvimento incremental. \\
+\bottomrule
 \end{tabular}
 \end{table}
 
