@@ -3,24 +3,27 @@
 \chapter{Introdução} % Main chapter title
 \label{chap:introducao}
 
-\section{Introdução e Enquadramento}
-\label{sec:enquadramento}
+\section{Contexto}
+\label{sec:contexto}
 
-No panorama atual dos sistemas de videovigilância verifica-se uma grande dependência de hardware, como \glspl{NVR} para agregar várias câmaras e disponibilizar streaming da sua imagem. A maioria destes dispositivos também possibilita o playback e exportação de vídeos gravados, sendo que alguns controlam ainda os acessos de utilizadores. A detecção de movimentos ou objetos é uma feature de apenas alguns modelos apesar de que, ultimamente, se têm verificado um grande crescimento e aposta tecnológica nesta área \cite{6491471}. Assim, os \glspl{NVR}, embora raramente reúnam individualmente todas estas funcionalidades num dispositivo só \cite{damjanovski2014cctv}, são a peça central do processo de videovigilância dentro de uma rede controlada.
+No panorama atual dos sistemas de videovigilância verifica-se uma grande dependência de hardware, como \glspl{NVR} para agregar várias câmaras e disponibilizar streaming da sua imagem. A maioria destes dispositivos também possibilita o \textit{playback} e exportação de vídeos gravados, sendo que alguns controlam ainda os acessos de utilizadores. A detecção de movimentos ou objetos é uma \textit{feature} de apenas alguns modelos apesar de que, ultimamente, se têm verificado um grande crescimento e aposta tecnológica nesta área \cite{6491471}. Assim, os \glspl{NVR}, embora raramente reúnam individualmente todas estas funcionalidades num dispositivo só \cite{damjanovski2014cctv}, são a peça central do processo de videovigilância dentro de uma rede controlada.
+
+O presente trabalho decorre em contexto empresarial, sendo acolhido pela empresa StabilityBubble, Lda. O \gls{FUSE} não se configura apenas como um exercício académico teórico, mas sim como a proposta de uma plataforma comercial destinada a responder a lacunas de mercado identificadas pela empresa. Assim, esta dissertação visa conciliar o rigor da investigação científica com os requisitos práticos e operacionais de um produto de software real, tirando partido da infraestrutura e \textit{know-how} da entidade de acolhimento.
+
+\section{Problema}
+\label{sec:problema}
 
 Em determinados cenários \cite{KISSLING2024141}, existe a impossibilidade destas câmaras serem inseridas todas numa determinada \gls{LAN} privada. Por este motivo e por estarem numa outra rede não controlada, é necessário aceder via Internet, que origina alguns problemas, tais como:
 
 \begin{itemize}
     \item Incompatibilidade entre câmaras de diferentes fornecedores, obrigando muitas vezes à utilização de mais do que um software, já que nem todas são totalmente compatíveis com a mesma aplicação.
-    \item Falta de segurança e de privacidade dos dados, uma vez que muitas destas câmaras recorrem a conexões \gls{P2P} quando acedidas fora da \gls{LAN}. Este mecanismo depende, geralmente, de servidores do fornecedor, sobre os quais não existe controlo nem garantia de proteção dos dados \cite{Nozomi2021}. Além disso, a comunicação entre a aplicação e a câmara é frequentemente pouco segura e não encriptada, expondo a stream de vídeo e as credenciais a potenciais ataques.
+    \item Falta de segurança e de privacidade dos dados, uma vez que muitas destas câmaras recorrem a conexões \gls{P2P} quando acedidas fora da \gls{LAN}. Este mecanismo depende, geralmente, de servidores do fabricante, sobre os quais não existe controlo nem garantia de proteção dos dados \cite{Nozomi2021}. Além disso, a comunicação entre a aplicação e a câmara é frequentemente pouco segura e não encriptada, expondo a stream de vídeo e as credenciais a potenciais ataques.
     \item Falta de controlo de acessos e gestão de utilizadores, pois a maior parte das aplicações de acesso remoto a \gls{CCTV} são desenvolvidas para cenários onde estas atividades não são a prioridade \cite{Ragothaman2023}, priorizando o acesso intuitivo e rápido.
 \end{itemize}
 
-Para além destas barreiras técnicas e de segurança, emerge um desafio operacional extremamente relevante, particularmente no contexto da segurança pública. Entidades como os \glspl{OPC} dependem de videovigilância para a obtenção de provas. O processo atual, contudo, assenta frequentemente na revisão humana através da visualização integral contínua das gravações efetuadas, distribuindo muitas vezes intervalos de tempo por vários agentes para que seja facilitada. Esta informação foi obtida através de um questionário/entrevista, realizado em conjunto com agentes da investigação criminal da \gls{GNR} e da \gls{PSP}, no qual o objetivo principal seria a validação da existência deste problema. O mesmo pode ser consultado no ANEXO A. Ainda assim, este processo torna-se demorado e intensivo, recorrendo a uma enorme quantidade de recursos humanos e tempo, que são valiosos e, infelizmente, escassos \cite{DN2024}.
+Para além destas barreiras técnicas e de segurança, emerge um desafio operacional extremamente relevante, particularmente no contexto da segurança pública. Entidades como os \glspl{OPC} dependem de videovigilância para a obtenção de provas. O processo atual, contudo, assenta frequentemente na revisão humana através da visualização integral contínua das gravações efetuadas, distribuindo muitas vezes intervalos de tempo por vários agentes para que seja facilitado. Esta informação foi obtida através de um questionário/entrevista, realizado em conjunto com agentes da investigação criminal da \gls{GNR} e da \gls{PSP}, no qual o objetivo principal seria a validação da existência deste problema. O mesmo pode ser consultado no \textbf{CITAR ANEXO A}. Ainda assim, este processo torna-se demorado e intensivo, recorrendo a uma enorme quantidade de recursos humanos e tempo, que são valiosos e, infelizmente, escassos \cite{DN2024}.
 
 Uma vez que estes problemas trazem insegurança e ineficiência, resolvê-los é uma preocupação do encarregado de segurança e \gls{CCTV} de uma entidade pública ou privada, tal como dos agentes encarregues pela obtenção de prova sob videovigilância dentro das polícias de investigação criminal. É neste contexto de múltiplos desafios que surge a proposta deste trabalho: o desenvolvimento do \gls{FUSE}. O \gls{FUSE} é idealizado como uma plataforma de software que centraliza e organiza sistemas de videovigilância heterogéneos e geograficamente dispersos, com um foco integrado na segurança dos dados, na automatização da análise de vídeo, e na manutenção de registos de auditoria e gestão de utilizadores.
-
-Importa ressalvar que o presente trabalho decorre em contexto empresarial, sendo acolhido pela empresa StabilityBubble, Lda. O \gls{FUSE} não se configura apenas como um exercício académico teórico, mas sim como a proposta de uma plataforma comercial destinada a responder a lacunas de mercado identificadas pela empresa. Assim, esta dissertação visa conciliar o rigor da investigação científica com os requisitos práticos e operacionais de um produto de software real, tirando partido da infraestrutura e know-how da entidade de acolhimento.
 
 \section{Pergunta de Investigação}
 \label{sec:pergunta_investigacao}
@@ -37,7 +40,7 @@ Decompondo esta pergunta para uma melhor e mais estruturada compreensão, a inve
 
 \textbf{RQ1.3:} Em que medida a integração de modelos de visão computacional para a automatização da deteção de eventos pode validar a utilização da plataforma proposta para otimização de processos de investigação criminal?
 
-A resposta à questão central de investigação (RQ1) será materializada através da implementação e validação experimental da plataforma \gls{FUSE}. Todo o processo encontra-se detalhado no capítulo 5 referente à Metodologia. No entanto, para fundamentar as decisões técnicas necessárias na implementação do \gls{MVP} analisar-se-ão as sub-questões operacionais, no capítulo 4 do Estudo do Estado da Arte.
+A resposta à questão central de investigação (RQ1) será materializada através da implementação e validação experimental da plataforma \gls{FUSE}. Todo o processo encontra-se detalhado na \autoref{sec:metodologia} referente à Metodologia. No entanto, para fundamentar as decisões técnicas necessárias na implementação do \gls{MVP} analisar-se-ão as sub-questões operacionais, no \autoref{chap:estado_da_arte}.
 
 \section{Objetivos}
 \label{sec:objetivos}
@@ -45,16 +48,71 @@ A resposta à questão central de investigação (RQ1) será materializada atrav
 Foram definidos o seguintes objetivos para o desenvolvimento e validação do \gls{FUSE}:
 
 \begin{itemize}
-    \item Desenvolver uma arquitetura de software extensível que, através de uma camada de abstração, normalize a comunicação com câmaras de diferentes fornecedores. O sistema deverá suportar um protocolo base de streaming como o \gls{RTSP} e centralizar as funcionalidades de visualização em tempo real, gravação, e playback numa interface unificada.
+    \item Desenvolver uma arquitetura de software extensível que, através de uma camada de abstração, normalize a comunicação com câmaras de diferentes fornecedores. O sistema deverá suportar um protocolo base de streaming como o \gls{RTSP} e centralizar as funcionalidades de visualização em tempo real, gravação, e \textit{playback} numa interface unificada.
     \item Implementar um modelo de comunicação seguro, Secured By Design, que utilize túneis \gls{VPN} para isolar e criptografar a comunicação entre as câmaras externas e o servidor de implementação da aplicação.
     \item Desenvolver um sistema de controlo de acessos baseado em ações (modelo \gls{ABAC}) para gerir as permissões de utilizadores de forma granular e garantir a auditoria das ações.
-    \item Integrar um módulo de análise de vídeo para a deteção automatizada de eventos complexos, implementando um pipeline de processamento progressivo em três fases:
+    \item Integrar um módulo de análise de vídeo para a deteção automatizada de eventos complexos, implementando uma \textit{pipeline} de processamento progressivo em três fases:
     \begin{itemize}
         \item Fase 1 (Deteção de Atividade): Identificação de movimento e atividade relevante nos streams de vídeo para filtrar segmentos de interesse.
         \item Fase 2 (Classificação de Objetos): Análise dos segmentos filtrados para detectar e classificar objetos de categorias pré-definidas (e.g., humanos, veículos, animais).
         \item Fase 3 (Extração de Atributos): Análise aprofundada dos objetos classificados para extrair características específicas e customizáveis, como matrículas e cores de veículos, ou atributos de vestuário e acessórios de pessoas, que servirão de base para a pesquisa de eventos complexos.
     \end{itemize}
-    \item Validar a viabilidade da arquitetura através de um protótipo funcional (\gls{MVP}) que demonstre a integração bem-sucedida de, no mínimo, duas/três (DECIDIR AINDA) câmaras tecnologicamente diferentes, a segurança da comunicação e a eficácia da deteção de eventos num cenário simulado, pelo menos até à Fase 2 anteriormente mencionada.
+    \item Validar a viabilidade da arquitetura através de um protótipo funcional (\gls{MVP}) que demonstre a integração bem-sucedida de, no mínimo, duas câmaras tecnologicamente diferentes, a segurança da comunicação e a eficácia da deteção de eventos num cenário simulado, pelo menos até à Fase 2 anteriormente mencionada.
 \end{itemize}
 
 Quanto aos principais contributos deste trabalho, espera-se que do ponto de vista técnico-científico surja uma arquitetura referência para integração segura e inteligente de sistemas \gls{CCTV} distribuídos, principalmente quando há a presença de interoperabilidade entre redes não controladas e controladas. Por outro lado, do ponto de vista social e operacional, tenciona-se validar a ferramenta para que esta possa vir a aumentar significativamente a eficiência e eficácia da investigação criminal dos \gls{OPC}, otimizando a alocação de recursos e reduzindo o tempo de análise manual do vídeo.
+
+
+\section{Metodologia}
+\label{sec:metodologia}
+
+A metodologia adotada para a realização deste trabalho académico baseia-se no modelo de ``Research Process'' proposto por B. J. Oates no livro ``Researching Information Systems and Computing'' \cite{Oates2006}, ilustrado na Figura \ref{fig:research_process}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{ch3/assets/research-process.png}
+\caption{Diagrama de ''Research Process'' de B. J. Oates \cite{Oates2006}, aplicado ao contexto do projeto.}
+\label{fig:research_process}
+\end{figure}
+
+O ponto de partida da investigação enquadra-se em ``\textbf{Experiences and motivation}'', dado que a génese deste projeto deriva diretamente da observação da ineficiência e limitações técnicas enfrentadas pelos \glspl{OPC} e gestores de segurança na recolha de imagens de \gls{CCTV}. Através de feedback adquirido através de questionários e entrevistas com Núcleos (\gls{GNR}) e Esquadras (\gls{PSP}) de Investigação Criminal (Anexo A), estes problemas são confirmados e registrados. Complementarmente, é realizada uma revisão de literatura preliminar para compreender o estado da arte em protocolos de comunicação e visão computacional. Esta análise permitiu identificar a ausência de soluções integradas que garantam simultaneamente segurança em redes hostis e inteligência analítica avançada. A junção desta necessidade prática (experiência) com a identificação desta lacuna teórica (literatura) resultou na formalização das perguntas de investigação apresentadas anteriormente.
+
+A estratégia central adotada para este trabalho é a de ``\textbf{Design and Creation}''. Esta abordagem é a mais adequada para projetos de Engenharia de Software cujo objetivo primário é o desenvolvimento de um protótipo que visa resolver muitos dos problemas práticos observados e identificados em determinado cenário, como forma de validação de futura implementação ou desenvolvimento de algo mais avançado. Dentro desta estratégia inserem-se quatro principais passos, nomeadamente Design, Desenvolvimento, Testes e Conclusões.
+
+Relativamente aos resultados e à sua avaliação, será usado o método de ``\textbf{Interviews}'' com utilizadores finais, sendo estes \glspl{OPC} ou encarregados de segurança de uma outra entidade, de modo a recolher feedback e validação do funcionamento do protótipo e respetiva utilidade do mesmo. Em adição, será também usado o método de ``\textbf{Observation}'', onde se poderá obter e quantificar resultados e taxas de correspondência na análise automática de eventos e objetos.
+
+Quanto à análise de dados, optou-se por uma abordagem mista que integra os dois métodos disponíveis: ``\textbf{Quantitative}'' e ``\textbf{Qualitative}''. A análise quantitativa incidirá sobre as métricas técnicas recolhidas durante os testes do protótipo, tais como as taxas de precisão e alerta na deteção e classificação de objetos (Fase 2 e 3 da pipeline), a latência do streaming via túnel \gls{VPN}, os tempos de processamento da análise de vídeo, entre outros. Já a análise qualitativa será aplicada à interpretação do feedback dos utilizadores e das observações de cenário real, avaliando o impacto operacional da ferramenta, a eficácia percebida na redução do tempo de investigação e a adequação da interface aos processos de trabalho dos \glspl{OPC}.
+
+
+\section{Considerações Éticas}
+\label{sec:etica}
+
+A realização deste trabalho rege-se pelos princípios de integridade, responsabilidade e rigor científico descritos no Código de Boas Práticas e de Conduta do P.PORTO \cite{PPORTO2020}.
+
+Do ponto de vista profissional, o trabalho enquadra-se nos princípios estruturantes da engenharia de software, alinhados com referências internacionais como o Software Engineering Code of Ethics and Professional Practice, desenvolvido em conjunto pela \gls{ACM} e pela \gls{IEEE-CS} \cite{ACM_Ethics}. A conformidade com estes princípios garante a qualidade e segurança dos sistemas desenvolvidos, a responsabilidade perante clientes e utilizadores, e a honestidade na comunicação de resultados, limitações e riscos associados às soluções tecnológicas.
+
+O \gls{FUSE} envolve uma \textit{pipeline} de análise automática aplicada a contextos de videovigilância, potencialmente incidindo sobre a obtenção de dados pessoais identificáveis. Estes dados sensíveis apenas serão obtidos num contexto de validação do \gls{MVP} em cenário real, que estará sempre salvaguardado por requerimento de despacho judicial para fornecimento de meios técnicos e respetiva autorização de captação de imagem. Ainda assim, a pipeline é desenhada em estrita observância do EU AI Act \cite{EU_AI_Act}, garantindo que o sistema não incorre em ''Unacceptable risks''. 
+
+O sistema não se destina, nem permite, práticas proibidas tais como:
+
+\begin{itemize}
+    \item \textit{Social scoring} ou manipulação comportamental;
+    \item Recolha indiscriminada (untargeted scraping) de imagens de \gls{CCTV} para criação de bases de dados de reconhecimento facial;
+    \item Identificação biométrica remota em tempo real em espaços públicos para fins policiais (real-time remote biometric identification).
+\end{itemize}
+
+No âmbito do último ponto, apesar do alvo ser legislar o reconhecimento biométrico em tempo-real, justifica-se a conformidade pela natureza da análise automática, que será realizada sob gravações dos eventos, e não sob o próprio streaming.
+
+A análise focada na ``Fase 3'' da pipeline de deteção automática restringe-se à classificação de características objetivas (e.g., cor de vestuário, tipo de veículo) para auxiliar a pesquisa forense, mantendo sempre o princípio da validação humana, onde a decisão final cabe ao agente humano e não ao algoritmo.
+
+
+\section{Estrutura do Documento}
+\label{sec:estrutura_documento}
+
+Este documento está organizado em capítulos que apresentam de forma estruturada o trabalho desenvolvido. O \autoref{chap:introducao} (\nameref{chap:introducao}) apresenta o contexto do problema, as questões de investigação, os objetivos, as considerações éticas, a metodologia adotada e a estrutura do documento.
+
+O \autoref{chap:estado_da_arte} (\nameref{chap:estado_da_arte}) apresenta uma revisão sistemática da literatura sobre arquiteturas de abstração e interoperabilidade de dispositivos \gls{IoT}, protocolos de comunicação segura e visão computacional, respondendo às sub-questões de investigação operacionais.
+
+O \autoref{chap:planeamento} (\nameref{chap:planeamento}) descreve o âmbito do projeto através de um \gls{WBS}, apresenta o cronograma de execução através de um diagrama de Gantt e identifica os stakeholders e riscos do projeto.
+
+O documento inclui ainda uma secção de Bibliografia com todas as referências utilizadas e um Anexo A que contém o questionário e entrevistas realizadas junto dos \glspl{OPC}.
