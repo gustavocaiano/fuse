@@ -60,6 +60,22 @@ A questão de investigação foi estruturada de acordo com o modelo PICOCS apres
 
 A tabela inclui os critérios de inclusão e exclusão (I/E) relacionados com cada parte da questão de investigação, bem como as possíveis \textit{sub-strings} utilizadas para conduzir a pesquisa nas bases de dados científicas. Apenas estudos de 2018 em diante que contemplem arquiteturas de software ou middleware para integração de dispositivos heterogéneos foram considerados.
 
+A pesquisa foi conduzida em três bases de dados principais: IEEE Xplore (282 registos), ACM Digital Library (94 registos) e ScienceDirect (59 registos), totalizando 435 registos identificados através de pesquisa sistemática. Adicionalmente, foi identificado 1 registo através de outras fontes (tese de repositório universitário - UFU), resultando num total de 436 registos na fase de identificação. 
+
+Após a remoção de duplicados (1 registo), foram analisados 435 registos na fase de screening através da leitura de títulos e resumos. Desta análise, 412 registos foram excluídos por não cumprirem os critérios de inclusão, nomeadamente por focarem-se puramente em algoritmos de visão computacional sem arquitetura de sistema, abordarem domínios como agricultura ou saúde sem componente de vídeo, ou simplemsmente não se adequar ao tema de integração de dispositivos \gls{IoT} ou de camadas de abstração em design de software. Os 23 registos restantes foram avaliados em texto completo, dos quais 12 foram excluídos por falta de detalhes de implementação, ausência de diagrama de arquitetura claro, ou por serem propostas teóricas sem validação prática. O processo resultou na inclusão final de 11 estudos na revisão qualitativa, conforme ilustrado na Figura \ref{fig:lrrq1_prisma}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{ch2/assets/LRRQ1-prisma.png}
+\caption{Fluxo PRISMA para a LRRQ1}
+\label{fig:lrrq1_prisma}
+\end{figure}
+
+O rigor na filtragem aplicada, reduzindo de 435 para 11 estudos incluídos, garantiu que apenas trabalhos com arquiteturas de sistema relevantes, detalhadas e validadas fossem analisados, assegurando a qualidade e relevância da revisão de literatura para fundamentar as decisões arquiteturais do \gls{FUSE}.
+
+
+\subsection{Discussion}
+
 \section{LRRQ2 - Protocolos de Comunicação Segura e VPN}
 \label{sec:lrrq2_vpn}
 
