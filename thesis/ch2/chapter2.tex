@@ -60,7 +60,7 @@ A questão de investigação foi estruturada de acordo com o modelo PICOCS apres
 
 A tabela inclui os critérios de inclusão e exclusão (I/E) relacionados com cada parte da questão de investigação, bem como as possíveis \textit{sub-strings} utilizadas para conduzir a pesquisa nas bases de dados científicas. Apenas estudos de 2018 em diante que contemplem arquiteturas de software ou middleware para integração de dispositivos heterogéneos foram considerados.
 
-A pesquisa foi conduzida em três bases de dados principais: IEEE Xplore (282 registos), ACM Digital Library (94 registos) e ScienceDirect (59 registos), totalizando 435 registos identificados através de pesquisa sistemática. Adicionalmente, foi identificado 1 registo através de outras fontes (tese de repositório universitário - UFU), resultando num total de 436 registos na fase de identificação. 
+A pesquisa foi conduzida em três bases de dados principais: IEEE Xplore (282 registos), ACM Digital Library (94 registos) e ScienceDirect (59 registos), totalizando 435 registos identificados através de pesquisa sistemática. Adicionalmente, foi identificado 1 registo \cite{resende_sistema_2025} através de outras fontes, resultando num total de 436 registos na fase de identificação. 
 
 Após a remoção de duplicados (1 registo), foram analisados 435 registos na fase de screening através da leitura de títulos e resumos. Desta análise, 412 registos foram excluídos por não cumprirem os critérios de inclusão, nomeadamente por focarem-se puramente em algoritmos de visão computacional sem arquitetura de sistema, abordarem domínios como agricultura ou saúde sem componente de vídeo, ou simplemsmente não se adequar ao tema de integração de dispositivos \gls{IoT} ou de camadas de abstração em design de software. Os 23 registos restantes foram avaliados em texto completo, dos quais 12 foram excluídos por falta de detalhes de implementação, ausência de diagrama de arquitetura claro, ou por serem propostas teóricas sem validação prática. O processo resultou na inclusão final de 11 estudos na revisão qualitativa, conforme ilustrado na Figura \ref{fig:lrrq1_prisma}.
 
@@ -105,10 +105,24 @@ A questão de investigação foi estruturada de acordo com o modelo PICOCS apres
 
 A tabela inclui os critérios de inclusão e exclusão (I/E) relacionados com cada parte da questão de investigação, bem como as possíveis \textit{sub-strings} utilizadas para conduzir a pesquisa nas bases de dados científicas. Apenas estudos de 2018 em diante que contemplem protocolos de comunicação segura, \glspl{VPN} ou mecanismos de túnel para acesso remoto e \textit{streaming} foram considerados.
 
+
+A pesquisa foi conduzida em três bases de dados principais: IEEE Xplore (62 registos), ACM Digital Library (15 registos) e ScienceDirect (2 registos), totalizando 79 registos identificados através de pesquisa sistemática. Adicionalmente, foi identificado 1 registo através de outras fontes, o mesmo identificado para a outra questão \cite{resende_sistema_2025}, resultando num total de 80 registos na fase de identificação.
+
+Após a verificação de duplicados, não foram encontrados registos duplicados, mantendo-se os 80 registos para análise na fase de screening através da leitura de títulos e resumos. Desta análise, 52 registos foram excluídos por não cumprirem os critérios de inclusão, nomeadamente por serem irrelevantes para o tema de \glspl{VPN}, protocolos seguros ou por falta de foco em acesso remoto. Os 28 registos restantes foram avaliados em texto completo, dos quais 9 foram excluídos por tecnologia obsoleta, falta de detalhes de implementação ou por estarem fora do âmbito do estudo. O processo resultou na inclusão final de 19 estudos na revisão qualitativa, conforme ilustrado na Figura \ref{fig:lrrq2_prisma}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{ch2/assets/LRRQ2-prisma.png}
+\caption{Fluxo PRISMA para a LRRQ2}
+\label{fig:lrrq2_prisma}
+\end{figure}
+
+O rigor na filtragem aplicada, reduzindo de 80 para 19 estudos incluídos, garantiu que apenas trabalhos com protocolos de comunicação segura relevantes, detalhados e validadas fossem analisados. Comparativamente à LRRQ1, que identificou 435 registos resultando em 11 estudos incluídos (2,5\% de taxa de aproveitamento), a presente questão apresentou uma taxa de aproveitamento significativamente superior (23,8\%), indicando que a literatura sobre protocolos de comunicação segura e \glspl{VPN} apresenta uma maior concentração de artigos com conteúdo interessante e utilizável para fundamentar as decisões de segurança e comunicação do \gls{FUSE}.
+
 \section{Estado da Arte em Visão Computacional}
 \label{sec:estado_arte_visao}
 
-Relativamente à terceira sub-questão, a RQ1.3, referente à automatização da análise de vídeo, optou-se por uma abordagem de Revisão Narrativa e Exploratória, como descrita por Maria J. Grant e Andrew Booth em \cite{Grant2009} como ``State-of-the-art review''. Esta modalidade metodológica caracteriza-se pela sua flexibilidade na análise crítica da literatura atual, permitindo identificar conceitos-chave, padrões arquiteturais e soluções técnicas emergentes sem a rigidez protocolar de uma revisão sistemática e formal.
+Relativamente à terceira sub-questão, a RQ1.3, referente à automatização da análise de vídeo, optou-se por uma abordagem de Revisão Narrativa e Exploratória, como descrita por Maria J. Grant e Andrew Booth em \cite{Grant2009} como ''State-of-the-art review''. Esta modalidade metodológica caracteriza-se pela sua flexibilidade na análise crítica da literatura atual, permitindo identificar conceitos-chave, padrões arquiteturais e soluções técnicas emergentes sem a rigidez protocolar de uma revisão sistemática e formal.
 
 Esta opção justifica-se pela vertiginosa evolução dos modelos de \gls{AI} e pela necessidade de analisar não apenas literatura académica clássica, mas também documentação técnica de modelos recentes e \textit{benchmarks} da indústria. A análise encontra-se segmentada em três domínios fundamentais que correspondem às fases da pipeline de processamento proposta para o \gls{FUSE}:
 
