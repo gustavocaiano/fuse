@@ -978,3 +978,423 @@ parent={},%
 %
 }%
 
+\glsdefs@newdocentry{SOA}%
+{%
+name={\acronymfont {\glsentryshort {SOA}}},%
+sort={SOA},%
+type={acronym},%
+first={SOA},%
+firstplural={SOAs},%
+text={SOA},%
+plural={SOAs},%
+description={Service-Oriented Architecture},%
+descriptionplural={Service-Oriented Architecture},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Service-Oriented Architecture},%
+longplural={Service-Oriented Architectures},%
+short={SOA},%
+shortplural={SOAs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{HTTP}%
+{%
+name={\acronymfont {\glsentryshort {HTTP}}},%
+sort={HTTP},%
+type={acronym},%
+first={HTTP},%
+firstplural={HTTPs},%
+text={HTTP},%
+plural={HTTPs},%
+description={Hypertext Transfer Protocol},%
+descriptionplural={Hypertext Transfer Protocol},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Hypertext Transfer Protocol},%
+longplural={Hypertext Transfer Protocols},%
+short={HTTP},%
+shortplural={HTTPs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{MQTT}%
+{%
+name={\acronymfont {\glsentryshort {MQTT}}},%
+sort={MQTT},%
+type={acronym},%
+first={MQTT},%
+firstplural={MQTTs},%
+text={MQTT},%
+plural={MQTTs},%
+description={Message Queuing Telemetry Transport},%
+descriptionplural={Message Queuing Telemetry Transport},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Message Queuing Telemetry Transport},%
+longplural={Message Queuing Telemetry Transports},%
+short={MQTT},%
+shortplural={MQTTs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{CoAP}%
+{%
+name={\acronymfont {\glsentryshort {CoAP}}},%
+sort={CoAP},%
+type={acronym},%
+first={CoAP},%
+firstplural={CoAPs},%
+text={CoAP},%
+plural={CoAPs},%
+description={Constrained Application Protocol},%
+descriptionplural={Constrained Application Protocol},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Constrained Application Protocol},%
+longplural={Constrained Application Protocols},%
+short={CoAP},%
+shortplural={CoAPs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{REST}%
+{%
+name={\acronymfont {\glsentryshort {REST}}},%
+sort={REST},%
+type={acronym},%
+first={REST},%
+firstplural={RESTs},%
+text={REST},%
+plural={RESTs},%
+description={Representational State Transfer},%
+descriptionplural={Representational State Transfer},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Representational State Transfer},%
+longplural={Representational State Transfers},%
+short={REST},%
+shortplural={RESTs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{WiFi}%
+{%
+name={\acronymfont {\glsentryshort {WiFi}}},%
+sort={WiFi},%
+type={acronym},%
+first={WiFi},%
+firstplural={WiFis},%
+text={WiFi},%
+plural={WiFis},%
+description={Wireless Fidelity},%
+descriptionplural={Wireless Fidelity},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Wireless Fidelity},%
+longplural={Wireless Fidelitys},%
+short={WiFi},%
+shortplural={WiFis},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{WebRTC}%
+{%
+name={\acronymfont {\glsentryshort {WebRTC}}},%
+sort={WebRTC},%
+type={acronym},%
+first={WebRTC},%
+firstplural={WebRTCs},%
+text={WebRTC},%
+plural={WebRTCs},%
+description={Web Real-Time Communication},%
+descriptionplural={Web Real-Time Communication},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Web Real-Time Communication},%
+longplural={Web Real-Time Communications},%
+short={WebRTC},%
+shortplural={WebRTCs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{HLS}%
+{%
+name={\acronymfont {\glsentryshort {HLS}}},%
+sort={HLS},%
+type={acronym},%
+first={HLS},%
+firstplural={HLSs},%
+text={HLS},%
+plural={HLSs},%
+description={HTTP Live Streaming},%
+descriptionplural={HTTP Live Streaming},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={HTTP Live Streaming},%
+longplural={HTTP Live Streamings},%
+short={HLS},%
+shortplural={HLSs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{5G}%
+{%
+name={\acronymfont {\glsentryshort {5G}}},%
+sort={5G},%
+type={acronym},%
+first={5G},%
+firstplural={5Gs},%
+text={5G},%
+plural={5Gs},%
+description={5th Generation},%
+descriptionplural={5th Generation},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={5th Generation},%
+longplural={5th Generations},%
+short={5G},%
+shortplural={5Gs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{TSN}%
+{%
+name={\acronymfont {\glsentryshort {TSN}}},%
+sort={TSN},%
+type={acronym},%
+first={TSN},%
+firstplural={TSNs},%
+text={TSN},%
+plural={TSNs},%
+description={Time-Sensitive Networking},%
+descriptionplural={Time-Sensitive Networking},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Time-Sensitive Networking},%
+longplural={Time-Sensitive Networkings},%
+short={TSN},%
+shortplural={TSNs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{QoS}%
+{%
+name={\acronymfont {\glsentryshort {QoS}}},%
+sort={QoS},%
+type={acronym},%
+first={QoS},%
+firstplural={QoSs},%
+text={QoS},%
+plural={QoSs},%
+description={Quality of Service},%
+descriptionplural={Quality of Service},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Quality of Service},%
+longplural={Quality of Services},%
+short={QoS},%
+shortplural={QoSs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{Kubernetes}%
+{%
+name={\acronymfont {\glsentryshort {Kubernetes}}},%
+sort={Kubernetes},%
+type={acronym},%
+first={Kubernetes},%
+firstplural={Kubernetess},%
+text={Kubernetes},%
+plural={Kubernetess},%
+description={Kubernetes Container Orchestration Platform},%
+descriptionplural={Kubernetes Container Orchestration Platform},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Kubernetes Container Orchestration Platform},%
+longplural={Kubernetes Container Orchestration Platforms},%
+short={Kubernetes},%
+shortplural={Kubernetess},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{LDF}%
+{%
+name={\acronymfont {\glsentryshort {LDF}}},%
+sort={LDF},%
+type={acronym},%
+first={LDF},%
+firstplural={LDFs},%
+text={LDF},%
+plural={LDFs},%
+description={Low-level Data Fusion},%
+descriptionplural={Low-level Data Fusion},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Low-level Data Fusion},%
+longplural={Low-level Data Fusions},%
+short={LDF},%
+shortplural={LDFs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{IAL}%
+{%
+name={\acronymfont {\glsentryshort {IAL}}},%
+sort={IAL},%
+type={acronym},%
+first={IAL},%
+firstplural={IALs},%
+text={IAL},%
+plural={IALs},%
+description={Information Abstraction Layer},%
+descriptionplural={Information Abstraction Layer},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Information Abstraction Layer},%
+longplural={Information Abstraction Layers},%
+short={IAL},%
+shortplural={IALs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{PME}%
+{%
+name={\acronymfont {\glsentryshort {PME}}},%
+sort={PME},%
+type={acronym},%
+first={PME},%
+firstplural={PMEs},%
+text={PME},%
+plural={PMEs},%
+description={Pequenas e Médias Empresas},%
+descriptionplural={Pequenas e Médias Empresas},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Pequenas e Médias Empresas},%
+longplural={Pequenas e Médias Empresass},%
+short={PME},%
+shortplural={PMEs},%
+counter={page},%
+parent={},%
+%
+}%
+

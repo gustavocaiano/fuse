@@ -73,8 +73,36 @@ Após a remoção de duplicados (1 registo), foram analisados 435 registos na fa
 
 O rigor na filtragem aplicada, reduzindo de 435 para 11 estudos incluídos, garantiu que apenas trabalhos com arquiteturas de sistema relevantes, detalhadas e validadas fossem analisados, assegurando a qualidade e relevância da revisão de literatura para fundamentar as decisões arquiteturais do \gls{FUSE}.
 
+\subsection{Discussão}
 
-\subsection{Discussion}
+A análise dos 11 estudos incluídos revela uma convergência clara na literatura: a integração direta de dispositivos \gls{IoT} heterogéneos sem uma camada intermediária resulta em sistemas monolíticos e de difícil manutenção.A diversidade de protocolos (\gls{RTSP}, \gls{HTTP}, \gls{MQTT}), algoritmos de codificação de vídeo (H.264, H.265, MJPEG) e especificidades de fabricantes exige, invariavelmente a implementação de uma camada de abstração que atue como tradutor universal. Como observa \cite{mesmoudi_design_2018}, a ausência desta camada força o sistema central a lidar com a complexidade de hardware, violando princípios de desacoplamento. A literatura valida que a solução reside numa arquitetura que isole a lógica de negócio das particularidades dos dispositivos.
+
+\subsubsection{Padrões Arquiteturais: De Gateways a Microserviços Agnósticos}
+
+A evolução dos padrões arquiteturais na literatura aponta para um distanciamento de \textit{gateways }simples em direção a microserviços inteligentes. Inicialmente, soluções como o IoTM2B \cite{barros_iot_2019} e Smart Gateway \cite{mesmoudi_design_2018} validaram o uso de um ponto central para tradução de protocolos (ex: converter \gls{MQTT}/\gls{CoAP} para \gls{HTTP}). No entanto, \cite{barros_iot_2019} identifica uma limitação crítica: a normalização para \gls{HTTP} POST, embora eficaz para telemetria escalar (temperatura), introduz um gargalo de desempenho inaceitável para \textit{streaming} de vídeo contínuo.
+
+A resposta a esta limitação encontra-se na adoção de microserviços com o padrão \textit{Mediator}, como proposto por \cite{dobaj_microservice_2018}. Esta abordagem introduz uma Camada de Abstração de Dados dedicada que desacopla a lógica de serviço da comunicação com o dispositivo. Mais relevante para o conceito do \gls{FUSE} é a introdução do padrão ``Access Mapper'' ou ``Digital Twin'' por \cite{mafamane_study_2021}. Neste modelo, a aplicação central interage exclusivamente com um ``Dispositivo Virtual'' estandardizado, tornando-se completamente agnóstica ao hardware físico. Este é o fundamento teórico para um componente da solução a desenvolver, ou seja, uma camada que encapsula a complexidade do driver proprietário e expõe uma interface limpa e uniforme.
+
+\subsubsection{Abstração de Media e Normalização de Streaming}
+
+A abstração em sistemas de videovigilância exige também a normalização do próprio fluxo de vídeo. A conexão direta entre uma aplicação web e câmaras de vigilância apresenta desafios técnicos significativos devido à natureza dos fluxos de vídeo brutos e algoritmos de codificação de vídeo utilizados. A literatura, nomeadamente \cite{schwarzer_ial_2021}, suporta a implementação de uma camada intermédia responsável pela ingestão e gestão destes fluxos, expondo-os posteriormente num formato standardizado e otimizado para consumo web (como \gls{HLS} ou \gls{WebRTC}).
+
+Esta abordagem desacopla a aplicação cliente da complexidade de conexão direta às câmaras: o cliente consome sempre um fluxo normalizado a partir da camada de abstração. Embora \cite{schwarzer_ial_2021} e \cite{barra_exploring_2024} discutam também o processamento semântico destes fluxos na Edge (análise de vídeo), este tópico específico de automação e visão computacional será aprofundado na Secção \ref{sec:estado_arte_visao}. Para a LRRQ1, o contributo essencial é a arquitetura que garante a estabilidade e abstração do \textit{streaming}.
+
+\subsubsection{Escalabilidade e Adaptabilidade à Rede}
+
+A viabilidade futura do sistema depende da sua capacidade de escalar para novos dispositivos e adaptar-se a redes instáveis. \cite{mesmoudi_design_2018} demonstra a importância do \textit{ThingDiscovery} automatizado para detetar novas câmaras sem configuração manual, um requisito essencial para a usabilidade. No que toca à rede, \cite{george_distributed_2019} introduz o conceito vital de ``Latency-Accuracy Trade-off'', onde o middleware ajusta dinamicamente parâmetros (como resolução) face à congestão da rede. A validação empírica desta topologia distribuída é fornecida por \cite{gomez_strategies_2023}, que comprova uma redução de latência de até 98\% em arquiteturas Edge Computing comparativamente à Cloud pura para serviços críticos. Adicionalmente, \cite{immich_multi-tier_2019} demonstra as vantagens de uma arquitetura baseada em cadeias de módulos independentes. Esta modularidade permite que componentes distintos (como a ingestão de vídeo, a transcodificação e a análise) operem de forma independente e encadeada. Para o \gls{FUSE}, isto significa que é possível atualizar ou substituir módulos individuais sem comprometer a estabilidade do sistema base.
+
+\subsubsection{Análise Crítica}
+
+Apesar da diversidade de soluções, a revisão identifica lacunas relevantes para o contexto do \gls{FUSE}. Primeiro, a maioria das arquiteturas foca-se em telemetria (sensores), negligenciando os requisitos específicos de largura de banda do vídeo \cite{barros_iot_2019}. Segundo, embora existam padrões sintáticos, \cite{muniz_pragmatic_2019} alerta para a falta de ``Interoperabilidade Pragmática'', ou seja, a capacidade dos dispositivos comunicarem a intenção do dado (ex: urgência de um alerta) e não apenas o conteúdo.
+
+O trabalho de \cite{resende_sistema_2025} valida a viabilidade de usar plataformas open-source como o ZoneMinder para orquestrar estes fluxos em hardware modesto, atuando como um middleware de abstração eficaz. No entanto, o estudo alerta para os limites de performance quando se tenta realizar processamento analítico pesado no mesmo \textit{node}, reforçando a necessidade de uma arquitetura eficiente e distribuída.
+
+\subsubsection{Conclusão}
+
+A revisão da literatura fundamenta, de forma inequívoca, que a arquitetura do \gls{FUSE} deve assentar numa \textbf{Camada de Abstração Modular localizada}. Esta camada tem como responsabilidades críticas: (1) normalizar a comunicação com dispositivos heterogéneos para uma interface agnóstica \cite{barros_iot_2019,mesmoudi_design_2018}, (2) abstrair a complexidade do hardware físico através de representações virtuais \cite{mafamane_study_2021}, e (3) garantir a gestão unificada do \textit{streaming} de vídeo \cite{schwarzer_ial_2021}. A adoção de uma estrutura modular, em detrimento de uma abordagem monolítica rígida, assegura que o sistema possa acomodar novos protocolos e dispositivos futuramente \cite{dobaj_microservice_2018}, garantindo que a aplicação central permaneça desacoplada da volatilidade do hardware e assegurando a sua escalabilidade a longo prazo.
+
 
 \section{LRRQ2 - Protocolos de Comunicação Segura e VPN}
 \label{sec:lrrq2_vpn}
