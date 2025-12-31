@@ -1566,3 +1566,59 @@ parent={},%
 %
 }%
 
+\glsdefs@newdocentry{DPI}%
+{%
+name={\acronymfont {\glsentryshort {DPI}}},%
+sort={DPI},%
+type={acronym},%
+first={DPI},%
+firstplural={DPIs},%
+text={DPI},%
+plural={DPIs},%
+description={Deep Packet Inspection},%
+descriptionplural={Deep Packet Inspection},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Deep Packet Inspection},%
+longplural={Deep Packet Inspections},%
+short={DPI},%
+shortplural={DPIs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{SaaS}%
+{%
+name={\acronymfont {\glsentryshort {SaaS}}},%
+sort={SaaS},%
+type={acronym},%
+first={SaaS},%
+firstplural={SaaSs},%
+text={SaaS},%
+plural={SaaSs},%
+description={Software as a Service},%
+descriptionplural={Software as a Service},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Software as a Service},%
+longplural={Software as a Services},%
+short={SaaS},%
+shortplural={SaaSs},%
+counter={page},%
+parent={},%
+%
+}%
+

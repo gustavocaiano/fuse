@@ -101,11 +101,9 @@
 \glossaryentry{SBC?\glossentry{SBC}|setentrycounter[]{page}"\glsnumberformat}{15}
 \glossaryentry{NVR?\glossentry{NVR}|setentrycounter[]{page}"\glsnumberformat}{15}
 \glossaryentry{FUSE?\glossentry{FUSE}|setentrycounter[]{page}"\glsnumberformat}{16}
-\glossaryentry{PRISMA?\glossentry{PRISMA}|setentrycounter[]{page}"\glsnumberformat}{16}
-\glossaryentry{VPN?\glossentry{VPN}|setentrycounter[]{page}"\glsnumberformat}{16}
+\glossaryentry{DPI?\glossentry{DPI}|setentrycounter[]{page}"\glsnumberformat}{16}
 \glossaryentry{FUSE?\glossentry{FUSE}|setentrycounter[]{page}"\glsnumberformat}{16}
-\glossaryentry{P2P?\glossentry{P2P}|setentrycounter[]{page}"\glsnumberformat}{16}
-\glossaryentry{VPN?\glossentry{VPN}|setentrycounter[]{page}"\glsnumberformat}{16}
+\glossaryentry{PRISMA?\glossentry{PRISMA}|setentrycounter[]{page}"\glsnumberformat}{16}
 \glossaryentry{UDP?\glossentry{UDP}|setentrycounter[]{page}"\glsnumberformat}{16}
 \glossaryentry{P2P?\glossentry{P2P}|setentrycounter[]{page}"\glsnumberformat}{16}
 \glossaryentry{VPN?\glossentry{VPN}|setentrycounter[]{page}"\glsnumberformat}{16}
@@ -113,8 +111,9 @@
 \glossaryentry{FUSE?\glossentry{FUSE}|setentrycounter[]{page}"\glsnumberformat}{16}
 \glossaryentry{SBC?\glossentry{SBC}|setentrycounter[]{page}"\glsnumberformat}{16}
 \glossaryentry{VPN?\glossentry{VPN}|setentrycounter[]{page}"\glsnumberformat}{16}
-\glossaryentry{AI?\glossentry{AI}|setentrycounter[]{page}"\glsnumberformat}{16}
-\glossaryentry{FUSE?\glossentry{FUSE}|setentrycounter[]{page}"\glsnumberformat}{16}
+\glossaryentry{SaaS?\glossentry{SaaS}|setentrycounter[]{page}"\glsnumberformat}{16}
+\glossaryentry{AI?\glossentry{AI}|setentrycounter[]{page}"\glsnumberformat}{17}
+\glossaryentry{FUSE?\glossentry{FUSE}|setentrycounter[]{page}"\glsnumberformat}{17}
 \glossaryentry{VLM?\glossentry{VLM}|setentrycounter[]{page}"\glsnumberformat}{17}
 \glossaryentry{YOLO?\glossentry{YOLO}|setentrycounter[]{page}"\glsnumberformat}{17}
 \glossaryentry{CNN?\glossentry{CNN}|setentrycounter[]{page}"\glsnumberformat}{17}
