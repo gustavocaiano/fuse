@@ -1398,3 +1398,171 @@ parent={},%
 %
 }%
 
+\glsdefs@newdocentry{CGNAT}%
+{%
+name={\acronymfont {\glsentryshort {CGNAT}}},%
+sort={CGNAT},%
+type={acronym},%
+first={CGNAT},%
+firstplural={CGNATs},%
+text={CGNAT},%
+plural={CGNATs},%
+description={Carrier-Grade NAT},%
+descriptionplural={Carrier-Grade NAT},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Carrier-Grade NAT},%
+longplural={Carrier-Grade NATs},%
+short={CGNAT},%
+shortplural={CGNATs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{ISP}%
+{%
+name={\acronymfont {\glsentryshort {ISP}}},%
+sort={ISP},%
+type={acronym},%
+first={ISP},%
+firstplural={ISPs},%
+text={ISP},%
+plural={ISPs},%
+description={Internet Service Provider},%
+descriptionplural={Internet Service Provider},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Internet Service Provider},%
+longplural={Internet Service Providers},%
+short={ISP},%
+shortplural={ISPs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{TCP}%
+{%
+name={\acronymfont {\glsentryshort {TCP}}},%
+sort={TCP},%
+type={acronym},%
+first={TCP},%
+firstplural={TCPs},%
+text={TCP},%
+plural={TCPs},%
+description={Transmission Control Protocol},%
+descriptionplural={Transmission Control Protocol},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Transmission Control Protocol},%
+longplural={Transmission Control Protocols},%
+short={TCP},%
+shortplural={TCPs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{UDP}%
+{%
+name={\acronymfont {\glsentryshort {UDP}}},%
+sort={UDP},%
+type={acronym},%
+first={UDP},%
+firstplural={UDPs},%
+text={UDP},%
+plural={UDPs},%
+description={User Datagram Protocol},%
+descriptionplural={User Datagram Protocol},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={User Datagram Protocol},%
+longplural={User Datagram Protocols},%
+short={UDP},%
+shortplural={UDPs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{SSL}%
+{%
+name={\acronymfont {\glsentryshort {SSL}}},%
+sort={SSL},%
+type={acronym},%
+first={SSL},%
+firstplural={SSLs},%
+text={SSL},%
+plural={SSLs},%
+description={Secure Sockets Layer},%
+descriptionplural={Secure Sockets Layer},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Secure Sockets Layer},%
+longplural={Secure Sockets Layers},%
+short={SSL},%
+shortplural={SSLs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{SBC}%
+{%
+name={\acronymfont {\glsentryshort {SBC}}},%
+sort={SBC},%
+type={acronym},%
+first={SBC},%
+firstplural={SBCs},%
+text={SBC},%
+plural={SBCs},%
+description={Single Board Computer},%
+descriptionplural={Single Board Computer},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Single Board Computer},%
+longplural={Single Board Computers},%
+short={SBC},%
+shortplural={SBCs},%
+counter={page},%
+parent={},%
+%
+}%
+
