@@ -3,6 +3,8 @@
 \chapter{Introdução} % Main chapter title
 \label{chap:introducao}
 
+Este capítulo introduz o âmbito e a motivação do presente trabalho, contextualizando o desenvolvimento da plataforma \gls{FUSE} face aos desafios atuais da videovigilância e investigação criminal. Ao longo das secções seguintes, é definido o problema de investigação, formuladas as questões centrais e estabelecidos os objetivos técnico-científicos. Por fim, são detalhadas a metodologia de investigação adotada, as considerações éticas fundamentais e a organização estrutural da dissertação.
+
 \section{Contexto}
 \label{sec:contexto}
 
@@ -28,7 +30,7 @@ Uma vez que estes problemas trazem insegurança e ineficiência, resolvê-los é
 \section{Pergunta de Investigação}
 \label{sec:pergunta_investigacao}
 
-A proposta desta plataforma levanta a seguinte pergunta principais de investigação:
+Considerando os desafios técnicos e operacionais expostos, e com o intuito de resolver as falhas de segurança e falta de eficiência nos processos atuais, a proposta desta plataforma levanta a seguinte pergunta principal de investigação:
 
 \textbf{RQ1:} De que forma pode ser desenhada/projetada uma solução de software que permita aceder seguramente a câmaras \gls{CCTV}, localizadas em redes externas não controladas, caracterizadas por uma elevada diversidade de arquiteturas, padrões tecnológicos e origem de fabrico?
 
@@ -45,10 +47,10 @@ A resposta à questão central de investigação (RQ1) será materializada atrav
 \section{Objetivos}
 \label{sec:objetivos}
 
-Foram definidos o seguintes objetivos para o desenvolvimento e validação do \gls{FUSE}:
+De forma a operacionalizar a resposta às questões de investigação formuladas e garantir a criação de um artefacto funcional e robusto, foram definidos os seguintes objetivos para o desenvolvimento e validação do \gls{FUSE}:
 
 \begin{itemize}
-    \item Desenvolver uma arquitetura de software extensível que, através de uma camada de abstração, normalize a comunicação com câmaras de diferentes fornecedores. O sistema deverá suportar um protocolo base de streaming como o \gls{RTSP} e centralizar as funcionalidades de visualização em tempo real, gravação, e \textit{playback} numa interface unificada.
+    \item Desenvolver uma arquitetura de software extensível que, através de uma camada de abstração, normalize a comunicação com câmaras de diferentes fornecedores. O sistema deverá suportar um protocolo base de \textit{streaming} como o \gls{RTSP} e centralizar as funcionalidades de visualização em tempo real, gravação, e \textit{playback} numa interface unificada.
     \item Implementar um modelo de comunicação seguro, Secured By Design, que utilize túneis \gls{VPN} para isolar e criptografar a comunicação entre as câmaras externas e o servidor de implementação da aplicação.
     \item Desenvolver um sistema de controlo de acessos baseado em ações (modelo \gls{ABAC}) para gerir as permissões de utilizadores de forma granular e garantir a auditoria das ações.
     \item Integrar um módulo de análise de vídeo para a deteção automatizada de eventos complexos, implementando uma \textit{pipeline} de processamento progressivo em três fases:
@@ -57,10 +59,10 @@ Foram definidos o seguintes objetivos para o desenvolvimento e validação do \g
         \item Fase 2 (Classificação de Objetos): Análise dos segmentos filtrados para detectar e classificar objetos de categorias pré-definidas (e.g., humanos, veículos, animais).
         \item Fase 3 (Extração de Atributos): Análise aprofundada dos objetos classificados para extrair características específicas e customizáveis, como matrículas e cores de veículos, ou atributos de vestuário e acessórios de pessoas, que servirão de base para a pesquisa de eventos complexos.
     \end{itemize}
-    \item Validar a viabilidade da arquitetura através de um protótipo funcional (\gls{MVP}) que demonstre a integração bem-sucedida de, no mínimo, duas câmaras tecnologicamente diferentes, a segurança da comunicação e a eficácia da deteção de eventos num cenário simulado, pelo menos até à Fase 2 anteriormente mencionada.
+    \item Validar a viabilidade da arquitetura através de um \gls{MVP} que demonstre a integração bem-sucedida de, no mínimo, duas câmaras tecnologicamente diferentes, a segurança da comunicação e a eficácia da deteção de eventos num cenário simulado, pelo menos até à Fase 2 anteriormente mencionada.
 \end{itemize}
 
-Quanto aos principais contributos deste trabalho, espera-se que do ponto de vista técnico-científico surja uma arquitetura referência para integração segura e inteligente de sistemas \gls{CCTV} distribuídos, principalmente quando há a presença de interoperabilidade entre redes não controladas e controladas. Por outro lado, do ponto de vista social e operacional, tenciona-se validar a ferramenta para que esta possa vir a aumentar significativamente a eficiência e eficácia da investigação criminal dos \gls{OPC}, otimizando a alocação de recursos e reduzindo o tempo de análise manual do vídeo.
+Quanto aos principais contributos deste trabalho, espera-se que do ponto de vista técnico-científico surja uma arquitetura referência para integração segura e inteligente de sistemas \gls{CCTV} distribuídos, principalmente quando há a presença de interoperabilidade entre redes não controladas e controladas. Por outro lado, do ponto de vista social e operacional, tenciona-se validar a ferramenta para que esta possa vir a aumentar significativamente a eficiência e eficácia da investigação criminal dos \glspl{OPC}, otimizando a alocação de recursos e reduzindo o tempo de análise manual do vídeo.
 
 
 \section{Metodologia}
@@ -75,7 +77,7 @@ A metodologia adotada para a realização deste trabalho académico baseia-se no
 \label{fig:research_process}
 \end{figure}
 
-O ponto de partida da investigação enquadra-se em ``\textbf{Experiences and motivation}'', dado que a génese deste projeto deriva diretamente da observação da ineficiência e limitações técnicas enfrentadas pelos \glspl{OPC} e gestores de segurança na recolha de imagens de \gls{CCTV}. Através de feedback adquirido através de questionários e entrevistas com Núcleos (\gls{GNR}) e Esquadras (\gls{PSP}) de Investigação Criminal (\autoref{AppendixA}), estes problemas são confirmados e registrados. Complementarmente, é realizada uma revisão de literatura preliminar para compreender o estado da arte em protocolos de comunicação e visão computacional. Esta análise permitiu identificar a ausência de soluções integradas que garantam simultaneamente segurança em redes não controladas e inteligência analítica avançada. A junção desta necessidade prática (experiência) com a identificação desta lacuna teórica (literatura) resultou na formalização das perguntas de investigação apresentadas anteriormente.
+O ponto de partida da investigação enquadra-se em ``\textbf{Experiences and motivation}'', dado que a génese deste projeto deriva diretamente da observação da ineficiência e limitações técnicas enfrentadas pelos \glspl{OPC} e gestores de segurança na recolha de imagens de \gls{CCTV}. Através de feedback adquirido através de questionários e entrevistas com Núcleos (\gls{GNR}) e Esquadras (\gls{PSP}) de Investigação Criminal (\autoref{AppendixA}), estes problemas são confirmados e registados. Complementarmente, é realizada uma revisão de literatura preliminar para compreender o estado da arte em protocolos de comunicação e visão computacional. Esta análise permitiu identificar a ausência de soluções integradas que garantam simultaneamente segurança em redes não controladas e inteligência analítica avançada. A junção desta necessidade prática (experiência) com a identificação desta lacuna teórica (literatura) resultou na formalização das perguntas de investigação apresentadas anteriormente.
 
 A estratégia central adotada para este trabalho é a de ``\textbf{Design and Creation}''. Esta abordagem é a mais adequada para projetos de Engenharia de Software cujo objetivo primário é o desenvolvimento de um protótipo que visa resolver muitos dos problemas práticos observados e identificados em determinado cenário, como forma de validação de futura implementação ou desenvolvimento de algo mais avançado. Dentro desta estratégia inserem-se quatro principais passos, nomeadamente Design, Desenvolvimento, Testes e Conclusões.
 
@@ -115,4 +117,4 @@ O \autoref{chap:estado_da_arte} (\nameref{chap:estado_da_arte}) apresenta uma re
 
 O \autoref{chap:planeamento} (\nameref{chap:planeamento}) descreve o âmbito do projeto através de um \gls{WBS}, apresenta o cronograma de execução através de um diagrama de Gantt e identifica os stakeholders e riscos do projeto.
 
-O documento inclui ainda uma secção de Bibliografia com todas as referências utilizadas e o \autoref{AppendixA} que contém o questionário e entrevistas realizadas junto dos \glspl{OPC}.
+O documento inclui ainda um capítulo da Bibliografia com todas as referências utilizadas e o \autoref{AppendixA} que contém o questionário e entrevistas realizadas junto dos \glspl{OPC}.
