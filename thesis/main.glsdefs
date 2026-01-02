@@ -1622,3 +1622,59 @@ parent={},%
 %
 }%
 
+\glsdefs@newdocentry{CI/CD}%
+{%
+name={\acronymfont {\glsentryshort {CI/CD}}},%
+sort={CI/CD},%
+type={acronym},%
+first={CI/CD},%
+firstplural={CI/CDs},%
+text={CI/CD},%
+plural={CI/CDs},%
+description={Continuous Integration/Continuous Deployment},%
+descriptionplural={Continuous Integration/Continuous Deployment},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Continuous Integration/Continuous Deployment},%
+longplural={Continuous Integration/Continuous Deployments},%
+short={CI/CD},%
+shortplural={CI/CDs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{FOTA}%
+{%
+name={\acronymfont {\glsentryshort {FOTA}}},%
+sort={FOTA},%
+type={acronym},%
+first={FOTA},%
+firstplural={FOTAs},%
+text={FOTA},%
+plural={FOTAs},%
+description={Firmware Over-the-Air},%
+descriptionplural={Firmware Over-the-Air},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Firmware Over-the-Air},%
+longplural={Firmware Over-the-Airs},%
+short={FOTA},%
+shortplural={FOTAs},%
+counter={page},%
+parent={},%
+%
+}%
+
