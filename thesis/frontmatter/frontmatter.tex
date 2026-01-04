@@ -22,11 +22,11 @@
 %----------------------------------------------------------------------------------------
 %
 %\dedicatory{For/Dedicated to/To my\ldots}
-\begin{dedicatory}
-The dedicatory is optional. Below is an example of a humorous dedication.
-
-"To my wife Marganit and my children Ella Rose and Daniel Adam without whom this book would have been completed two years earlier." in "An Introduction To Algebraic Topology" by Joseph J. Rotman.
-\end{dedicatory}
+% \begin{dedicatory}
+% The dedicatory is optional. Below is an example of a humorous dedication.
+%
+% "To my wife Marganit and my children Ella Rose and Daniel Adam without whom this book would have been completed two years earlier." in "An Introduction To Algebraic Topology" by Joseph J. Rotman.
+% \end{dedicatory}
 
 %----------------------------------------------------------------------------------------
 %	ABSTRACT PAGE
@@ -50,7 +50,7 @@ A metodologia adotada segue o paradigma de "Design and Creation", com a validaç
 
 This dissertation presents the development of \gls{FUSE}, a software platform designed to unify and secure heterogeneous video surveillance systems dispersed across uncontrolled networks. Addressing the challenges of technological fragmentation and security vulnerabilities in current \gls{CCTV} infrastructures, \gls{FUSE} provides a centralized solution for entities such as \glspl{LEA}
 
-The proposed architecture features a hardware abstraction layer for normalizing camera communications via \gls{RTSP} and secures data transmission through VPN tunneling. It implements \gls{ABAC} as an access control method, and integrates a three-stage computer vision pipeline for automated activity detection, object classification, and attribute extraction. This approach aims to enhance interoperability, data security, and forensic analysis efficiency, adhering to ethical standards like the EU AI Act.
+The proposed architecture features a hardware abstraction layer for normalizing camera communications via \gls{RTSP} and secures data transmission through \gls{VPN} tunneling. It implements \gls{ABAC} as an access control method, and integrates a three-stage computer vision pipeline for automated activity detection, object classification, and attribute extraction. This approach aims to enhance interoperability, data security, and forensic analysis efficiency, adhering to ethical standards like the EU AI Act.
 
 
 \end{abstractotherlanguage}
@@ -61,9 +61,7 @@ The proposed architecture features a hardware abstraction layer for normalizing 
 
 \begin{acknowledgements}
 
-The optional Acknowledgment goes here\ldots Below is an example of a humorous acknowledgment.
-
-"I'd also like to thank the Van Allen belts for protecting us from the harmful solar wind, and the earth for being just the right distance from the sun for being conducive to life, and for the ability for water atoms to clump so efficiently, for pretty much the same reason. Finally, I'd like to thank every single one of my forebears for surviving long enough in this hostile world to procreate. Without any one of you, this book would not have been possible." in "The Woman Who Died a Lot" by Jasper Fforde.
+Agradeço ao meu orientador, Professor Paulo Baltarejo Sousa, pela disponibilidade, orientação e apoio prestado ao longo do desenvolvimento deste trabalho. Agradeço igualmente à entidade acolhedora, StabilityBubble, Lda., por disponibilizar os recursos e os meios profissionais que tornaram o desenvolvimento do projeto mais acessível, bem como pelo enquadramento e pelas ligações com o contexto real que contribuíram para aproximar a componente teórica da prática.
 \end{acknowledgements}
 
 %----------------------------------------------------------------------------------------
@@ -76,19 +74,19 @@ The optional Acknowledgment goes here\ldots Below is an example of a humorous ac
 
 \listoftables % Prints the list of tables
 
-\iflanguage{portuguese}{
-\renewcommand{\listalgorithmname}{Lista de Algor\'itmos}
-}
-\listofalgorithms % Prints the list of algorithms
-\addchaptertocentry{\listalgorithmname}
+% \iflanguage{portuguese}{
+% \renewcommand{\listalgorithmname}{Lista de Algor\'itmos}
+% }
+% \listofalgorithms % Prints the list of algorithms
+% \addchaptertocentry{\listalgorithmname}
 
 
-\renewcommand{\lstlistlistingname}{List of Source Code}
-\iflanguage{portuguese}{
-\renewcommand{\lstlistlistingname}{Lista de C\'odigo}
-}
-\lstlistoflistings % Prints the list of listings (programming language source code)
-\addchaptertocentry{\lstlistlistingname}
+% \renewcommand{\lstlistlistingname}{List of Source Code}
+% \iflanguage{portuguese}{
+% \renewcommand{\lstlistlistingname}{Lista de C\'odigo}
+% }
+% \lstlistoflistings % Prints the list of listings (programming language source code)
+% \addchaptertocentry{\lstlistlistingname}
 
 
 %----------------------------------------------------------------------------------------

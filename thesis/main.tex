@@ -52,6 +52,10 @@ headsepline, % Uncomment to get a line under the header
 
 \usepackage[hidelinks]{hyperref} % no borders on links
 
+% Allow embedding annex files (e.g., XLSX) inside the final PDF
+% Load AFTER hyperref.
+\usepackage{attachfile2}
+
 %
 % Next you have examples of admissable citation styles; we recomend using the authoryear-comp citation style (which resembles Harvard); don't forget to only uncomment one
 %
@@ -69,6 +73,7 @@ headsepline, % Uncomment to get a line under the header
 \addbibresource{mainbibliography.bib} % The filename of the bibliography
 \addbibresource{ch2/lrrq1.bib} % Referências específicas da LRRQ1
 \addbibresource{ch2/lrrq2.bib} % Referências específicas da LRRQ2
+\addbibresource{ch2/vl.bib} % Referências específicas da VL
 
 \makeglossaries % build the glossary
 
@@ -112,6 +117,9 @@ headsepline, % Uncomment to get a line under the header
 \hypersetup{pdftitle=\ttitle} % Set the PDF's title to your title
 \hypersetup{pdfauthor=\authorname} % Set the PDF's author to your name
 \hypersetup{pdfkeywords=\keywordnames} % Set the PDF's keywords to your keywords
+
+
+\newcommand{\percentage}[1]{#1\%}
 
 \begin{document}
 

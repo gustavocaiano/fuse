@@ -1678,3 +1678,115 @@ parent={},%
 %
 }%
 
+\glsdefs@newdocentry{OCR}%
+{%
+name={\acronymfont {\glsentryshort {OCR}}},%
+sort={OCR},%
+type={acronym},%
+first={OCR},%
+firstplural={OCRs},%
+text={OCR},%
+plural={OCRs},%
+description={Optical Character Recognition},%
+descriptionplural={Optical Character Recognition},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Optical Character Recognition},%
+longplural={Optical Character Recognitions},%
+short={OCR},%
+shortplural={OCRs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{RAG}%
+{%
+name={\acronymfont {\glsentryshort {RAG}}},%
+sort={RAG},%
+type={acronym},%
+first={RAG},%
+firstplural={RAGs},%
+text={RAG},%
+plural={RAGs},%
+description={Retrieval-Augmented Generation},%
+descriptionplural={Retrieval-Augmented Generation},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Retrieval-Augmented Generation},%
+longplural={Retrieval-Augmented Generations},%
+short={RAG},%
+shortplural={RAGs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{TCO}%
+{%
+name={\acronymfont {\glsentryshort {TCO}}},%
+sort={TCO},%
+type={acronym},%
+first={TCO},%
+firstplural={TCOs},%
+text={TCO},%
+plural={TCOs},%
+description={Total Cost of Ownership},%
+descriptionplural={Total Cost of Ownership},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Total Cost of Ownership},%
+longplural={Total Cost of Ownerships},%
+short={TCO},%
+shortplural={TCOs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{IP}%
+{%
+name={\acronymfont {\glsentryshort {IP}}},%
+sort={IP},%
+type={acronym},%
+first={IP},%
+firstplural={IPs},%
+text={IP},%
+plural={IPs},%
+description={Internet Protocol},%
+descriptionplural={Internet Protocol},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Internet Protocol},%
+longplural={Internet Protocols},%
+short={IP},%
+shortplural={IPs},%
+counter={page},%
+parent={},%
+%
+}%
+
