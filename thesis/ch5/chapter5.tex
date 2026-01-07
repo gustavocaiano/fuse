@@ -1,23 +1,26 @@
 % Chapter 5
 
-\chapter{Ética}
-\label{chap:etica}
+\chapter{Considerações Finais}
+\label{chap:conclusoes}
+O presente capítulo tem como objetivo sintetizar os resultados obtidos durante a fase de preparação da dissertação, consolidando as decisões tomadas com base na investigação realizada. Apresentam-se, de seguida, as principais conclusões retiradas do estudo do estado da arte e do planeamento, bem como a rota detalhada para o desenvolvimento futuro do projeto \gls{FUSE}.
 
-A realização deste trabalho rege-se pelos princípios de integridade, responsabilidade e rigor científico descritos no Código de Boas Práticas e de Conduta do P.PORTO \cite{PPORTO2020}.
+\section{Conclusões}
+\label{sec:conclusoes_finais}
 
-Do ponto de vista profissional, o trabalho enquadra-se nos princípios estruturantes da engenharia de software, alinhados com referências internacionais como o Software Engineering Code of Ethics and Professional Practice, desenvolvido em conjunto pela \gls{ACM} e pela \gls{IEEE-CS} \cite{ACM_Ethics}. A conformidade com estes princípios garante a qualidade e segurança dos sistemas desenvolvidos, a responsabilidade perante clientes e utilizadores, e a honestidade na comunicação de resultados, limitações e riscos associados às soluções tecnológicas.
+O estudo do estado da arte, detalhado no \autoref{chap:estado_da_arte}, foi determinante para as decisões arquiteturais do projeto. A análise literária confirmou que a interoperabilidade entre dispositivos heterogéneos exige uma camada de abstração robusta baseada em microserviços. No domínio da segurança, a investigação apontou para a obsolescência das \glspl{VPN} tradicionais em cenários de \textit{streaming} de vídeo, validando a adoção de túneis modernos como o WireGuard e topologias \gls{P2P} para garantir a conectividade segura sem comprometer a performance. 
 
-O \gls{FUSE} envolve uma pipeline de análise automática aplicada a contextos de videovigilância, potencialmente incidindo sobre a obtenção de dados pessoais identificáveis. Estes dados sensíveis apenas serão obtidos num contexto de validação do \gls{MVP} em cenário real, que estará sempre salvaguardado por requerimento de despacho judicial para fornecimento de meios técnicos e respetiva autorização de captação de imagem. Ainda assim, a pipeline é desenhada em estrita observância do EU AI Act \cite{EU_AI_Act}, garantindo que o sistema não incorre em ``Unacceptable risks''. 
+Adicionalmente, a revisão sobre visão computacional demonstrou a inviabilidade atual do processamento complexo em dispositivos Edge de baixo custo, fundamentando a opção por uma arquitetura de inteligência centralizada que tira partido de modelos avançados como o \gls{YOLO} e \glspl{VLM} para uma análise semântica aprofundada.
 
-O sistema não se destina, nem permite, práticas proibidas tais como:
+O planeamento apresentado no \autoref{chap:planeamento}, suportado por uma análise de riscos e cronograma detalhado, demonstra a possibilidade da execução técnica e temporal do projeto, estabelecendo uma rota clara para a fase de implementação que se segue.
+
+\section{Trabalho Futuro}
+\label{sec:trabalho_futuro}
+
+Com a conclusão da fase de preparação (\gls{PREPD}), o trabalho transita agora para a execução técnica no âmbito da unidade curricular de dissertação (\gls{DIMEI}). Os passos imediatos e futuros, alinhados com o plano de trabalhos estabelecido, focam-se na materialização do \gls{FUSE} e compreendem:
 
 \begin{itemize}
-    \item Social scoring ou manipulação comportamental;
-    \item Recolha indiscriminada (untargeted scraping) de imagens de \gls{CCTV} para criação de bases de dados de reconhecimento facial;
-    \item Identificação biométrica remota em tempo real em espaços públicos para fins policiais (real-time remote biometric identification).
+    \item \textbf{Design Arquitetural:} Formalização da arquitetura do sistema através do modelo de Vistas 4+1, detalhando os componentes e as suas interações.
+    \item \textbf{Implementação do MVP:} Desenvolvimento iterativo dos módulos críticos, começando pela infraestrutura de comunicações seguras, seguido pela camada de abstração de câmaras e, finalmente, a \textit{pipeline} de análise de vídeo.
+    \item \textbf{Validação em Cenário Real:} Instalação e teste do protótipo em ambiente operacional, permitindo recolher métricas de desempenho e feedback qualitativo dos utilizadores finais.
+    \item \textbf{Escrita da Dissertação:} Documentação contínua do processo de desenvolvimento e resultados, culminando na produção do documento final de dissertação que reportará as conclusões do projeto.
 \end{itemize}
-
-No âmbito do último ponto, apesar do alvo ser legislar o reconhecimento biométrico em tempo-real, justifica-se a conformidade pela natureza da análise automática, que será realizada sob gravações dos eventos, e não sob o próprio streaming.
-
-A análise focada na ``Fase 3'' da pipeline de deteção automática restringe-se à classificação de características objetivas (e.g., cor de vestuário, tipo de veículo) para auxiliar a pesquisa forense, mantendo sempre o princípio da validação humana, onde a decisão final cabe ao agente humano e não ao algoritmo.
-

@@ -52,14 +52,14 @@ Como se observa na Figura \ref{fig:gantt}, após a data de entrega da unidade cu
 \section{Project Charter e Gestão de Riscos}
 \label{sec:gestao_riscos}
 
-O Project Charter constituiu o artefacto inicial deste projeto, servindo como primeiro documento para a formalização da proposta de dissertação junto da empresa acolhedora e da instituição académica. Dada a sua natureza preliminar, este documento apresentou uma visão inicial do problema e dos objetivos que, embora alinhados com a missão do \gls{FUSE}, se revelaram amplos, tendo sido posteriormente refinados e concretizados no \gls{WBS} e no plano de trabalhos detalhado anteriormente. As datas e entregáveis originais constantes no Charter foram, por conseguinte, ajustados para refletir um mais correto e detalhado planeamento.
+O Project Charter (Apêndice \ref{AppendixB}) constituiu o artefacto inicial deste projeto, servindo como primeiro documento para a formalização da proposta de dissertação junto da empresa acolhedora e da instituição académica. Dada a sua natureza preliminar, este documento apresentou uma visão inicial do problema e dos objetivos que, embora alinhados com a missão do \gls{FUSE}, se revelaram amplos, tendo sido posteriormente refinados e concretizados no \gls{WBS} e no plano de trabalhos detalhado anteriormente. As datas e entregáveis originais constantes no Charter foram, por conseguinte, ajustados para refletir um mais correto e detalhado planeamento.
 
 \subsection{Stakeholder Identification}
 \label{subsec:stakeholder_identification}
 
-Apesar dos ajustes realizados, o Project Charter mantém-se como a referência central para a identificação das partes interessadas (Stakeholders). A Tabela \ref{tab:stakeholders} apresenta o mapeamento atualizado dos Stakeholders, classificando-os quanto ao seu poder de influência e nível de interesse no sucesso do projeto. Destaca-se a inclusão da StabilityBubble, cuja posição estratégica evolui para fornecedor potencial do software pós-desenvolvimento, e a exclusão de entusiastas de Home Automation, inicialmente projetados como possível público-alvo. Esta exclusão dá-se devido à grande apropriação do \gls{FUSE} a entidades e \glspl{OPC}, dado que se torna uma solução demasiado desenvolvida para projetos caseiros e pequenos.
+Apesar dos ajustes realizados, o Project Charter mantém-se como a referência central para a identificação das partes interessadas (Stakeholders). A Tabela \ref{tab:stakeholders} apresenta o mapeamento atualizado dos Stakeholders, classificando-os quanto ao seu poder de influência e nível de interesse no sucesso do projeto. Como principais diferenças entre a identificação do presente documento e a do Project Charter,  destaca-se a inclusão da StabilityBubble, cuja posição estratégica evolui para fornecedor potencial do software pós-desenvolvimento, e a exclusão de entusiastas de Home Automation, inicialmente projetados como possível público-alvo. Esta exclusão dá-se devido à grande apropriação do \gls{FUSE} a entidades e \glspl{OPC}, dado que se torna uma solução demasiado desenvolvida para projetos caseiros e pequenos.
 
-Para a classificação dos Stakeholders, utilizou-se como base a ``Mendelow's Matrix'' \cite{Mendelow1981}. A atribuição dos níveis ('Alto', 'Médio', 'Baixo') obedeceu aos seguintes critérios:
+Para a classificação dos Stakeholders, utilizou-se como base a ''Mendelow's Matrix'' \cite{Mendelow1981}. A atribuição dos níveis ('Alto', 'Médio', 'Baixo') obedeceu aos seguintes critérios:
 
 \begin{itemize}
     \item \textbf{Poder:} Capacidade da entidade em influenciar decisões, alocar recursos ou bloquear o andamento do projeto.
@@ -68,7 +68,7 @@ Para a classificação dos Stakeholders, utilizou-se como base a ``Mendelow's Ma
 
 \begin{table}[H]
 \centering
-\caption{Stakeholders identificados}
+\caption{Identificação de Stakeholders}
 \label{tab:stakeholders}
 \begin{tabular}{lllp{6cm}}
 \toprule
@@ -84,7 +84,7 @@ Fornecedores de Câmaras & Baixo & Baixo & O \gls{FUSE} visa a eliminação da d
 \end{tabular}
 \end{table}
 
-\subsection{Risk Management}
+\subsection{Gestão de Riscos}
 \label{subsec:risk_management}
 
 Relativamente à gestão de riscos, trata-se de um processo contínuo que se iniciou com o levantamento preliminar no Project Charter. Embora a análise inicial focasse riscos mais genéricos (e.g., dependência de hardware), o planeamento aprofundado permitiu identificar ameaças mais específicas e definir estratégias de mitigação concretas. A Tabela \ref{tab:riscos} consolida os riscos, atribuindo-lhes uma probabilidade e um impacto, combinando alguns identificados na fase inicial com novos riscos técnicos decorrentes da complexidade da análise de vídeo e integração de redes. A quantificação do risco segue uma matriz de probabilidade e impacto (P×I), onde ambas as variáveis são classificadas numa escala de Likert \cite{Likert1932} de 1 a 5. Esta escala foi definida da seguinte forma:
@@ -106,7 +106,7 @@ A multiplicação destes fatores resulta no Risco Quantificado, permitindo prior
 \midrule
 1 & Indisponibilidade de Hardware (\gls{GPU}) & A análise de vídeo requer hardware gráfico potente, que é escasso ou não disponível & 3 & 4 & 12 & Mitigar \\
 2 & Incompatibilidade de Protocolos & Determinada câmara não suporta o protocolo \gls{RTSP}, impossibilitando a integração prevista. & 2 & 2 & 4 & Aceitar \\
-3 & Falsos Positivos na Deteção & Pipeline de \gls{AI} gera demasiados alertas falsos em condições adversas (chuva, noite). & 3 & 3 & 9 & Mitigar \\
+3 & Falsos Positivos na Deteção & \textit{Pipeline} de \gls{AI} gera demasiados alertas falsos em condições adversas (chuva, noite). & 3 & 3 & 9 & Mitigar \\
 4 & Atraso no Cronograma & A complexidade da integração de múltiplos sistemas excede o tempo previsto para o semestre letivo. & 3 & 5 & 15 & Mitigar \\
 \bottomrule
 \end{tabular}
@@ -116,13 +116,13 @@ A Tabela \ref{tab:riscos} apresenta quatro riscos identificados, dos quais três
 
 As estratégias de resposta detalhadas para cada risco são as seguintes:
 
-\textbf{Risco 1 - Indisponibilidade de Hardware (\gls{GPU}):} A estratégia de mitigação consiste em garantir que a integração com a pipeline de análise automática seja feita de forma modular e desacoplada, permitindo a flexibilidade da escolha do modelo de \gls{AI} utilizado conforme o hardware disponível no momento. Esta abordagem assegura que o sistema possa adaptar-se a diferentes configurações de hardware sem comprometer a funcionalidade core.
+\textbf{Risco 1 - Indisponibilidade de Hardware (\gls{GPU}):} A estratégia de mitigação consiste em garantir que a integração com a \textit{pipeline} de análise automática seja feita de forma modular e desacoplada, permitindo a flexibilidade da escolha do modelo de \gls{AI} utilizado conforme o hardware disponível no momento. Esta abordagem assegura que o sistema possa adaptar-se a diferentes configurações de hardware sem comprometer a funcionalidade core.
 
 \textbf{Risco 2 - Incompatibilidade de Protocolos:} A opção pela estratégia de ``Aceitação'' serve para delimitar claramente o âmbito do projeto. O \gls{MVP} a ser desenvolvido não pretende ser universalmente compatível com todo o conjunto de câmaras existentes, mas sim provar o conceito através de um protocolo standard habitualmente presente (\gls{RTSP}), excluindo câmaras que não suportem este protocolo. Esta decisão permite focar o esforço de engenharia na inteligência do sistema e não na compatibilidade de drivers.
 
 \textbf{Risco 3 - Falsos Positivos na Deteção:} A mitigação será realizada através da implementação de um sistema de ajuste de sensibilidade configurável pelo utilizador, permitindo que este defina parâmetros como os segundos necessários de deteção do objeto antes do alerta ser gerado. Esta funcionalidade permite reduzir falsos positivos em condições adversas, como chuva ou condições de pouca luz.
 
-\textbf{Risco 4 - Atraso no Cronograma:} A estratégia de mitigação assenta na adoção de uma abordagem de desenvolvimento incremental. Será assegurada a estabilidade do núcleo de visualização e deteção básica (pipeline bi-fásica) como um \gls{MVP} robusto, antes de iterar para as funcionalidades avançadas de extração de atributos (pipeline tri-fásica). Caso o desenvolvimento da pipeline tri-fásica se revele incompatível com o tempo disponível, esta será tratada como trabalho futuro, garantindo sempre a entrega de um produto funcional.
+\textbf{Risco 4 - Atraso no Cronograma:} A estratégia de mitigação assenta na adoção de uma abordagem de desenvolvimento incremental. Será assegurada a estabilidade do núcleo de visualização e deteção básica (\textit{pipeline} bi-fásica) como um \gls{MVP} robusto, antes de iterar para as funcionalidades avançadas de extração de atributos (\textit{pipeline} tri-fásica). Caso o desenvolvimento da \textit{pipeline} tri-fásica se revele incompatível com o tempo disponível, esta será tratada como trabalho futuro, garantindo sempre a entrega de um produto funcional.
 
 A estratégia de mitigação para os riscos prioritários (Riscos 1 e 4) assenta fundamentalmente na modularidade e no desenvolvimento incremental. Ao garantir que a arquitetura do sistema é flexível quanto aos modelos de \gls{AI} e que as funcionalidades são entregues por fases, assegura-se que, mesmo na eventualidade destes riscos se materializarem, o projeto resultará sempre num produto funcional (\gls{MVP}), salvaguardando a dissertação. A monitorização destes riscos será realizada periodicamente em cada reunião de ponto de situação com o orientador e supervisor, permitindo o ajuste dinâmico das estratégias de resposta caso a probabilidade ou impacto de algum fator sofra alterações ao longo do ciclo de vida do projeto.
 
