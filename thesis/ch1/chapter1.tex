@@ -3,14 +3,14 @@
 \chapter{Introdução} % Main chapter title
 \label{chap:introducao}
 
-Este capítulo introduz o âmbito e a motivação do presente trabalho, contextualizando o desenvolvimento da plataforma \gls{FUSE} face aos desafios atuais da videovigilância e investigação criminal. Ao longo das secções seguintes, é definido o problema de investigação, formuladas as questões centrais e estabelecidos os objetivos técnico-científicos. Por fim, são detalhadas a metodologia de investigação adotada, as considerações éticas fundamentais e a organização estrutural da dissertação.
+Este capítulo introduz o âmbito e a motivação do presente trabalho, contextualizando o desenvolvimento da plataforma proposta face aos desafios atuais da videovigilância e investigação criminal. Ao longo das secções seguintes, é definido o problema de investigação, formuladas as questões centrais e estabelecidos os objetivos técnico-científicos. Por fim, são detalhadas a metodologia de investigação adotada, as considerações éticas fundamentais e a organização estrutural da dissertação.
 
 \section{Contexto}
 \label{sec:contexto}
 
 No panorama atual dos sistemas de videovigilância verifica-se uma grande dependência de hardware, como \glspl{NVR} para agregar várias câmaras e disponibilizar streaming da sua imagem. A maioria destes dispositivos também possibilita o \textit{playback} e exportação de vídeos gravados, sendo que alguns controlam ainda os acessos de utilizadores. A detecção de movimentos ou objetos é uma \textit{feature} de apenas alguns modelos apesar de que, ultimamente, se têm verificado um grande crescimento e aposta tecnológica nesta área \cite{6491471}. Assim, os \glspl{NVR}, embora raramente reúnam individualmente todas estas funcionalidades num dispositivo só \cite{damjanovski2014cctv}, são a peça central do processo de videovigilância dentro de uma rede controlada.
 
-O presente trabalho decorre em contexto empresarial, sendo acolhido pela empresa StabilityBubble, Lda. O \gls{FUSE} não se configura apenas como um exercício académico teórico, mas sim como a proposta de uma plataforma comercial destinada a responder a lacunas de mercado identificadas pela empresa. Assim, esta dissertação visa conciliar o rigor da investigação científica com os requisitos práticos e operacionais de um produto de software real, tirando partido da infraestrutura e \textit{know-how} da entidade de acolhimento.
+O presente trabalho decorre em contexto empresarial, sendo acolhido pela empresa StabilityBubble, Lda. Neste âmbito, propõe-se o desenvolvimento do \gls{FUSE}, uma plataforma de software orientada para a centralização, organização e acesso seguro a sistemas de videovigilância heterogéneos, incluindo câmaras localizadas em redes não controladas. A proposta não se configura apenas como um exercício académico teórico, mas sim como a resposta a lacunas de mercado identificadas pela empresa. Assim, esta dissertação visa conciliar o rigor da investigação científica com os requisitos práticos e operacionais de um produto de software real, tirando partido da infraestrutura e \textit{know-how} da entidade de acolhimento.
 
 \section{Problema}
 \label{sec:problema}
@@ -65,6 +65,11 @@ De forma a operacionalizar a resposta às questões de investigação formuladas
 
 Quanto aos principais contributos deste trabalho, espera-se que do ponto de vista técnico-científico surja uma arquitetura referência para integração segura e inteligente de sistemas \gls{CCTV} distribuídos, principalmente quando há a presença de interoperabilidade entre redes não controladas e controladas. Por outro lado, do ponto de vista social e operacional, tenciona-se validar a ferramenta para que esta possa vir a aumentar significativamente a eficiência e eficácia da investigação criminal dos \glspl{OPC}, otimizando a alocação de recursos e reduzindo o tempo de análise manual do vídeo.
 
+\subsubsection{Requesitos da Entidade}
+\todo{adicionar aqui os requisitos da entidade}exemplo: é necessário que a solução tenha X e que seja feita em Y
+\todo{Decidir se devo deixar esta sub-secção aqui}
+
+
 
 \section{Metodologia}
 \label{sec:metodologia}
@@ -110,6 +115,8 @@ No âmbito do último ponto, apesar do alvo ser legislar o reconhecimento biomé
 
 A análise focada na ''Fase 3'' da \textit{pipeline} de deteção automática restringe-se à identificação de características objetivas (e.g., cor de vestuário, tipo de veículo) para auxiliar a pesquisa forense, mantendo sempre o princípio da validação humana, onde a decisão final cabe ao agente humano e não ao algoritmo.
 
+\subsection{Utilização de \gls{AI}}
+Como será de obviar, no decorrer desta dissertação foi utilizada \gls{AI} para auxiliar a produção do documento. como exemplo das utilizações dou o exemplo de \todo{PARAGRAFO EM CONSTRUÇÃO}
 
 \section{Estrutura do Documento}
 \label{sec:estrutura_documento}
