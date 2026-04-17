@@ -1,0 +1,70 @@
+@startuml
+' Cenário atual de acesso remoto a sistemas CCTV
+' Duas linhas paralelas (um cenário por linha) convergem em Internet -> Operador
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+
+skinparam ArrowColor #5D748A
+skinparam ArrowThickness 1.1
+skinparam ArrowFontColor #374151
+skinparam ArrowFontSize 10
+
+skinparam PackageStyle rectangle
+skinparam RoundCorner 6
+
+skinparam package {
+  BorderColor #9CA3AF
+  BackgroundColor #FFFFFF
+  FontColor #374151
+  FontStyle italic
+  FontSize 11
+}
+
+skinparam rectangle {
+  BorderColor #374151
+  BackgroundColor #FFFFFF
+  FontColor #111827
+}
+
+skinparam cloud {
+  BorderColor #5D748A
+  BackgroundColor #F1F5F9
+  FontColor #111827
+}
+
+skinparam actor {
+  BorderColor #374151
+  FontColor #111827
+}
+
+left to right direction
+
+package "Cenário 1 — SIM / 4G + P2P" as S1 {
+  rectangle "Câmaras IP\n(SIM / 4G)" as Cam4G
+  cloud "Cloud do fabricante\nRelay P2P" as Relay
+  Cam4G --> Relay : saída via 4G
+}
+
+package "Cenário 2 — Router com porta aberta" as S2 {
+  rectangle "Câmaras IP" as CamLAN
+  rectangle "Router" as Router
+  rectangle "Firewall\nregra aberta" as Firewall
+  CamLAN --> Router
+  Router --> Firewall
+}
+
+cloud "Internet" as Net
+actor "Operador\nremoto" as Op
+
+Relay --> Net : via intermediário
+Firewall --> Net : acesso direto
+Net --> Op : operação remota
+
+' Empilhar os dois cenários verticalmente
+Cam4G -[hidden]down- CamLAN
+Relay -[hidden]down- Firewall
+
+@enduml

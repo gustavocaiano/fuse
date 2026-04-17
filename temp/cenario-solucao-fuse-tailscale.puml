@@ -1,0 +1,73 @@
+@startuml
+' Solução proposta: acesso remoto a CCTV via Tailscale (arquitetura FUSE)
+' Convenções:
+'   - linha sólida  = conectividade IP física
+'   - linha ponto-a-ponto (..)  = túnel VPN Tailscale (end-to-end FUSE <-> SBC)
+'   - linha tracejada (dashed)  = fluxos lógicos de dados (streaming / PTZ)
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+
+skinparam ArrowColor #5D748A
+skinparam ArrowThickness 1.1
+skinparam ArrowFontColor #374151
+skinparam ArrowFontSize 10
+
+skinparam PackageStyle rectangle
+skinparam RoundCorner 6
+
+skinparam package {
+  BorderColor #9CA3AF
+  BackgroundColor #FFFFFF
+  FontColor #374151
+  FontStyle italic
+  FontSize 11
+}
+
+skinparam rectangle {
+  BorderColor #374151
+  BackgroundColor #FFFFFF
+  FontColor #111827
+}
+
+skinparam cloud {
+  BorderColor #5D748A
+  BackgroundColor #F1F5F9
+  FontColor #111827
+}
+
+skinparam actor {
+  BorderColor #374151
+  FontColor #111827
+}
+
+left to right direction
+
+actor "Utilizador" as User
+rectangle "Servidor FUSE\n«tailnet»" as FUSE
+cloud "Internet" as Net
+
+package "Local remoto" as Remote {
+  rectangle "Router local\n4G / 5G" as Router
+  rectangle "SBC\n«tailnet»" as SBC
+  rectangle "Câmara IP" as Camera
+
+  Router -up- SBC
+  Router -down- Camera
+}
+
+' Conectividade IP física (sólido)
+User --> FUSE : acesso web
+FUSE -- Net
+Net -- Router : uplink 4G / 5G
+
+' Túnel Tailscale (linha ponto-a-ponto, end-to-end entre endpoints da tailnet)
+FUSE .. SBC : Tailscale
+
+' Fluxos lógicos de dados (tracejado ligeiro)
+Camera -[#9CA3AF,dashed]-> FUSE : streaming
+FUSE -[#9CA3AF,dashed]-> Camera : controlo PTZ
+
+@enduml
