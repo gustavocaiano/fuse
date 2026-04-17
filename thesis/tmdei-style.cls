@@ -311,10 +311,10 @@ KOMA-script documentation for details.}]{fancyhdr}
 \newcommand*{\university}[1]{\def\univname{#1}}
 \newcommand*{\department}[1]{\def\deptname{#1}}
 \newcommand*{\keywords}[1]{\def\keywordnames{#1}}
-\newcommand*{\todo}[1]{%
+\newcommand*{\todo}[2][green!30]{%
   \begingroup
   \setlength{\fboxsep}{1pt}%
-  \colorbox{yellow!30}{\strut\textbf{TODO:}~#1}%
+  \colorbox{#1}{\strut#2}%
   \endgroup
 }
 

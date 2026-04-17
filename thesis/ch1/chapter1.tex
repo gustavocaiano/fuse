@@ -3,7 +3,7 @@
 \chapter{Introdução} % Main chapter title
 \label{chap:introducao}
 
-Este capítulo introduz o âmbito e a motivação do presente trabalho, contextualizando o desenvolvimento da plataforma proposta face aos desafios atuais da videovigilância e investigação criminal. Ao longo das secções seguintes, é definido o problema de investigação, formuladas as questões centrais e estabelecidos os objetivos técnico-científicos. Por fim, são detalhadas a metodologia de investigação adotada, as considerações éticas fundamentais e a organização estrutural da dissertação.
+Este capítulo introduz o âmbito e a motivação do presente trabalho, contextualizando o desenvolvimento da plataforma proposta face aos desafios atuais da videovigilância e investigação criminal. Ao longo das secções seguintes, é definido o problema de investigação, formuladas as questões centrais e estabelecidos os objetivos técnico-científicos. Por fim, são detalhadas a metodologia de investigação adotada, as considerações éticas fundamentais, o planeamento do projeto e a organização estrutural da dissertação.
 
 \section{Contexto}
 \label{sec:contexto}
@@ -66,7 +66,8 @@ De forma a operacionalizar a resposta às questões de investigação formuladas
 Quanto aos principais contributos deste trabalho, espera-se que do ponto de vista técnico-científico surja uma arquitetura referência para integração segura e inteligente de sistemas \gls{CCTV} distribuídos, principalmente quando há a presença de interoperabilidade entre redes não controladas e controladas. Por outro lado, do ponto de vista social e operacional, tenciona-se validar a ferramenta para que esta possa vir a aumentar significativamente a eficiência e eficácia da investigação criminal dos \glspl{OPC}, otimizando a alocação de recursos e reduzindo o tempo de análise manual do vídeo.
 
 \subsubsection{Requesitos da Entidade}
-\todo{adicionar aqui os requisitos da entidade}exemplo: é necessário que a solução tenha X e que seja feita em Y
+\todo{adicionar aqui os requisitos da entidade} 
+exemplo: é necessário que a solução tenha X e que seja feita em Y
 \todo{Decidir se devo deixar esta sub-secção aqui}
 
 
@@ -118,15 +119,42 @@ A análise focada na ''Fase 3'' da \textit{pipeline} de deteção automática re
 \subsection{Utilização de \gls{AI}}
 Como será de obviar, no decorrer desta dissertação foi utilizada \gls{AI} para auxiliar a produção do documento. como exemplo das utilizações dou o exemplo de \todo{PARAGRAFO EM CONSTRUÇÃO}
 
+\section{Planeamento}
+\label{sec:planeamento}
+
+Esta secção descreve o planeamento deste projeto, estruturado para garantir a exequibilidade dos objetivos propostos dentro do prazo académico estipulado. A organização das atividades divide-se entre a fase de preparação (unidade curricular de \gls{PREPD}) e a fase de execução e escrita da dissertação (unidade curricular de \gls{DIMEI}).
+
+A estruturação do projeto foi realizada com recurso a uma \textit{Work Breakdown Structure} (\gls{WBS}), detalhada no \autoref{AppendixC}, que ditou a decomposição do trabalho em cinco fases incrementais:
+\begin{itemize}
+    \item \textbf{Planeamento e Análise:} Definição do problema, estudo do estado da arte e produção de artefactos iniciais (ex. Project Charter e questionários aos \glspl{OPC}).
+    \item \textbf{Design:} Modelação arquitetural da solução (Vistas 4+1) e desenho do Modelo de Domínio.
+    \item \textbf{Desenvolvimento:} Fase nuclear de implementação técnica, compreendendo os módulos de Comunicações Seguras, Camada de Abstração e Análise de Vídeo.
+    \item \textbf{Testes:} Validação funcional e unitária da arquitetura, seguida de testes do protótipo em cenário real.
+    \item \textbf{Conclusões:} Redação final do documento de dissertação e preparação da respetiva defesa pública.
+\end{itemize}
+
+O planeamento temporal encontra-se representado no diagrama de Gantt, Figura \ref{fig:gantt}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{ch1/assets/gantt-labeled.png}
+\caption{Gantt Chart do projeto.}
+\label{fig:gantt}
+\end{figure}
+
+A execução do cronograma estende-se por aproximadamente 220 dias úteis, iniciando-se em outubro de 2025 com a fase de \textbf{Planeamento e Análise} (\gls{PREPD}), cujo encerramento está estipulado para 22 de janeiro de 2026. A partir desta data, o projeto transita para a unidade curricular de \gls{DIMEI}, arrancando com o \textbf{Design} arquitetural da solução.
+
+A fase de \textbf{Desenvolvimento} representa o núcleo temporal do projeto (com uma duração estimada de 85 dias, entre fevereiro e junho de 2026). Esta fase acomoda, de forma parcialmente paralela, a implementação das Comunicações Seguras, da Camada de Abstração e do Módulo de Análise de Vídeo (desenvolvido numa abordagem bi-fásica e tri-fásica). Em simultâneo, a fase de \textbf{Testes} avança de forma contínua a partir de abril, garantindo a validação unitária e funcional iterativa dos componentes. A data-alvo para a entrega final da dissertação está fixada a 22 de junho de 2026.
+
+Contudo, como ilustrado na Figura \ref{fig:gantt}, existe trabalho planeado até ao final de agosto de 2026. Esta extensão temporal deve-se à complexidade da validação do protótipo em ambiente real (junto dos \glspl{OPC}), que se expecta exigir um período mais alargado do que o estipulado para o término formal da dissertação. O \textit{feedback} adquirido até à data de entrega académica será anexado ao relatório final, enquanto a validação e otimização do sistema continuarão o seu curso natural pós-entrega. Por fim, a identificação dos \textit{stakeholders} e a análise detalhada de riscos (matriz de probabilidade/impacto e mitigação) encontram-se documentadas no \autoref{AppendixD}.
+
 \section{Estrutura do Documento}
 \label{sec:estrutura_documento}
 
-Este documento está organizado em capítulos que apresentam de forma estruturada o trabalho desenvolvido. O \autoref{chap:introducao} (\nameref{chap:introducao}) apresenta o contexto do problema, as questões de investigação, os objetivos, as considerações éticas, a metodologia adotada e a estrutura do documento.
+Este documento está organizado em capítulos que apresentam de forma estruturada o trabalho desenvolvido. O \autoref{chap:introducao} (\nameref{chap:introducao}) apresenta o contexto do problema, as questões de investigação, os objetivos, as considerações éticas, a metodologia adotada, o planeamento do projeto e a estrutura do documento.
 
 O \autoref{chap:estado_da_arte} (\nameref{chap:estado_da_arte}) apresenta uma revisão sistemática da literatura sobre arquiteturas de abstração e interoperabilidade de dispositivos \gls{IoT}, protocolos de comunicação segura e visão computacional, respondendo às sub-questões de investigação operacionais.
 
-O \autoref{chap:planeamento} (\nameref{chap:planeamento}) descreve o âmbito do projeto através de um \gls{WBS}, apresenta o cronograma de execução através de um diagrama de Gantt e identifica os stakeholders e riscos do projeto.
-
 O \autoref{chap:conclusoes} (\nameref{chap:conclusoes}) resume os resultados desta fase de preparação e apresenta o plano para o trabalho futuro a desenvolver na dissertação.
 
-O documento inclui ainda a Bibliografia com todas as referências consultadas e utilizadas, bem como os apêndices: o \autoref{AppendixA}, que contém o link para download das respostas relativas ao questionário apresentado em formato de entrevista junto dos \glspl{OPC}, e o \autoref{AppendixB}, que disponibiliza o Project Charter na sua versão integral.
+O documento inclui ainda a Bibliografia com todas as referências consultadas e utilizadas, bem como os apêndices: o \autoref{AppendixA}, que contém o link para download das respostas relativas ao questionário apresentado em formato de entrevista junto dos \glspl{OPC}; o \autoref{AppendixB}, que disponibiliza o Project Charter na sua versão integral; o \autoref{AppendixC}, que detalha o \gls{WBS} do projeto; e o \autoref{AppendixD}, que apresenta a identificação de stakeholders e a análise de riscos.

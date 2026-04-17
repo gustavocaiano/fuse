@@ -1,0 +1,49 @@
+# My Thesis Structure
+
+- Lista de Figuras
+- Lista de Tabelas
+- Introdução
+  - Contexto
+  - Problema
+  - Pergunta de Investigação
+  - Objetivos
+  - Metodologia
+  - Considerações Éticas
+  - Estrutura do Documento
+- Estudo do Estado da Arte
+  - Processo de Investigação
+  - LRRQ1 - Arquiteturas de Abstração e Interoperabilidade IoT
+    - Processo de Pesquisa
+    - Discussão
+      - Padrões Arquiteturais
+      - Abstração de Media e Normalização de Streaming
+      - Escalabilidade e Adaptabilidade à Rede
+      - Análise Crítica
+  - LRRQ2 - Protocolos de Comunicação Segura e VPN
+    - Processo de Pesquisa
+    - Discussão
+      - O Desafio da Conectividade em Redes Não Controladas
+      - Limitações dos Protocolos Legacy e Comparação TCP vs. UDP
+      - A Ascensão do WireGuard e Túneis de Alta Performance
+      - Análise Crítica
+  - Estado da Arte em Visão Computacional
+    - Processamento em Edge vs Centralizado
+    - Deteção de Movimento e Filtragem Temporal (Fase 1)
+    - Deteção e Classificação de Objetos (Fase 2)
+    - Modelos de Visão-Linguagem (VLM) e Identificação Alvo (Fase 3)
+    - Armazenamento e Pesquisa Forense
+  - Conclusão do Estado da Arte
+- Planeamento de Trabalho
+  - Definição do Âmbito e Entregáveis
+  - Plano de Trabalho
+  - Project Charter e Gestão de Riscos
+    - Identificação de Stakeholders
+    - Gestão de Riscos
+- Considerações Finais
+  - Conclusões
+  - Trabalho Futuro
+- Bibliografia
+- Apêndice Questionário e Entrevistas
+  - Questionário (ficheiro de respostas)
+- Apêndice Project Charter
+  - Project Charter (documento completo)

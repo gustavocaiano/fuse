@@ -1,0 +1,77 @@
+# PDF Structure
+
+- List of Figures
+- List of Tables
+- List of Source Code
+- List of Acronyms
+- Introduction
+  - Context
+  - Problem
+  - Objectives
+  - Ethical Considerations
+  - Methodology
+  - Project Planning
+  - Document Structure
+- Background on OCR
+  - Historical Development
+  - Fundamental Concepts
+  - Applications of OCR
+  - Challenges and Limitations
+  - Summary
+- State of the Art
+  - LRRQ1 - Feasibility of OCR for handwritten text extraction
+    - Search Process
+    - Discussion
+  - LRRQ2 - OCR tools with high accuracy for handwritten text
+    - Search Process
+    - Discussion
+  - LRRQ3 - Image enhancement techniques
+    - Search Process
+    - Discussion
+  - Summary
+- Analysis & Design
+  - Analysis
+    - Domain
+    - Functional requirements
+    - Non-functional requirements
+  - Design
+    - Architecture
+    - CI/CD
+  - Summary
+- Implementation
+  - Backend
+    - Functionalities
+      - User Management & Authentication
+      - Form Structure
+      - Form Response Extraction
+      - Validation
+    - Design patterns
+    - Testing
+  - Android Application
+    - Functionalities
+      - Authentication, Account & Home screens
+      - List screens
+      - Details screens
+      - Upload form response
+      - Apply validation
+    - Design patterns
+    - Testing
+  - Backoffice
+  - Summary
+- Experimentation & Evaluation
+  - Text extraction accuracy
+    - Methodology
+    - Results
+  - User testing
+    - Methodology
+    - Results
+  - Summary
+- Conclusions
+  - Document summary
+  - Achieved objectives
+  - Challenges and future work
+  - Final appreciation
+- Bibliography
+- Appendix Example test form
+- Appendix Text extraction tests dataset
+- Appendix User testing analytics dataset
