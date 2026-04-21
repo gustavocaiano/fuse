@@ -19,3 +19,7 @@ mind map colorido, infográfico empresarial, gradientes, 3D, glassmorphism, somb
 - aspect ratio 14:8 ou 16:9
 - cause-effect diagram, institutional academic style
 - flat vector, dark blue / grey / black palette, no gradients
+
+
+follow-ups : 
+  - pega neste diagrama e corrige os acentos para ficarem corretos em português de portugal . por exemplo em revisão manual e heterogéneos.

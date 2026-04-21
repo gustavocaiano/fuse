@@ -1,0 +1,45 @@
+@startuml
+title fuse-app -> digital-twin -> camera-deployment
+
+autonumber
+skinparam responseMessageBelowArrow true
+
+actor "browser" as Browser
+participant "fuse-app" as FuseApp
+participant "digital-twin" as DigitalTwin
+box "camera-deployment" #F5F5F5
+  participant "camera" as Camera
+end box
+
+note right of Camera
+  logical boundary used for
+  conceptual representation
+end note
+
+Browser -> FuseApp: Register camera or start PTZ discovery
+
+loop port-discovery over candidate ports and protocols
+  FuseApp -> Camera: Probe candidate PTZ endpoint
+  alt Compatible PTZ endpoint found
+    Camera --> FuseApp: Return compatible PTZ endpoint
+    break
+  else No compatible PTZ endpoint
+    Camera --> FuseApp: Return no compatible PTZ endpoint
+  end
+end
+
+FuseApp -> FuseApp: Store discovered PTZ configuration
+
+Browser -> FuseApp: Press PTZ control (move / stop)
+
+alt PTZ configuration available
+  FuseApp -> DigitalTwin: Send PTZ command
+  DigitalTwin -> Camera: Relay PTZ command
+  Camera --> DigitalTwin: Return PTZ status
+  DigitalTwin --> FuseApp: Confirm command outcome
+  FuseApp --> Browser: Report accepted command
+else PTZ configuration missing
+  FuseApp --> Browser: Report PTZ unavailable
+end
+
+@enduml

@@ -1,0 +1,46 @@
+@startuml
+title fuse-nginx -> fuse-app -> media-parser
+
+autonumber
+skinparam responseMessageBelowArrow true
+
+actor "browser" as Browser
+participant "fuse-nginx" as Nginx
+participant "fuse-app" as FuseApp
+participant "media-parser" as MediaParser
+
+Browser -> Nginx: Request camera view
+Nginx -> FuseApp: Forward application request
+FuseApp -> FuseApp: Authorize viewer and issue stream authorization
+FuseApp --> Nginx: Return page with stream authorization
+Nginx --> Browser: Deliver camera view
+
+Browser -> Nginx: Request video stream
+Nginx -> Nginx: Validate stream authorization
+note right of Nginx
+  Stream access is granted only when
+  the request matches the policy
+  issued by fuse-app.
+end note
+
+alt Cookie invalid or expired
+  Nginx --> Browser: Deny stream request
+else Cookie valid
+  Nginx -> MediaParser: Forward streaming request
+  MediaParser --> Nginx: Return stream fragments
+  Nginx --> Browser: Deliver stream response
+
+  loop Playlist refresh and media chunks
+    Browser -> Nginx: Request next stream fragment
+    Nginx -> MediaParser: Forward fragment request
+    MediaParser --> Nginx: Return stream fragment
+    Nginx --> Browser: Deliver stream fragment
+  end
+end
+
+group Recording hook after segment completion
+  MediaParser -> FuseApp: Notify segment completion
+  FuseApp -> FuseApp: Validate recording notification
+end
+
+@enduml

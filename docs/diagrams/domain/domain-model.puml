@@ -1,0 +1,104 @@
+@startuml
+title Fuse - Domain Model
+
+hide circle
+hide methods
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+entity "User" as User {
+  * id : bigint
+  --
+  name : string
+  username : string
+  email : string
+  is_confirmed : bool
+  has_email_authentication : bool
+}
+
+entity "Process" as Process {
+  * id : bigint
+  --
+  number : string
+  status : ProcessStatus
+  crime_type : string?
+  abilio_id : bigint?
+  deadline_at : datetime?
+}
+
+entity "process_user" as ProcessUser {
+  * process_id : bigint
+  * user_id : bigint
+}
+
+entity "Camera" as Camera {
+  * id : bigint
+  --
+  process_id : bigint?
+  slug : string
+  name : string
+  user : string
+  password : string?
+  path : string?
+  ip_address : string
+  rtsp_port : string
+  rec : bool
+  detection_enabled : bool
+  detection_target_class : person|vehicle
+  ptz_protocol : PTZProtocol?
+  ptz_port : string?
+}
+
+entity "RecordingSegment" as RecordingSegment {
+  * id : bigint
+  --
+  camera_id : bigint
+  segment_uid : string
+  relative_path : string
+  started_at : datetime?
+  duration_seconds : float
+  size_bytes : int?
+  status : pending|queued|processing|detected|not_detected|failed|skipped
+  target_class : person|vehicle?
+  detector_job_id : string?
+  detector_metadata : json?
+  last_error : text?
+}
+
+entity "DetectionEvent" as DetectionEvent {
+  * id : bigint
+  --
+  camera_id : bigint
+  recording_segment_id : bigint
+  event_type : string
+  event_start_seconds : float?
+  event_end_seconds : float?
+  event_start_at : datetime?
+  event_end_at : datetime?
+  confidence : float?
+  motion_score : float?
+  metadata : json?
+}
+
+entity "DetectionObject" as DetectionObject {
+  * id : bigint
+  --
+  detection_event_id : bigint
+  label : string?
+  confidence : float?
+  track_id : string?
+  bbox : json?
+  bbox_samples : json?
+  mask_ref : string?
+  metadata : json?
+}
+
+User ||--o{ ProcessUser : assigned as operator
+Process ||--o{ ProcessUser : has
+Process ||--o{ Camera : owns
+Camera ||--o{ RecordingSegment : records
+Camera ||--o{ DetectionEvent : scopes
+RecordingSegment ||--o{ DetectionEvent : yields
+DetectionEvent ||--o{ DetectionObject : contains
+
+@enduml

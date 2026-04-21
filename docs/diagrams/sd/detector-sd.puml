@@ -1,0 +1,40 @@
+@startuml
+title media-parser -> fuse-app -> detector
+
+autonumber
+skinparam responseMessageBelowArrow true
+
+participant "media-parser" as MediaParser
+participant "fuse-app" as FuseApp
+database "fuse-database" as FuseDatabase
+
+box "detector" #F5F5F5
+  participant "detector-api" as DetectorApi
+  participant "detector-worker" as DetectorWorker
+end box
+
+MediaParser -> FuseApp: Notify segment completion
+FuseApp -> FuseApp: Validate segment notification
+FuseApp -> FuseDatabase: Persist recording segment
+FuseApp -> DetectorApi: Submit segment for analysis
+DetectorApi -> DetectorWorker: Process analysis job
+DetectorWorker -> FuseApp: Request recorded segment
+FuseApp --> DetectorWorker: Provide segment data
+
+DetectorWorker -> DetectorWorker: Analyze motion
+
+alt No motion
+  DetectorWorker -> FuseApp: Return negative analysis result
+else Motion detected
+  DetectorWorker -> DetectorWorker: Analyze object detection
+  alt No object detected
+    DetectorWorker -> FuseApp: Return negative analysis result
+  else Object detected
+    DetectorWorker -> FuseApp: Return positive analysis result
+  end
+end
+
+FuseApp -> FuseDatabase: Persist analysis outcome
+FuseApp --> DetectorWorker: Return callback acknowledgment
+
+@enduml
