@@ -19,11 +19,23 @@ Em determinados cenários \cite{KISSLING2024141}, existe a impossibilidade desta
 
 \begin{itemize}
     \item Incompatibilidade entre câmaras de diferentes fornecedores, obrigando muitas vezes à utilização de mais do que um software, já que nem todas são totalmente compatíveis com a mesma aplicação.
-    \item Falta de segurança e de privacidade dos dados, uma vez que muitas destas câmaras recorrem a conexões \gls{P2P} quando acedidas fora da \gls{LAN}. Este mecanismo depende, geralmente, de servidores do fabricante, sobre os quais não existe controlo nem garantia de proteção dos dados \cite{Nozomi2021}. Além disso, a comunicação entre a aplicação e a câmara é frequentemente pouco segura e não encriptada, expondo a stream de vídeo e as credenciais a potenciais ataques.
+    \item Falta de segurança e de privacidade dos dados na exposição dos equipamentos à Internet. Para contornar as restrições de rede local (\gls{LAN}), recorre-se tipicamente a duas abordagens: a utilização de conexões \gls{P2P} (que dependem de servidores \textit{relay} do fabricante, sobre os quais não existe controlo nem garantia de proteção dos dados \cite{Nozomi2021}); ou a abertura direta de portas no \textit{router} ou \textit{firewall} local (\textit{port forwarding}), o que aumenta drasticamente a superfície de ataque da rede. Além disso, a comunicação entre a aplicação e a câmara é frequentemente pouco segura e não encriptada, expondo a \textit{stream} de vídeo e as credenciais a potenciais ataques.
     \item Falta de controlo de acessos e gestão de utilizadores, pois a maior parte das aplicações de acesso remoto a \gls{CCTV} são desenvolvidas para cenários onde estas atividades não são a prioridade \cite{Ragothaman2023}, priorizando o acesso intuitivo e rápido.
 \end{itemize}
 
-Para além destas barreiras técnicas e de segurança, emerge um desafio operacional extremamente relevante, particularmente no contexto da segurança pública. Entidades como os \glspl{OPC} dependem de videovigilância para a obtenção de provas. O processo atual, contudo, assenta frequentemente na revisão humana através da visualização integral contínua das gravações efetuadas, distribuindo muitas vezes intervalos de tempo por vários agentes para que seja facilitado. Esta informação foi obtida através de um questionário/entrevista, realizado em conjunto com agentes da investigação criminal da \gls{GNR} e da \gls{PSP}, no qual o objetivo principal seria a validação da existência deste problema. O mesmo pode ser consultado no \autoref{AppendixA}. Ainda assim, este processo torna-se demorado e intensivo, recorrendo a uma enorme quantidade de recursos humanos e tempo, que são valiosos e, infelizmente, escassos \cite{DN2024}.
+A Figura \ref{fig:cenario_atual_cctv} ilustra estes dois paradigmas arquiteturais correntes para o acesso remoto, evidenciando as falhas de segurança e a dependência de infraestruturas de terceiros que caracterizam o cenário atual.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{ch1/assets/processo-atual-conectividade-cctv.png}
+\caption{Cenário atual de acesso remoto a sistemas \gls{CCTV}, destacando a dependência de servidores \gls{P2P} e a exposição insegura via \textit{firewall}.}
+\label{fig:cenario_atual_cctv}
+\end{figure}
+
+-->>Aqui quero referir que estes problemas também se aplicam à seguranca publica, no caso da utilização de meios técnicos para vigilância de suspeitos. <<--
+
+
+ Entidades como os \glspl{OPC} dependem de videovigilância para a obtenção de provas. O processo atual, contudo, assenta frequentemente na revisão humana através da visualização integral contínua das gravações efetuadas, distribuindo muitas vezes intervalos de tempo por vários agentes para que seja facilitado. Esta informação foi obtida através de um questionário/entrevista, realizado em conjunto com agentes da investigação criminal da \gls{GNR} e da \gls{PSP}, no qual o objetivo principal seria a validação da existência deste problema. O mesmo pode ser consultado no \autoref{AppendixA}. Ainda assim, este processo torna-se demorado e intensivo, recorrendo a uma enorme quantidade de recursos humanos e tempo, que são valiosos e, infelizmente, escassos \cite{DN2024}.
 
 Uma vez que estes problemas trazem insegurança e ineficiência, resolvê-los é uma preocupação do encarregado de segurança e \gls{CCTV} de uma entidade pública ou privada, tal como dos agentes encarregues pela obtenção de prova sob videovigilância dentro das polícias de investigação criminal. É neste contexto de múltiplos desafios que surge a proposta deste trabalho: o desenvolvimento do \gls{FUSE}. O \gls{FUSE} é idealizado como uma plataforma de software que centraliza e organiza sistemas de videovigilância heterogéneos e geograficamente dispersos, com um foco integrado na segurança dos dados, na automatização da análise de vídeo, e na manutenção de registos de auditoria e gestão de utilizadores.
 
