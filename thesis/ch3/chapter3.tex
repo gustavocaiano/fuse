@@ -1,28 +1,109 @@
 % Chapter 3
 
-\chapter{Metodologia}
-\label{chap:metodologia}
+\chapter{Análise e Desenho}
+\label{chap:analise_e_desenho}
 
-A metodologia adotada para a realização deste trabalho académico baseia-se no modelo de ``Research Process'' proposto por B. J. Oates no livro ``Researching Information Systems and Computing'' \cite{Oates2006}, ilustrado na Figura \ref{fig:research_process}.
+teste teste
+
+\subsection{Âmbito do MVP}
+
+
+O \gls{MVP} definido para o \gls{FUSE} tem como objetivo validar, de forma experimental, os principais blocos arquiteturais propostos para responder às questões de investigação: a integração unificada de câmaras tecnologicamente heterogéneas, o acesso seguro a dispositivos em redes externas não controladas e a automatização inicial da análise de vídeo. Assim, o \gls{MVP} não pretende constituir uma versão final de produção da plataforma, mas sim um protótipo funcional que demonstre a viabilidade técnica da solução proposta.
+
+No âmbito deste \gls{MVP} serão consideradas, no mínimo, duas câmaras tecnologicamente distintas, expostas através de uma camada de abstração comum. Esta camada deverá permitir normalizar operações essenciais, nomeadamente a visualização em tempo real, o controlo da câmara, denominado de \gls{PTZ}, a gravação e o \textit{playback} das gravações. A comunicação entre as implementações de câmaras e o servidor central será realizada através de um \gls{SBC}, como um Raspberry Pi, atuando como \textit{gateway} através de um um túnel seguro, neste caso com a ferramenta Tailscale (baseada em Wireguard).
+
+Durante o desenvolvimento e validação do \gls{MVP}, será utilizada a infraestrutura de coordenação disponibilizada pelo Tailscale no seu plano gratuito, operada em modelo \gls{SaaS} pela entidade responsável pela tecnologia. Esta opção é assumida como solução prática de desenvolvimento de protótipo, permitindo validar a conectividade segura sem introduzir, nesta fase, a complexidade operacional associada ao alojamento próprio do servidor intermediário da \gls{VPN}. Num cenário final de implementação, esta dependência deverá ser substituída por uma instância de Headscale, uma solução \textit{open-source} e \textit{self-hosted} do servidor de controlo do Tailscale, alojada em infraestrutura própria \cite{headscale_url}.
+
+A componente de análise automática de vídeo será validada até à Fase 2 da \textit{pipeline} proposta. Isto inclui uma primeira fase de deteção de movimento e uma segunda fase de deteção de objetos, recorrendo a modelos de visão computacional adequados ao cenário experimental. Esta delimitação permite avaliar a utilidade da plataforma na redução do esforço de análise manual, sem comprometer o trabalho com funcionalidades mais avançadas que exigiriam uma validação mais extensa e um desenvolvimento alongado.
+
+Ficam fora do âmbito imediato do \gls{MVP} a Fase 3 da \textit{pipeline}, relativa à extração de características através de \glspl{VLM}, a descoberta automática de câmaras e mecanismos de pesquisa forense avançada sobre o histórico de eventos. Estas funcionalidades são consideradas extensões futuras da arquitetura.
+
+Deste modo, o desenvolvimentoconcentra-se na validação dos elementos essenciais do \gls{FUSE}: conectividade segura, abstração de câmaras heterogéneas, disponibilização centralizada de vídeo e deteção automática inicial de eventos. As secções seguintes detalham os requisitos e decisões arquiteturais que concretizam este âmbito.
+
+\section{Requisitos}
+
+\subsection{Requisitos Funcionais}
+
+\subsection{Requisitos Não Funcionais}
+
+\todo{ser self-hosted é um requisito não funcional ?}
+
+\section{Arquitetura da Solução}
+\subsection{Visão Geral da Solução}
+
+\todo{Usar} esta secção para ligar o problema do Cap. 1 à solução proposta: câmaras em redes externas não controladas, acesso via router 4G/5G, \gls{SBC} como gateway remoto e túnel Tailscale/WireGuard até ao servidor FUSE. Explicar que os fluxos de \textit{streaming} e PTZ no diagrama são fluxos lógicos encaminhados através do \gls{SBC}/tailnet, não comunicação direta insegura entre câmara e servidor. Referir também que Tailscale é uma opção prática do \gls{MVP}, com possibilidade futura de Headscale para uma implantação totalmente \textit{self-hosted}.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{ch3/assets/research-process.png} % Placeholder para imagem
-\caption{Diagrama de ''Research Proces'' de B. J. Oates \cite{Oates2006}, aplicado ao contexto do projeto.}
-\label{fig:research_process}
+\includegraphics[width=\textwidth]{ch3/assets/cenario-solucao-fuse-tailscale.png}
+\caption{Cenário de conectividade segura proposto para o FUSE com Tailscale.}
+\label{fig:cenario_solucao_fuse_tailscale}
 \end{figure}
 
-O ponto de partida da investigação enquadra-se em ``Experiences and motivation'', dado que a génese deste projeto deriva diretamente da observação da ineficiência e limitações técnicas enfrentadas pelos \glspl{OPC} e gestores de segurança na recolha de imagens de \gls{CCTV}. Através de feedback adquirido através de questionários e entrevistas com Núcleos (\gls{GNR}) e Esquadras (\gls{PSP}) de Investigação Criminal (\autoref{AppendixA}), estes problemas são confirmados e registrados. Complementarmente, é realizada uma revisão de literatura preliminar para compreender o estado da arte em protocolos de comunicação e visão computacional. Esta análise permitiu identificar a ausência de soluções integradas que garantam simultaneamente segurança em redes não controladas e inteligência analítica avançada. A junção desta necessidade prática (experiência) com a identificação desta lacuna teórica (literatura) resultou na formalização das perguntas de investigação apresentadas anteriormente.
+\subsection{Modelo de Domínio}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{ch3/assets/domain-model.png}
+\caption{Modelo de Domínio}
+\label{fig:domain_model}
+\end{figure}
 
-A estratégia central adotada para este trabalho é a de ``Design and Creation''. Esta abordagem é a mais adequada para projetos de Engenharia de Software cujo objetivo primário é o desenvolvimento de um protótipo que visa resolver muitos dos problemas práticos observados e identificados em determinado cenário, como forma de validação de futura implementação ou desenvolvimento de algo mais avançado. Dentro desta estratégia inserem-se quatro principais passos, nomeadamente Design, Desenvolvimento, Testes e Conclusões.
+\subsection{Componentes Principais}
+\subsection{Infraestrutura e Conectividade}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{ch3/assets/logical-and-physical.jpg}
+\caption{Vista Híbrida que combina Implementação e Lógica}
+\label{fig:physical}
+\end{figure}
+
+\subsection{Interações entre Componentes}
+
+\subsubsection{Processo de Streaming}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{ch3/assets/streaming-sd.png}
+\caption{Vista de Processo de Streaming}
+\label{fig:ssd_streaming}
+\end{figure}
+
+\subsubsection{Processo de Controlo da Câmara}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{ch3/assets/ptz-sd.png}
+\caption{Vista de Processo de Controlo de Câmara}
+\label{fig:ssd_ptz}
+\end{figure}
+
+
+\subsubsection{Processo de Deteção}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{ch3/assets/detector-sd.png}
+\caption{Vista de Processo de Deteção}
+\label{fig:ssd_detector}
+\end{figure}
+
+
+\section{Rastreabilidade das Decisões Arquiteturais}
 
 \begin{itemize}
-    \item \textbf{Design:} O foco será a proposta de arquitetura a seguir no passo seguinte de desenvolvimento.
-    \item \textbf{Desenvolvimento:} Terá como principal objetivo a implementação do protótipo (\gls{MVP}) e da pipeline de análise de vídeo.
-    \item \textbf{Testes:} Incluirão uma avaliação da consistência e qualidade do código, tal como implementação em cenário real, que possibilitará a obtenção de resultados.
-    \item \textbf{Conclusões:} Interpretação dos resultados obtidos para validação da solução.
+    \item \todo{AD-01 --- Solução \textit{self-hosted}: ligar aos objetivos do Cap. 1 sobre soberania dos dados, privacidade e custódia da prova. Tratar como restrição/driver arquitetural, não apenas como requisito não funcional.}
+    \item \todo{AD-02 --- \gls{SBC}/Raspberry Pi como \textit{gateway} remoto: justificar com redes externas 4G/5G, \gls{CGNAT} e câmaras fora da rede institucional/controlada.}
+    \item \todo{AD-03 --- WireGuard/Tailscale para conectividade segura: relacionar com a LRRQ2; evitar \textit{port forwarding}, exposição direta das câmaras e dependência do \gls{P2P} dos fabricantes.}
+    \item \todo{AD-04 --- Camada de abstração / \textit{Digital Twin}: relacionar com a LRRQ1; normalizar câmaras heterogéneas e esconder diferenças de fabricantes, protocolos e capacidades.}
+    \item \todo{AD-05 --- \textit{Streaming} normalizado via \textit{media-parser}/\textit{nginx}: explicar que o \textit{browser} não comunica diretamente com a câmara e consome sempre um fluxo tratado pela plataforma.}
+    \item \todo{AD-06 --- \gls{AI} centralizada no servidor/\gls{GPU}: justificar com o Cap. 2; o \textit{Edge} é usado para conectividade/gateway, enquanto os modelos pesados ficam no servidor central.}
+    \item \todo{AD-07 --- \textit{Pipeline} incremental: Fase 1/2 no \gls{MVP} e Fase 3 pós-\gls{MVP}; evitar prometer validação da Fase 3 se esta for apenas extensão arquitetural.}
+    \item \todo{AD-08 --- \gls{ABAC}, auditoria e cadeia de custódia: ligar ao contexto forense; acesso por utilizador/processo/câmara/ação e registo de visualização, PTZ, exportação e deteção.}
 \end{itemize}
 
-Relativamente aos resultados e à sua avaliação, será usado o método de ``Interviews'' com utilizadores finais, sendo estes \glspl{OPC} ou encarregados de segurança de uma outra entidade, de modo a recolher feedback e validação do funcionamento do protótipo e respetiva utilidade do mesmo. Em adição, será também usado o método de ``Observation'', onde se poderá obter e quantificar resultados e taxas de correspondência na análise automática de eventos e objetos.
 
-Quanto à análise de dados, optou-se por uma abordagem mista que integra os dois métodos disponíveis: ``Quantitative'' e ``Qualitative''. A análise quantitativa incidirá sobre as métricas técnicas recolhidas durante os testes do protótipo, tais como as taxas de precisão e alerta na deteção e classificação de objetos (Fase 2 e 3 da pipeline), a latência do streaming via túnel \gls{VPN}, os tempos de processamento da análise de vídeo, entre outros. Já a análise qualitativa será aplicada à interpretação do feedback dos utilizadores e das observações de cenário real, avaliando o impacto operacional da ferramenta, a eficácia percebida na redução do tempo de investigação e a adequação da interface aos processos de trabalho dos \glspl{OPC}.
+\section{Síntese}
+
+\begin{itemize}
+    \item \todo{Resumir que o capítulo transformou requisitos e estado da arte num desenho arquitetural para o FUSE.}
+    \item \todo{Fechar a arquitetura em quatro blocos: conectividade segura via \gls{SBC}/VPN; abstração de câmaras via \textit{Digital Twin}; \textit{streaming}/gravação centralizados; detector centralizado com \textit{pipeline} incremental.}
+    \item \todo{Reforçar o âmbito do \gls{MVP}: validação de \textit{streaming}, PTZ e deteção até Fase 2; Fase 3/VLM e hardening total \textit{self-hosted} ficam como evolução.}
+    \item \todo{Criar ponte para o Cap. 4: a implementação concretiza os componentes, interfaces e fluxos definidos neste capítulo.}
+\end{itemize}

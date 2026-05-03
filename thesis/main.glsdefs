@@ -110,6 +110,34 @@ parent={},%
 %
 }%
 
+\glsdefs@newdocentry{PTZ}%
+{%
+name={\acronymfont {\glsentryshort {PTZ}}},%
+sort={PTZ},%
+type={acronym},%
+first={PTZ},%
+firstplural={PTZs},%
+text={PTZ},%
+plural={PTZs},%
+description={Pan-Tilt-Zoom},%
+descriptionplural={Pan-Tilt-Zoom},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Pan-Tilt-Zoom},%
+longplural={Pan-Tilt-Zooms},%
+short={PTZ},%
+shortplural={PTZs},%
+counter={page},%
+parent={},%
+%
+}%
+
 \glsdefs@newdocentry{CCTV}%
 {%
 name={\acronymfont {\glsentryshort {CCTV}}},%

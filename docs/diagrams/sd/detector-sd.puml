@@ -1,5 +1,5 @@
 @startuml
-title media-parser -> fuse-app -> detector
+
 
 autonumber
 skinparam responseMessageBelowArrow true

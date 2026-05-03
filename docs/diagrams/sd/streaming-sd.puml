@@ -1,5 +1,5 @@
 @startuml
-title fuse-nginx -> fuse-app -> media-parser
+
 
 autonumber
 skinparam responseMessageBelowArrow true

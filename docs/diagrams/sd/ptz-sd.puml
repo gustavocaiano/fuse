@@ -1,5 +1,5 @@
 @startuml
-title fuse-app -> digital-twin -> camera-deployment
+
 
 autonumber
 skinparam responseMessageBelowArrow true

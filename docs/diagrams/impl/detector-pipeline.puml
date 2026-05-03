@@ -1,0 +1,104 @@
+@startuml
+
+' Diagrama de atividade centrado no processamento interno do detector.
+' A receção do segmento, orquestração assíncrona, comunicação de resultado
+' e persistência são tratados nos diagramas de sequência e no modelo de domínio.
+' Esta versão representa a pipeline implementada/validada até à Fase 2.
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+
+skinparam ArrowColor #5D748A
+skinparam ArrowThickness 1.1
+skinparam ArrowFontColor #374151
+skinparam ArrowFontSize 10
+
+skinparam ActivityBorderColor #374151
+skinparam ActivityBackgroundColor #FFFFFF
+skinparam ActivityFontColor #111827
+skinparam ActivityDiamondBorderColor #374151
+skinparam ActivityDiamondBackgroundColor #F9FAFB
+skinparam ActivityStartColor #374151
+skinparam ActivityEndColor #374151
+
+skinparam note {
+  BorderColor #9CA3AF
+  BackgroundColor #F9FAFB
+  FontColor #374151
+}
+
+start
+
+:Segmento de vídeo
+recebido pelo detector;
+
+
+partition "Fase 1 - Deteção de Movimento" {
+  :Selecionar frames do vídeo
+  de acordo com configuração de FPS;
+
+  :Preparar cada frame selecionado
+  (tons de cinzento e redução de ruído);
+
+  :Comparar cada frame com o anterior
+  para identificar alterações;
+
+  :Comparar movimento detetado com 
+  sensibilidade configurada;
+
+  if (Há movimento relevante?) then (sim)
+    :Delimitar os intervalos do vídeo
+    onde ocorreu atividade;
+
+    :Agrupar intervalos próximos
+    numa janela de análise;
+  else (não)
+    :Terminar análise sem deteção
+    (NOT_DETECTED);
+    stop
+  endif
+}
+
+partition "Fase 2 - Deteção de objetos" {
+  :Aplicar YOLOv11-seg
+  com seguimento temporal
+  às janelas com movimento;
+
+  :Manter apenas deteções do tipo
+  de objeto pretendido e com
+  índice de confiança suficiente;
+
+  note right
+    pessoa, veículo, etc...
+  end note
+
+  if (Foi encontrado objeto de interesse?) then (sim)
+    :Consolidar deteções repetidas
+    do mesmo objeto ao longo do tempo;
+
+    :Produzir evento de deteção
+    com objetos, bounding box
+    e intervalo temporal;
+  else (não)
+    :Terminar análise sem deteção
+    (NOT_DETECTED);
+    stop
+  endif
+}
+
+partition "Fase 3 - Extração de atributos" {
+  if (Extração de atributos implementada?) then (Sim (Trabalho Futuro))
+    :Extração de atributos (Por implementar);
+  else (Não (MVP))
+    
+  endif
+}
+
+:Terminar análise com deteção confirmada
+(DETECTED);
+
+stop
+
+@enduml

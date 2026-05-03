@@ -1,10 +1,10 @@
 @startuml
-title Fuse - Domain Model
+
 
 hide circle
 hide methods
 skinparam classAttributeIconSize 0
-skinparam linetype ortho
+skinparam linetype ortho 
 
 entity "User" as User {
   * id : bigint
@@ -14,6 +14,22 @@ entity "User" as User {
   email : string
   is_confirmed : bool
   has_email_authentication : bool
+}
+
+entity "Role" as Role {
+  * id : bigint
+  --
+  name : string
+  guard_name : string
+  ad_group_name : string?
+}
+
+entity "Permission" as Permission {
+  * id : bigint
+  --
+  name : string
+  guard_name : string
+  group : string
 }
 
 entity "Process" as Process {
@@ -29,6 +45,9 @@ entity "Process" as Process {
 entity "process_user" as ProcessUser {
   * process_id : bigint
   * user_id : bigint
+  -- 
+  start_at : datetime?
+  end_at : datetime?
 }
 
 entity "Camera" as Camera {
@@ -45,7 +64,7 @@ entity "Camera" as Camera {
   rec : bool
   detection_enabled : bool
   detection_target_class : person|vehicle
-  ptz_protocol : PTZProtocol?
+  ptz_protocol : string?
   ptz_port : string?
 }
 
@@ -58,8 +77,8 @@ entity "RecordingSegment" as RecordingSegment {
   started_at : datetime?
   duration_seconds : float
   size_bytes : int?
-  status : pending|queued|processing|detected|not_detected|failed|skipped
-  target_class : person|vehicle?
+  status : queued | processing | detected | not_detected | failed
+  target_class : person | vehicle?
   detector_job_id : string?
   detector_metadata : json?
   last_error : text?
@@ -93,12 +112,15 @@ entity "DetectionObject" as DetectionObject {
   metadata : json?
 }
 
-User ||--o{ ProcessUser : assigned as operator
-Process ||--o{ ProcessUser : has
-Process ||--o{ Camera : owns
-Camera ||--o{ RecordingSegment : records
-Camera ||--o{ DetectionEvent : scopes
-RecordingSegment ||--o{ DetectionEvent : yields
-DetectionEvent ||--o{ DetectionObject : contains
+User }o--o{ Role 
+Role }o-down-o{ Permission 
+User ||.down.o{ ProcessUser 
+Process ||..o{ ProcessUser  
+Process ||--o{ Camera 
+Camera ||--o{ RecordingSegment 
+Camera ||--o{ DetectionEvent 
+RecordingSegment ||-left-o{ DetectionEvent 
+
+DetectionEvent ||-up-o{ DetectionObject 
 
 @enduml
