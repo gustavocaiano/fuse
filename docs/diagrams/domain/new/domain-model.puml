@@ -1,0 +1,111 @@
+@startuml
+
+
+
+
+hide circle
+hide methods
+skinparam classAttributeIconSize 0
+
+skinparam linetype ortho
+skinparam shadowing false
+skinparam nodesep 90
+skinparam ranksep 75
+skinparam ArrowFontSize 11
+skinparam ArrowThickness 1
+skinparam ArrowColor #2F3A4A
+
+
+
+class "Utilizador" as Utilizador {
+  nome
+  email
+}
+
+class "Role" as Role {  
+  nome
+}
+
+class "Permissão" as Permissao {
+  ação : Tipo de ação
+  entidade relacionada
+}
+
+class "Processo" as Processo {
+  NUIPC
+  data de abertura
+  tipo de crime
+}
+
+class "Câmara" as Camara {
+  identificação
+  localização
+  url
+  alvo de deteção
+}
+
+class "Segmento de Gravação" as SegmentoGravacao {
+  período temporal
+  estado de processamento
+}
+
+class "Evento de Deteção" as EventoDetecao {
+  tipo
+  segundo de início
+  segundo de fim
+  confiança
+  revisto
+  relevância
+}
+
+class "Objeto Detetado" as ObjetoDetetado {
+  classe
+  confiança
+  localização na imagem
+}
+
+
+
+' enum "classe de deteção" as DetectionTargetClass {
+'   person
+'   vehicle
+' }
+
+' enum "estado de processamento" as SegmentStatus {
+'   pending
+'   queued
+'   processing
+'   detected
+'   not_detected
+'   failed
+'   skipped
+' }
+
+enum "Tipo de ação" as Action {
+  CRIAR
+  ELIMINAR
+  DESTRUIR
+  RESTAURAR
+  ATUALIZAR
+  VISUALIZAR
+  VISUALIZAR_TODAS
+}
+
+
+Utilizador "0..*" -right- "0..*" Role : assume
+Role "0..*" -right- "0..*" Permissao : agrega
+Permissao .right.> Action
+
+Processo "0..*" -right- "0..*" Utilizador : investigado por
+Camara "0..*" -down- "0..1" Processo : está afeta a
+ ' Camara "1" .. "1" DetectionTargetClass : asd
+
+Camara "1" -right- "0..*" SegmentoGravacao : gera
+SegmentoGravacao "1" -right- "0..*" EventoDetecao : é identificado
+' SegmentoGravacao "1" -right- "1" SegmentStatus : tem estado
+EventoDetecao "1" -right- "0..*" ObjetoDetetado : contém
+
+
+
+
+@enduml
