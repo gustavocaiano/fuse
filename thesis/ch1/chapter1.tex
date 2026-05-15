@@ -25,14 +25,15 @@ Em organizações com instalações geograficamente distribuídas, é frequente 
     \item Falta de controlo de acessos e gestão de utilizadores, pois a maior parte das aplicações de acesso remoto a \gls{CCTV} prioriza o acesso intuitivo e rápido em detrimento de políticas rigorosas de segurança \cite{Ragothaman2023}.
 \end{itemize}
 
-A Figura \ref{fig:cenario_atual_cctv} ilustra estes dois paradigmas arquiteturais correntes para o acesso remoto, evidenciando as falhas de segurança e a dependência de infraestruturas de terceiros que caracterizam o cenário atual.
-
+A Figura \ref{fig:cenario_atual_cctv} ilustra os dois paradigmas arquiteturais que ocorrem com mais frequência para o acesso remoto.
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{ch1/assets/processo-atual-conectividade-cctv.png}
 \caption{Cenário atual de acesso remoto a sistemas \gls{CCTV}, destacando a dependência de servidores \gls{P2P} e a exposição insegura via \textit{firewall}.}
 \label{fig:cenario_atual_cctv}
 \end{figure}
+
+No primeiro, as conexões são estabelecidas através de um servidor intermediário do fabricante dos dispositivos. No segundo, as conexões são estabelecidas diretamente entre o cliente e a câmara, tendo que o acesso à mesma ser exposto publicamente à Internet. Os cenários descritos evidenciam as falhas de segurança e a dependência de infraestruturas de terceiros que caracterizam o cenário atual.
 
 Estes desafios arquiteturais e de segurança assumem uma gravidade particular no âmbito da segurança pública. Quando os \glspl{OPC} recorrem à instalação de meios técnicos de videovigilância para monitorização de suspeitos, deparam-se frequentemente com a necessidade de operar em redes externas não controladas. Nestes cenários críticos, a dependência de plataformas heterogéneas e as vulnerabilidades do acesso remoto comprometem não só a segurança operacional, mas também a integridade da própria cadeia de custódia da prova.
 
@@ -63,9 +64,9 @@ A resposta à questão central de investigação (RQ1) será materializada atrav
 De forma a operacionalizar a resposta às questões de investigação formuladas e garantir a criação de um artefacto funcional e robusto, foram definidos os seguintes objetivos para o desenvolvimento e validação do \gls{FUSE}:
 
 \begin{itemize}
-    \item Desenvolver uma arquitetura de software extensível que, através de uma camada de abstração, normalize a comunicação com câmaras de diferentes fornecedores. O sistema deverá suportar um protocolo base de \textit{streaming} como o \gls{RTSP} e centralizar as funcionalidades de visualização em tempo real, gravação, e \textit{playback} numa interface unificada.
+    \item Desenvolver uma arquitetura de software extensível que, através de uma camada de abstração, normalize a comunicação com câmaras de diferentes fornecedores. O sistema deverá receber e suportar o \textit{streaming} e centralizar as funcionalidades de visualização em tempo real, gravação, e \textit{playback} numa interface unificada.
     \item Implementar um modelo de comunicação seguro, Secured By Design, que utilize túneis \gls{VPN} para isolar e criptografar a comunicação entre as câmaras externas e o servidor de implementação da aplicação.
-    \item Desenvolver um sistema de controlo de acessos baseado em ações (modelo \gls{ABAC}) para gerir as permissões de utilizadores de forma granular e garantir a auditoria das ações.
+    \item Desenvolver um sistema de controlo de acessos baseado em permissões granulares e verificações contextuais, permitindo gerir ações por utilizador, processo, câmara e recurso, bem como garantir a auditoria das operações relevantes.
     \item Integrar um módulo de análise de vídeo para a deteção automatizada de eventos complexos, implementando uma \textit{pipeline} de processamento progressivo em três fases:
     \begin{itemize}
         \item Fase 1 (Deteção de Atividade): Identificação de movimento e atividade relevante nos streams de vídeo para filtrar segmentos de interesse.
@@ -78,12 +79,14 @@ De forma a operacionalizar a resposta às questões de investigação formuladas
 
 Quanto aos principais contributos deste trabalho, espera-se que do ponto de vista técnico-científico surja uma arquitetura referência para integração segura e inteligente de sistemas \gls{CCTV} distribuídos, principalmente quando há a presença de interoperabilidade entre redes não controladas e controladas. Por outro lado, do ponto de vista social e operacional, tenciona-se validar a ferramenta para que esta possa vir a aumentar significativamente a eficiência e eficácia da investigação criminal dos \glspl{OPC}, otimizando a alocação de recursos e reduzindo o tempo de análise manual do vídeo.
 
-\subsubsection{Requisitos da Entidade}
-\todo{adicionar aqui os requisitos da entidade} 
-exemplo: é necessário que a solução tenha X e que seja feita em Y
-\todo{Decidir se devo deixar esta sub-secção aqui}
+\subsection{Requisitos da Entidade}
+\label{subsec:requisitos_entidade}
 
+Para além dos objetivos anteriormente definidos, a entidade de acolhimento estabelece um conjunto de requisitos tecnológicos para o desenvolvimento do projeto.
 
+Em primeiro lugar, a aplicação principal do \gls{FUSE}, excluindo eventuais módulos independentes que possam justificar a utilização de outras ferramentas, deverá ser desenvolvida sobre a stack tecnológica Laravel + Filament. Esta opção permite alinhar o desenvolvimento com o ecossistema técnico já dominado pela entidade, acelerando a implementação do \gls{MVP} e facilitando a futura manutenção, extensão e integração da plataforma.
+
+Adicionalmente, sempre que tecnicamente viável deverá ser privilegiada a utilização de soluções \textit{open-source}. Este princípio aplica-se à escolha de bibliotecas, dependências e componentes de infraestrutura, reduzindo a dependência de soluções proprietárias e aumentando a auditabilidade do sistema.
 
 \section{Metodologia}
 \label{sec:metodologia}
@@ -130,7 +133,14 @@ No âmbito do último ponto, apesar do alvo ser legislar o reconhecimento biomé
 A análise focada na ''Fase 3'' da \textit{pipeline} de deteção automática restringe-se à identificação de características objetivas (e.g., cor de vestuário, tipo de veículo) para auxiliar a pesquisa forense, mantendo sempre o princípio da validação humana, onde a decisão final cabe ao agente humano e não ao algoritmo.
 
 \subsection{Utilização de \gls{AI}}
-Como será de obviar, no decorrer desta dissertação foi utilizada \gls{AI} para auxiliar a produção do documento. como exemplo das utilizações dou o exemplo de \todo{PARAGRAFO EM CONSTRUÇÃO}
+\label{subsec:utilizacao_ai}
+
+No decorrer desta dissertação foram utilizadas ferramentas de \gls{AI} como apoio ao processo de escrita, revisão e organização do trabalho. Todas as respostas geradas foram analisadas, editadas e validadas pelo autor, que assume integral responsabilidade pelo conteúdo final apresentado.
+
+O \textit{harness} mais utilizado foi o \textit{opencode}, que permite orquestrar \glspl{LLM} e disponibilizar-lhes, quando necessário, acesso controlado aos ficheiros do repositório, incluindo os ficheiros \texttt{.tex} da dissertação. Adicionalmente, foi utilizada uma \textit{skill} de apoio à escrita académica, designada \textit{academic-writing}, baseada numa \textit{skill} pública disponibilizada num repositório GitHub \cite{JamditisAcademicWritingSkill}, tendo sido apenas traduzida e adaptada para trabalho académico em português.
+
+Foi também utilizada \gls{AI} generativa para apoiar a criação da Figura \ref{fig:cenario_atual_cctv}, apresentada na introdução do problema. O objetivo desta utilização foi produzir uma representação explicativa e intuitiva do cenário atual de acesso remoto a sistemas \gls{CCTV}. O prompt usado para esse efeito, assim como outros prompts relevantes utilizados ao longo do trabalho, encontram-se publicamente disponíveis no repositório do projeto \cite{CaianoFUSEPrompts2026}.
+
 
 \section{Planeamento}
 \label{sec:planeamento}
@@ -163,6 +173,8 @@ Contudo, como ilustrado na Figura \ref{fig:gantt}, existe trabalho planeado até
 
 \section{Estrutura do Documento}
 \label{sec:estrutura_documento}
+
+\todo{FALTA COISAS AQUIIII ATENCAOOOOO}
 
 Este documento está organizado em capítulos que apresentam de forma estruturada o trabalho desenvolvido. O \autoref{chap:introducao} (\nameref{chap:introducao}) apresenta o contexto do problema, as questões de investigação, os objetivos, as considerações éticas, a metodologia adotada, o planeamento do projeto e a estrutura do documento.
 

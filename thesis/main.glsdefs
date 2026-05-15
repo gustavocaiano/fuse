@@ -866,6 +866,34 @@ parent={},%
 %
 }%
 
+\glsdefs@newdocentry{LLM}%
+{%
+name={\acronymfont {\glsentryshort {LLM}}},%
+sort={LLM},%
+type={acronym},%
+first={LLM},%
+firstplural={LLMs},%
+text={LLM},%
+plural={LLMs},%
+description={Large Language Model},%
+descriptionplural={Large Language Model},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Large Language Model},%
+longplural={Large Language Models},%
+short={LLM},%
+shortplural={LLMs},%
+counter={page},%
+parent={},%
+%
+}%
+
 \glsdefs@newdocentry{RTS}%
 {%
 name={\acronymfont {\glsentryshort {RTS}}},%
@@ -1281,6 +1309,62 @@ long={Time-Sensitive Networking},%
 longplural={Time-Sensitive Networkings},%
 short={TSN},%
 shortplural={TSNs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{NUIPC}%
+{%
+name={\acronymfont {\glsentryshort {NUIPC}}},%
+sort={NUIPC},%
+type={acronym},%
+first={NUIPC},%
+firstplural={NUIPCs},%
+text={NUIPC},%
+plural={NUIPCs},%
+description={Número Único de Identificação de Processo Crime},%
+descriptionplural={Número Único de Identificação de Processo Crime},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Número Único de Identificação de Processo Crime},%
+longplural={Número Único de Identificação de Processo Crimes},%
+short={NUIPC},%
+shortplural={NUIPCs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{BBOX}%
+{%
+name={\acronymfont {\glsentryshort {BBOX}}},%
+sort={BBOX},%
+type={acronym},%
+first={BBOX},%
+firstplural={BBOXs},%
+text={BBOX},%
+plural={BBOXs},%
+description={Bounding Box},%
+descriptionplural={Bounding Box},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Bounding Box},%
+longplural={Bounding Boxs},%
+short={BBOX},%
+shortplural={BBOXs},%
 counter={page},%
 parent={},%
 %
