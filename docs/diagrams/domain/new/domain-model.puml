@@ -1,4 +1,4 @@
-@startuml newmd
+@startuml domain-model
 
 
 
@@ -27,7 +27,6 @@ class "Role" as Role {
 }
 
 class "Permissão" as Permissao {
-  ação : Tipo de ação
   entidade relacionada
 }
 
@@ -94,7 +93,7 @@ enum "Tipo de ação" as Action {
 
 Utilizador "0..*" -right- "0..*" Role : assume
 Role "0..*" -right- "0..*" Permissao : agrega
-Permissao .right.> Action
+Permissao  "0..*" -right-  "1" Action : do tipo
 
 Processo "0..*" -right- "0..*" Utilizador : investigado por
 Camara "0..*" -down- "0..1" Processo : está afeta a
