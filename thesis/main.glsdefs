@@ -1090,6 +1090,34 @@ parent={},%
 %
 }%
 
+\glsdefs@newdocentry{HTTPS}%
+{%
+name={\acronymfont {\glsentryshort {HTTPS}}},%
+sort={HTTPS},%
+type={acronym},%
+first={HTTPS},%
+firstplural={HTTPSs},%
+text={HTTPS},%
+plural={HTTPSs},%
+description={Hypertext Transfer Protocol Secure},%
+descriptionplural={Hypertext Transfer Protocol Secure},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Hypertext Transfer Protocol Secure},%
+longplural={Hypertext Transfer Protocol Secures},%
+short={HTTPS},%
+shortplural={HTTPSs},%
+counter={page},%
+parent={},%
+%
+}%
+
 \glsdefs@newdocentry{MQTT}%
 {%
 name={\acronymfont {\glsentryshort {MQTT}}},%

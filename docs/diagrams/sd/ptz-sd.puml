@@ -5,7 +5,7 @@ autonumber
 skinparam responseMessageBelowArrow true
 
 actor "browser" as Browser
-participant "fuse-app" as FuseApp
+participant "app" as FuseApp
 participant "digital-twin" as DigitalTwin
 box "camera-deployment" #F5F5F5
   participant "camera" as Camera

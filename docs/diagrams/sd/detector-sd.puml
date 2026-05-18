@@ -5,8 +5,8 @@ autonumber
 skinparam responseMessageBelowArrow true
 
 participant "media-parser" as MediaParser
-participant "fuse-app" as FuseApp
-database "fuse-database" as FuseDatabase
+participant "app" as FuseApp
+database "database" as FuseDatabase
 
 box "detector" #F5F5F5
   participant "detector-api" as DetectorApi

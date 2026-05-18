@@ -28,7 +28,7 @@ Source: `helpers/prompts/01-cenario-atual-cctv-acesso-remoto.md`
 Source: `thesis/ch2/chapter2.tex:152-175`
 
 - Expor dispositivos IoT diretamente à Internet é descrito como impraticável/inseguro.
-- Em redes móveis 4G/5G existe o problema de **CGNAT**, que inviabiliza acesso direto tradicional.
+- Em redes móveis 4G existe o problema de **CGNAT**, que inviabiliza acesso direto tradicional.
 - A solução proposta inverte o modelo: o dispositivo em edge inicia o túnel / participa numa rede P2P para atravessar NAT sem configuração complexa.
 - O protocolo escolhido é **WireGuard**, pela baixa latência e baixo overhead.
 - A arquitetura FUSE materializa-se com **cada câmara (ou conjunto de câmaras) acompanhada por um SBC**, especificamente um **Raspberry Pi**.
@@ -159,7 +159,7 @@ Source: `README.md`
 - **Próximo artefacto preferido:** **PUML**.
 - **Estilo visual pretendido para futura figura:** **semelhante** ao prompt académico anterior (mesmo tom, com alguma liberdade).
 - **Estratégia visual de comparação:** **duas figuras separadas** — uma para o problema e outra para a solução.
-- **Uplink do router local no novo deployment:** **4G/5G no router**.
+- **Uplink do router local no novo deployment:** **4G no router**.
 - **Estado da recolha nesta fase:** parar aqui; base considerada suficiente por agora.
 
 ## Current direction locked for next step
@@ -174,7 +174,7 @@ Source: `README.md`
 - **1 local remoto** de referência.
 - **1 câmara + 1 router local + 1 SBC**.
 - **Câmara e SBC ligados ao router local**.
-- **Router com uplink 4G/5G**.
+- **Router com uplink 4G**.
 - **Servidor central FUSE** dentro da **tailnet**.
 - **Utilizador final** acede por **web normal** ao servidor central.
 - O **SBC** atua como **router VPN** com **Tailscale**, expondo a **LAN pequena da câmara** via subnet routing (detalhe preferencialmente na legenda).

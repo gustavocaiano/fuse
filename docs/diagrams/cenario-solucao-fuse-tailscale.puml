@@ -50,7 +50,7 @@ rectangle "Servidor FUSE\n«tailnet»" as FUSE
 cloud "Internet" as Net
 
 package "Local remoto" as Remote {
-  rectangle "Router local\n4G / 5G" as Router
+  rectangle "Router local\n4G" as Router
   rectangle "SBC\n«tailnet»" as SBC
   rectangle "Câmara IP" as Camera
 
@@ -61,7 +61,7 @@ package "Local remoto" as Remote {
 ' Conectividade IP física (sólido)
 User --> FUSE : acesso web
 FUSE -- Net
-Net -- Router : uplink 4G / 5G
+Net -- Router
 
 ' Túnel Tailscale (linha ponto-a-ponto, end-to-end entre endpoints da tailnet)
 FUSE .. SBC : Tailscale

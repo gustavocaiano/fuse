@@ -5,8 +5,8 @@ autonumber
 skinparam responseMessageBelowArrow true
 
 actor "browser" as Browser
-participant "fuse-nginx" as Nginx
-participant "fuse-app" as FuseApp
+participant "nginx" as Nginx
+participant "app" as FuseApp
 participant "media-parser" as MediaParser
 
 Browser -> Nginx: Request camera view
@@ -20,7 +20,7 @@ Nginx -> Nginx: Validate stream authorization
 note right of Nginx
   Stream access is granted only when
   the request matches the policy
-  issued by fuse-app.
+  issued by app.
 end note
 
 alt Cookie invalid or expired
