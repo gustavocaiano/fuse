@@ -1,0 +1,44 @@
+@startuml
+
+
+autonumber
+skinparam responseMessageBelowArrow true
+
+actor "browser" as Browser
+participant "app" as FuseApp
+participant "digital-twin" as DigitalTwin
+box "camera-deployment" #F5F5F5
+  participant "camera" as Camera
+end box
+
+Browser -> FuseApp: Regista câmara ou inicia descoberta PTZ
+
+group Descoberta automática de endpoint PTZ
+  loop Para cada endpoint habitual
+    FuseApp -> Camera: Testa endpoint PTZ 
+    alt Endpoint PTZ compatível encontrado
+      Camera --> FuseApp: Devolve compatibilidade
+      break
+    else Sem endpoint PTZ compatível
+      Camera --> FuseApp: Indica indisponibilidade/Sem resposta
+    end
+  end
+end
+
+FuseApp -> FuseApp: Guarda configuração PTZ descoberta
+
+Browser -> FuseApp: Aciona controlo PTZ 
+
+alt Configuração PTZ disponível
+  FuseApp -> DigitalTwin: Envia comando PTZ com configurações
+  FuseApp --> Browser: Informa comando aceite
+  DigitalTwin -> Camera: Encaminha comando PTZ
+  Camera -> Camera: [movimento] 
+  Camera --> DigitalTwin: Responde com sucesso
+  DigitalTwin --> FuseApp: Confirma resultado do comando
+  
+else Configuração PTZ em falta
+  FuseApp --> Browser: Informa PTZ indisponível
+end
+
+@enduml

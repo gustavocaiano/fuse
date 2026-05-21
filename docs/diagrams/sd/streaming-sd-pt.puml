@@ -1,0 +1,42 @@
+@startuml
+
+
+autonumber
+skinparam responseMessageBelowArrow true
+
+actor "browser" as Browser
+participant "nginx" as Nginx
+participant "app" as FuseApp
+participant "media-parser" as MediaParser
+
+Browser -> Nginx: Solicita visualização da câmara
+Nginx -> FuseApp: Encaminha pedido aplicacional
+FuseApp -> FuseApp: Valida permissões e atribui cookie de autorização
+FuseApp --> Nginx: Devolve página e cookie de autorização
+Nginx --> Browser: Entrega página e cookie de autorização
+
+Browser -> Nginx: Solicita stream de vídeo
+Nginx -> Nginx: Valida cookie de autorização de stream
+
+
+alt Cookie inválido ou expirado
+  Nginx --> Browser: Recusa pedido de stream
+else Cookie válido
+  Nginx -> MediaParser: Encaminha pedido de streaming
+  MediaParser --> Nginx: Devolve fragmentos de stream
+  Nginx --> Browser: Entrega fragmentos de stream
+
+  loop Stream em direto
+    Browser -> Nginx: Solicita próximo fragmento de stream
+    Nginx -> MediaParser: Encaminha pedido
+    MediaParser --> Nginx: Devolve fragmento de stream
+    Nginx --> Browser: Entrega fragmento de stream
+  end
+end
+
+group Conclusão de gravação de segmento de video
+  MediaParser -> FuseApp: Notifica conclusão de gravação de segmento
+  FuseApp -> FuseApp: Valida notificação de gravação
+end
+
+@enduml

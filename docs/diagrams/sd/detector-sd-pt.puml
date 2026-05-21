@@ -1,0 +1,47 @@
+@startuml
+
+
+autonumber
+skinparam responseMessageBelowArrow true
+
+participant "media-parser" as MediaParser
+participant "app" as FuseApp
+participant "nginx" as Nginx
+database "database" as FuseDatabase
+
+box "detector" #F5F5F5
+  participant "detector-api" as DetectorApi
+  participant "detector-worker" as DetectorWorker
+end box
+
+MediaParser -> FuseApp: Notifica gravação do segmento
+FuseApp -> FuseApp: Valida notificação
+FuseApp -> FuseDatabase: Persiste segmento
+FuseApp -> DetectorApi: Submete pedido de análise
+DetectorApi -> DetectorWorker: Processa tarefa de análise
+DetectorWorker -> Nginx: Solicita segmento
+Nginx -> FuseApp: Encaminha pedido do segmento
+FuseApp --> Nginx: Disponibiliza segmento
+Nginx --> DetectorWorker: Entrega segmento
+
+DetectorWorker -> DetectorWorker: Analisa movimento
+
+alt Sem movimento
+  DetectorWorker -> Nginx: Devolve resultado negativo da análise
+  Nginx -> FuseApp: Encaminha resultado negativo da análise
+else Movimento detetado
+  DetectorWorker -> DetectorWorker: Analisa deteção de objetos
+  alt Sem objeto detetado
+    DetectorWorker -> Nginx: Devolve resultado negativo da análise
+    Nginx -> FuseApp: Encaminha resultado negativo da análise
+  else Objeto detetado
+    DetectorWorker -> Nginx: Devolve resultado positivo da análise
+    Nginx -> FuseApp: Encaminha resultado positivo da análise
+  end
+end
+
+FuseApp -> FuseDatabase: Persiste resultado
+FuseApp --> Nginx: Devolve confirmação do callback
+Nginx --> DetectorWorker: Entrega confirmação do callback
+
+@enduml

@@ -42,13 +42,13 @@ entity "Process" as Process {
   deadline_at : datetime?
 }
 
-entity "process_user" as ProcessUser {
-  * process_id : bigint
-  * user_id : bigint
-  -- 
-  start_at : datetime?
-  end_at : datetime?
-}
+' entity "process_user" as ProcessUser {
+'   * process_id : bigint
+'   * user_id : bigint
+'   -- 
+'   start_at : datetime?
+'   end_at : datetime?
+' }
 
 entity "Camera" as Camera {
   * id : bigint
@@ -114,11 +114,10 @@ entity "DetectionObject" as DetectionObject {
 
 User }o--o{ Role 
 Role }o-down-o{ Permission 
-User ||.down.o{ ProcessUser 
-Process ||..o{ ProcessUser  
+Process }o-o{ User  
 Process ||--o{ Camera 
 Camera ||--o{ RecordingSegment 
-Camera ||--o{ DetectionEvent 
+
 RecordingSegment ||-left-o{ DetectionEvent 
 
 DetectionEvent ||-up-o{ DetectionObject 

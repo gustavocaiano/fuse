@@ -52,16 +52,16 @@ Decompondo esta pergunta para uma melhor e mais estruturada compreensão, a inve
 
 \textbf{RQ1.1:} Como pode ser desenhada uma camada de abstração de software que normalize as funcionalidades (visualização, controlo, gravação) de câmaras de diferentes interfaces e especificações técnicas distintas, garantindo a extensibilidade futura do sistema?
 
-\textbf{RQ1.2:} Que mecanismos de rede e protocolos de comunicação podem ser utilizados para garantir a confidencialidade e integridade da comunicação com câmaras localizadas em redes não fidedignas, sem introduzir vulnerabilidades na rede de destino e agregação das várias streams?
+\textbf{RQ1.2:} Que mecanismos de rede e protocolos de comunicação podem ser utilizados para garantir a confidencialidade e integridade da comunicação com câmaras localizadas em redes não fidedignas, sem introduzir vulnerabilidades na rede de destino e agregação das várias \textit{streams}?
 
 \textbf{RQ1.3:} Como podem ser integrados modelos de visão computacional para a automatização da deteção de eventos, validando a utilização da plataforma proposta para otimização de processos de investigação criminal?
 
-A resposta à questão central de investigação (RQ1) será materializada através da implementação e validação experimental da plataforma \gls{FUSE}. Todo o processo encontra-se detalhado na \autoref{sec:metodologia} referente à Metodologia. No entanto, para fundamentar as decisões técnicas necessárias na implementação do \gls{MVP} analisar-se-ão as sub-questões operacionais, no \autoref{chap:estado_da_arte}.
+Estas questões irão ser respondidas ao longo do decorrer do documento. A resposta à questão central de investigação (RQ1) será também materializada através da implementação e validação experimental da plataforma \gls{FUSE}. Todo o processo encontra-se detalhado na \autoref{sec:metodologia} referente à Metodologia. No entanto, para fundamentar as decisões técnicas necessárias na implementação do \gls{MVP} analisar-se-ão as sub-questões operacionais, no \autoref{chap:estado_da_arte}.
 
 \section{Objetivos}
 \label{sec:objetivos}
 
-De forma a operacionalizar a resposta às questões de investigação formuladas e garantir a criação de um artefacto funcional e robusto, foram definidos os seguintes objetivos para o desenvolvimento e validação do \gls{FUSE}:
+De forma a operacionalizar a resposta às questões de investigação formuladas e garantir a criação de um \gls{MVP}, foram definidos os seguintes objetivos para o desenvolvimento e validação do \gls{FUSE}:
 
 \begin{itemize}
     \item Desenvolver uma arquitetura de software extensível que, através de uma camada de abstração, normalize a comunicação com câmaras de diferentes fornecedores. O sistema deverá receber e suportar o \textit{streaming} e centralizar as funcionalidades de visualização em tempo real, gravação, e \textit{playback} numa interface unificada.
@@ -69,7 +69,7 @@ De forma a operacionalizar a resposta às questões de investigação formuladas
     \item Desenvolver um sistema de controlo de acessos baseado em permissões granulares e verificações contextuais, permitindo gerir ações por utilizador, processo, câmara e recurso, bem como garantir a auditoria das operações relevantes.
     \item Integrar um módulo de análise de vídeo para a deteção automatizada de eventos complexos, implementando uma \textit{pipeline} de processamento progressivo em três fases:
     \begin{itemize}
-        \item Fase 1 (Deteção de Atividade): Identificação de movimento e atividade relevante nos streams de vídeo para filtrar segmentos de interesse.
+        \item Fase 1 (Deteção de Atividade): Identificação de movimento e atividade relevante nos \textit{streams} de vídeo para filtrar segmentos de interesse.
         \item Fase 2 (Classificação de Objetos): Análise dos segmentos filtrados para detectar e classificar objetos de categorias pré-definidas (e.g., humanos, veículos, animais).
         \item Fase 3 (Extração de Atributos): Análise aprofundada dos objetos classificados para extrair características específicas e customizáveis, como matrículas e cores de veículos, ou atributos de vestuário e acessórios de pessoas, que servirão de base para alertar ao \gls{OPC} de determinado evento complexo.
     \end{itemize}
@@ -118,19 +118,23 @@ Do ponto de vista profissional, o trabalho enquadra-se nos princípios estrutura
 
 O \gls{FUSE} envolve uma \textit{pipeline} de análise automática aplicada em contextos de videovigilância, potencialmente incidindo sobre a obtenção de dados pessoais identificáveis. Estes dados sensíveis apenas serão obtidos num contexto de validação do \gls{MVP} em cenário real, que estará sempre salvaguardado por despacho judicial para fornecimento de meios técnicos e respetiva autorização de captação de imagens. Ainda assim, a \textit{pipeline} é desenhada procurando alinhar-se com o EU AI Act \cite{EU_AI_Act}, mitigando o risco de o sistema incorrer em ''Unacceptable risks''.
 
-Para além do enquadramento legal via despacho judicial para os testes em ambiente real, a privacidade a longo prazo é assegurada pelo design arquitetural da solução (\textit{Privacy by Design}). Ao optar-se por um modelo \textit{self-hosted} em detrimento de \gls{SaaS}, garante-se que a custódia das imagens permanece sempre sob o controlo exclusivo dos \glspl{OPC} ou da entidade detentora, onde a plataforma é implementada.
+Para além do enquadramento legal via despacho judicial para os testes em ambiente real, a privacidade a longo prazo é assegurada pelo design arquitetural da solução (Privacy by Design). Ao optar-se por um modelo \textit{self-hosted} em detrimento de \gls{SaaS}, garante-se que a custódia das imagens permanece sempre sob o controlo exclusivo dos \glspl{OPC} ou da entidade detentora, onde a plataforma é implementada.
 
 O sistema não se destina, nem permite, práticas proibidas tais como:
 
 \begin{itemize}
     \item \textit{Social scoring} ou manipulação comportamental;
-    \item Recolha indiscriminada (untargeted scraping) de imagens de \gls{CCTV} para criação de bases de dados de reconhecimento facial;
+    \item Recolha indiscriminada (\textit{untargeted scraping}) de imagens de \gls{CCTV} para criação de bases de dados de reconhecimento facial;
     \item Identificação biométrica remota em tempo real em espaços públicos para fins policiais (real-time remote biometric identification).
 \end{itemize}
 
-No âmbito do último ponto, apesar do alvo ser legislar o reconhecimento biométrico em tempo-real, justifica-se a conformidade pela natureza da análise automática, que será realizada sob gravações dos eventos, e não sob o próprio streaming.
+No âmbito do último ponto, apesar do alvo ser legislar o reconhecimento biométrico em tempo-real, justifica-se a conformidade pela natureza da análise automática, que será realizada sob gravações dos eventos, e não sob o próprio \textit{streaming}.
+
+\todo{A questão que coloco aqui é como garantes que o sistema é utilizado de acordo com estas regras??}
 
 A análise focada na ''Fase 3'' da \textit{pipeline} de deteção automática restringe-se à identificação de características objetivas (e.g., cor de vestuário, tipo de veículo) para auxiliar a pesquisa forense, mantendo sempre o princípio da validação humana, onde a decisão final cabe ao agente humano e não ao algoritmo.
+
+
 
 \subsection{Utilização de \gls{AI}}
 \label{subsec:utilizacao_ai}
@@ -139,7 +143,7 @@ No decorrer desta dissertação foram utilizadas ferramentas de \gls{AI} como ap
 
 O \textit{harness} mais utilizado foi o \textit{opencode}, que permite orquestrar \glspl{LLM} e disponibilizar-lhes, quando necessário, acesso controlado aos ficheiros do repositório, incluindo os ficheiros \texttt{.tex} da dissertação. Adicionalmente, foi utilizada uma \textit{skill} de apoio à escrita académica, designada \textit{academic-writing}, baseada numa \textit{skill} pública disponibilizada num repositório GitHub \cite{JamditisAcademicWritingSkill}, tendo sido apenas traduzida e adaptada para trabalho académico em português.
 
-Foi também utilizada \gls{AI} generativa para apoiar a criação da Figura \ref{fig:cenario_atual_cctv}, apresentada na introdução do problema. O objetivo desta utilização foi produzir uma representação explicativa e intuitiva do cenário atual de acesso remoto a sistemas \gls{CCTV}. O prompt usado para esse efeito, assim como outros prompts relevantes utilizados ao longo do trabalho, encontram-se publicamente disponíveis no repositório do projeto \cite{CaianoFUSEPrompts2026}.
+Foi também utilizada \gls{AI} generativa para apoiar a criação da Figura \ref{fig:cenario_atual_cctv}, apresentada na introdução do problema. O objetivo desta utilização foi produzir uma representação explicativa e intuitiva do cenário atual de acesso remoto a sistemas \gls{CCTV}. O \textit{prompt} usado para esse efeito, assim como outros \textit{prompts} relevantes utilizados ao longo do trabalho, encontram-se disponíveis no repositório público do projeto \cite{CaianoFUSEPrompts2026}.
 
 
 \section{Planeamento}

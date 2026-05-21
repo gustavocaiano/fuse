@@ -3,7 +3,7 @@
 \chapter{Análise e Desenho}
 \label{chap:analise_e_desenho}
 
-Este capítulo encontra-se organizado em duas partes complementares: a análise e o desenho da solução proposta para o \gls{FUSE}. A primeira parte centra-se na compreensão e delimitação do problema a resolver, definindo o âmbito do \gls{MVP}, os requisitos funcionais e não funcionais e os principais conceitos representados no modelo de domínio. A segunda parte traduz essa análise numa proposta arquitetural, descrevendo a organização da solução, a utilização do Tailscale como mecanismo de conectividade segura, os componentes principais, a infraestrutura de suporte e as interações entre os diferentes serviços que compõem a plataforma.
+Este capítulo encontra-se organizado em duas partes complementares: a análise e o desenho da solução proposta para o \gls{FUSE}. A primeira parte centra-se na compreensão e delimitação do problema a resolver, definindo o âmbito do \gls{MVP}, os requisitos funcionais e não funcionais e os principais conceitos representados no modelo de domínio. A segunda parte traduz essa análise numa proposta arquitetural, descrevendo a organização da solução, a utilização de mecanismos de conexão segura, os componentes principais, a infraestrutura de suporte e as interações entre os diferentes serviços que compõem a plataforma.
 
 \section{Análise}
 
@@ -21,11 +21,11 @@ A componente de análise automática de vídeo será validada até à Fase 2 da 
 
 Ficam fora do âmbito imediato do \gls{MVP} a Fase 3 da \textit{pipeline}, relativa à extração de características através de \glspl{VLM}, a descoberta automática de câmaras e mecanismos de pesquisa forense avançada sobre o histórico de eventos. Estas funcionalidades são consideradas extensões futuras da arquitetura.
 
-Deste modo, o desenvolvimento concentra-se na validação dos elementos essenciais do \gls{FUSE}: conectividade segura, abstração de câmaras heterogéneas, disponibilização centralizada de vídeo e deteção automática inicial de eventos. As secções seguintes detalham os requisitos e decisões arquiteturais que concretizam este âmbito.
+Deste modo, o desenvolvimento concentra-se na validação dos elementos essenciais do \gls{FUSE}: conectividade segura, abstração de câmaras heterogéneas, disponibilização centralizada de vídeo e deteção automática inicial de eventos. As subsecções seguintes detalham os requisitos e decisões arquiteturais que concretizam este âmbito.
 
 
 \subsection{Modelo de Domínio}
-No modelo de domínio representado na Figura \ref{fig:domain_model}, podemos observar os conceitos fundamentais do sistema, incluindo as entidades, as relações entre elas e os principais atributos de negócio. Trata-se, portanto, de um modelo de domínio conceptual, e não de um modelo lógico ou de dados.
+No modelo de domínio representado na Figura \ref{fig:domain_model}, observa-se os conceitos fundamentais do sistema, incluindo as entidades, as relações entre elas e os principais atributos de negócio. Trata-se, portanto, de um modelo de domínio conceptual, e não de um modelo lógico ou de dados.
 
 
 \begin{figure}[H]
@@ -40,19 +40,19 @@ A conceptualização da plataforma encontra-se dividida em três grupos semânti
 \subsubsection{Gestão de Processos e Controlo de Acessos}
 O conceito agregador do domínio operacional é o \textbf{Processo}, que representa um Processo de investigação criminal. Este é inequivocamente identificado pelo seu \gls{NUIPC}, e é caracterizado pela sua data de abertura e tipo de crime.
 
-Um \textbf{Utilizador} participa em múltiplos processos e, inversamente, um processo pode ter vários investigadores associados, sendo o objetivo pretendido que um utilizador apenas possa aceder aos processos que lhe foram atribuídos. De forma a suportar um controlo de acessos granular, o modelo de autorização não se baseia num acesso monolítico, mas sim numa estrutura composta por \textit{\textbf{Role}} e \textbf{Permissão}. Um utilizador pode assumir várias \textit{roles} e cada papel pode agregar múltiplas permissões, permitindo definir perfis de acesso ajustados às responsabilidades de cada interveniente. Contudo, as \textit{roles} funcionam sobretudo como agregadores administrativos de permissões, não substituindo as verificações de autorização realizadas sobre ações e recursos concretos. Assim, as decisões sensíveis de acesso deverão considerar a permissão aplicável, o recurso acedido e o contexto operacional, nomeadamente a associação entre utilizador, processo e câmara. Esta abordagem está alinhada com princípios de \textit{secure-by-design}, evitando perfis excessivamente permissivos e promovendo validações granulares ao nível da aplicação. A Permissão tem ainda um associado um \textbf{Tipo de Ação} (e.g. VISUALIZAR, CRIAR, ELIMINAR, etc.) e um atributo referente à sua entidade relacionada (e.g. Processo, Utilizador, etc.).
+Um \textbf{Utilizador} participa em múltiplos processos e, inversamente, um processo pode ter vários investigadores (utilizadores) associados, sendo o objetivo pretendido que um utilizador apenas possa aceder aos processos que lhe foram atribuídos. De forma a suportar um controlo de acessos granular, o modelo de autorização não se baseia num acesso monolítico, mas sim numa estrutura composta por \textit{\textbf{Role}} e \textbf{Permissão}. Um utilizador pode assumir várias \textit{roles} e cada papel pode agregar múltiplas permissões, permitindo definir perfis de acesso ajustados às responsabilidades de cada interveniente. Contudo, as \textit{roles} funcionam sobretudo como agregadores administrativos de permissões, não substituindo as verificações de autorização realizadas sobre ações e recursos concretos. Assim, as decisões sensíveis de acesso deverão considerar a permissão aplicável, o recurso acedido e o contexto operacional, nomeadamente a associação entre utilizador, processo e câmara. Esta abordagem está alinhada com princípios de Secure by Design, evitando perfis excessivamente permissivos e promovendo validações granulares ao nível da aplicação. A Permissão tem ainda um associado um \textbf{Tipo de Ação} (e.g. VISUALIZAR, CRIAR, ELIMINAR, etc.) e um atributo referente à sua entidade relacionada (e.g. Processo, Utilizador, etc.).
 
 \subsubsection{Dispositivos e Gravação de Vídeo}
-A \textbf{Câmara} atua como a entidade física e lógica central, afeta a um Processo. Para além da sua identificação e do local de instalação, a câmara é caracterizada pelo seu url de acesso, bem como pelo alvo de deteção configurado.
-O Vídeo capturado pela Câmara não é tratado como uma entidade contínua infinita, mas sim particionada por segmentos. Assim, uma Câmara gera múltiplos \textbf{Segmentos de Gravação}, que consistem em unidades temporais de vídeo persistido. Estes segmentos possuem um período temporal definido que os posiciona temporalmente e um estado de processamento da deteção automática, servindo como base para a posterior análise assíncrona.
+A \textbf{Câmara} atua como a entidade física e lógica central, afeta a um Processo. Para além da sua identificação e do local de instalação, a câmara é caracterizada pelo seu endredeço de acesso (url), bem como pelo alvo de deteção configurado.
+O vídeo capturado pela Câmara não é tratado como uma entidade contínua infinita, mas sim particionada por segmentos. Assim, uma Câmara gera múltiplos \textbf{Segmentos de Gravação}, que consistem em unidades temporais de vídeo persistido. Estes segmentos possuem um período temporal definido que os posiciona temporalmente e um estado de processamento da deteção automática, servindo como base para a posterior análise assíncrona.
 
 \subsubsection{Análise Automática e Triagem}
-Este grupo foca-se na deteção e extração de conhecimento. Um Segmento de Gravação é analisado para identificar \textbf{Eventos de Deteção}. Cada evento representa uma ocorrência detetada num determinado instante ou período de tempo, possuindo um grau de confiança gerado pelo modelo de inteligência artificial. Para justificar a ocorrência, o Evento de Deteção contém pelo menos um \textbf{Objeto Detetado}, que inclui a sua própria classe, grau de confiança e localização espacial na imagem. Esta localização na imagem será descrita pelo seu nome técnico \textit{\gls{BBOX}} no decorrer deste documento.
+Este grupo foca-se na deteção e extração de conhecimento. Um Segmento de Gravação é analisado para identificar \textbf{Eventos de Deteção}. Cada evento representa uma ocorrência detetada num determinado instante ou período de tempo, possuindo um grau de confiança gerado pelo modelo de inteligência artificial. Para justificar a ocorrência, o Evento de Deteção contém pelo menos um \textbf{Objeto Detetado}, que inclui a sua própria classe, grau de confiança e localização espacial na imagem. Esta localização na imagem será descrita pelo seu nome técnico \gls{BBOX} no decorrer deste documento.
 Uma vez que a validação da prova exige supervisão humana, o Evento de Deteção contempla atributos adequados para o efeito, nomeadamente o estado de revisão e a sua relevância. Isto permite aos investigadores assinalar quais as deteções automáticas que constituem efetivamente interesse para o Processo, bem como reconhecer facilmente os eventos por rever.
 
 \subsection{Requisitos}
 
-Esta secção apresenta os requisitos que orientam o desenho e a validação do \gls{MVP}. Considerando que a solução proposta assume a forma de um protótipo arquitetural, os requisitos são formulados ao nível das capacidades essenciais a demonstrar, e não como uma especificação exaustiva de produto. Assim, são distinguidos requisitos funcionais e requisitos não funcionais.
+Esta subsecção apresenta os requisitos que orientam o desenho e a validação do \gls{MVP}. Considerando que a solução proposta assume a forma de um protótipo arquitetural, os requisitos são formulados ao nível das capacidades essenciais a demonstrar, e não como uma especificação exaustiva de produto. Assim, são distinguidos requisitos funcionais e requisitos não funcionais.
 
 \subsubsection{Requisitos Funcionais}
 Os requisitos funcionais identificam as capacidades observáveis que o \gls{MVP} deve demonstrar para validar a solução proposta. A \autoref{tab:requisitos_funcionais} apresenta o conjunto de requisitos funcionais definidos para orientar o desenho do protótipo.
@@ -109,7 +109,7 @@ Para evitar que estes requisitos permaneçam apenas como declarações abstratas
         \textbf{RNF-01} & Qualitativa e experimental & Considera-se satisfeito se o acesso remoto às câmaras for realizado sem exposição direta dos dispositivos à Internet, sem recurso a um servidor do fabricante, e se existirem evidências de registo de ações relevantes, como visualização, controlo, exportação ou operações de gestão. \\
         \textbf{RNF-02} & Qualitativa & Considera-se satisfeito se a solução puder ser implementada em infraestrutura controlada pela entidade final, recorrendo a \textit{containers}, sem dependência de hardware proprietário específico nem de serviços \textit{cloud} para armazenamento ou processamento de dados. \\
         \textbf{RNF-03} & Qualitativa & Considera-se satisfeito se os principais componentes comunicarem através de interfaces bem definidas, permitindo a evolução ou substituição independente de módulos como o \textit{media-parser}, o \textit{digital-twin} e o detetor. Esta validação deverá ser suportada por separação de responsabilidades, injeção de dependências e ausência de acoplamento forte entre componentes. \\
-        \textbf{RNF-04} & Quantitativa & Considera-se satisfeito, no cenário experimental do \gls{MVP}, se o atraso fim-a-fim do \textit{streaming} se mantiver abaixo de 6 segundos e se um evento detetado pela \textit{pipeline} automática ficar disponível para consulta ou alerta em menos de 5 minutos após a sua ocorrência no segmento analisado. \\
+        \textbf{RNF-04} & Quantitativa & Considera-se satisfeito, no cenário experimental do \gls{MVP}, se o atraso de uma ponta a outra do \textit{streaming} se mantiver abaixo de 6 segundos e se um evento detetado pela \textit{pipeline} automática ficar disponível para consulta ou alerta em menos de 5 minutos após a sua ocorrência no segmento analisado. \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -184,61 +184,74 @@ Deste modo, esta subsecção define a estrutura estática da infraestrutura e da
 
 \subsection{Interações entre Componentes}
 
-Esta seção complementará a anterior, explicando interaçãoes sequenciais entre os diferentes módulos apresentados
+Esta subsecção complementa a anterior, descrevendo as interações sequenciais entre os diferentes módulos apresentados. Enquanto a vista anterior caracteriza a estrutura estática da solução, os diagramas seguintes representam os principais fluxos operacionais do \gls{MVP}.
+
+Os diagramas apresentados devem ser interpretados como representações conceptuais dos principais fluxos de interação entre componentes. O seu objetivo não é listar todas as chamadas internas ou detalhes de implementação, mas sim evidenciar as responsabilidades dos componentes, os pontos de decisão relevantes e a ordem geral das interações. Assim, alguns passos internos são abstraídos quando não alteram a compreensão arquitetural do processo, sendo os detalhes técnicos de implementação aprofundados no \autoref{chap:implementacao}.
 
 \subsubsection{Processo de Streaming}
-A figura X representa o processo sequencial da aquisição do streaming e autorização do mesmo.
+
+A Figura \ref{fig:ssd_streaming} representa o processo de acesso ao \textit{streaming} em direto de uma câmara, desde o pedido inicial de visualização até à entrega contínua dos fragmentos de vídeo ao utilizador. Também aborda o tema da gravação e respetivas interações entre os componentes encarregues da gestão da mesma.
+
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{ch3/assets/streaming-sd.png}
+\includegraphics[width=\textwidth]{ch3/assets/streaming-sd-pt.png}
 \caption{Vista de Processo de Streaming}
 \label{fig:ssd_streaming}
 \end{figure}
 
-ler puml file e depois descrever a sequência (regras para o AI : descreve apenas a sequência com um pouco de detalhe e eu preencho a intenção)
+Este fluxo evidencia a separação entre a lógica aplicacional e a entrega do vídeo. O \textit{browser} não acede diretamente ao \textit{media-parser}; em vez disso, todo o acesso passa pelo \textit{nginx}, que atua como ponto controlado de entrada. A \textit{app} valida se o utilizador tem permissões para visualizar a câmara no contexto do processo associado e, quando o acesso é autorizado, emite um mecanismo temporário de autorização utilizado nos pedidos seguintes de \textit{streaming}.
+
+Após essa validação, o \textit{nginx} passa a decidir se os pedidos de fragmentos devem ser aceites ou recusados, encaminhando apenas os pedidos válidos para o \textit{media-parser}. Esta organização evita que o componente responsável pela gestão multimédia tenha de conhecer diretamente o modelo de utilizadores, processos e permissões da aplicação. O ciclo representado no diagrama traduz a natureza contínua do \textit{streaming} em direto. Adicionalmente, a notificação de conclusão de gravação de segmento demonstra a ligação entre a disponibilização do vídeo, a gravação segmentada e os processos posteriores de análise automática. Assim, quando o \textit{media-parser} termina a gravação de um segmento de vídeo, notifica a \textit{app} para que esta possa proceder com os seguintes passos incidentes da gravação. 
 
 \subsubsection{Processo de Controlo da Câmara}
-A figura X representa o processo sequencial da controlo da câmara.
+
+A Figura \ref{fig:ssd_ptz} representa o processo de descoberta e execução de comandos de controlo \gls{PTZ} sobre uma câmara instalada.
+
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{ch3/assets/ptz-sd.png}
-\caption{Vista de Processo de Controlo de Câmara}
+\includegraphics[width=\textwidth]{ch3/assets/ptz-sd-pt.png}
+\caption{Vista do processo de controlo da câmara}
 \label{fig:ssd_ptz}
 \end{figure}
 
-ler puml file e depois descrever a sequência (regras para o AI : descreve apenas a sequência com um pouco de detalhe e eu preencho a intenção)
+Este fluxo encontra-se dividido em dois momentos principais. O primeiro corresponde à descoberta automática de um \textit{endpoint} \gls{PTZ} compatível, realizada durante o registo ou configuração da câmara. Esta etapa é necessária porque diferentes dispositivos podem disponibilizar o controlo remoto em portas ou interfaces distintas, e porque nem todas as câmaras suportam operações \gls{PTZ}. A configuração encontrada é posteriormente guardada pela \textit{app}, evitando que este processo tenha de ser repetido antes de cada comando.
+
+O segundo momento corresponde à execução do comando de controlo. O utilizador aciona a operação através do \textit{browser}, mas a câmara continua a não ser controlada diretamente pelo cliente. A \textit{app} verifica se existe configuração \gls{PTZ} disponível e, caso exista, encaminha o comando e o \textit{endpoint} compatível para o \textit{digital-twin}. Este componente atua como camada de abstração operacional, convertendo a intenção da aplicação num comando adequado à câmara física. Caso a configuração não esteja disponível, a plataforma informa o utilizador de que o controlo \gls{PTZ} não pode ser utilizado.
+
+Importa notar que a confirmação enviada ao \textit{browser} indica apenas que o comando foi aceite e encaminhado pela plataforma, não significando necessariamente que o movimento físico da câmara já tenha sido concluído. Esta opção evita bloquear a interação do utilizador durante o intervalo que pode existir entre a emissão do comando e a execução efetiva do movimento pelo dispositivo. O resultado da operação permanece, assim, tratado internamente entre o \textit{digital-twin}, a \textit{camera} e a \textit{app}.
 
 \subsubsection{Processo de Deteção}
-A figura X representa o processo sequencial da deteção automática da solução.
+
+A Figura \ref{fig:ssd_detector} representa o processo de deteção automática desencadeado após a gravação de um segmento de vídeo.
+
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{ch3/assets/detector-sd.png}
-\caption{Vista de Processo de Deteção}
+\includegraphics[width=\textwidth]{ch3/assets/detector-sd-pt.png}
+\caption{Vista do processo de deteção automática}
 \label{fig:ssd_detector}
 \end{figure}
-ler puml file e depois descrever a sequência (regras para o AI : descreve apenas a sequência com um pouco de detalhe e eu preencho a intenção)
 
-\todo{Adicionar aqui um parágrafo conceptual sobre o papel arquitetural do detetor: explicar que é um componente externo ao núcleo da aplicação, acionado de forma assíncrona após a conclusão de segmentos de gravação, fora do caminho crítico do \textit{streaming} em direto, e responsável por devolver eventos/objetos detetados para revisão humana. Manter o foco na comunicação entre \textit{fuse-app} e \textit{detector}; não detalhar aqui a \textit{pipeline} interna, porque essa explicação e a respetiva figura ficam no Capítulo~\ref{chap:implementacao}.}
+Este fluxo evidencia que a análise automática não ocorre diretamente sobre o \textit{streaming} em direto, mas sim sobre segmentos de vídeo já gravados. Quando o \textit{media-parser} conclui a gravação de um segmento, notifica a \textit{app}, que valida essa notificação, regista o segmento na \textit{database} e submete posteriormente um pedido de análise ao \textit{detector-api}. Desta forma, o processo de deteção é acionado fora do caminho crítico da visualização em tempo real e em segundo plano.
+
+O detetor automático é tratado como um módulo externo ao núcleo aplicacional. A \textit{app} coordena a submissão do pedido, mas o processamento efetivo é realizado pelo \textit{detector-worker}, permitindo que as tarefas de visão computacional decorram de forma assíncrona e separada da lógica principal da plataforma. Quando necessita de obter o ficheiro de vídeo a analisar, o \textit{detector-worker} solicita o segmento através do \textit{nginx}, mantendo uma fronteira controlada entre o módulo de deteção e os recursos geridos pela aplicação.
+
+No interior do detetor, o diagrama representa apenas as decisões principais da \textit{pipeline}: a existência de movimento relevante e, quando aplicável, a deteção de objetos de interesse. Os detalhes internos desta \textit{pipeline}, incluindo os algoritmos e modelos utilizados, são tratados no \autoref{chap:implementacao}. Após a análise, o resultado é devolvido à \textit{app}, novamente através do \textit{nginx}, sendo de seguida persistido na \textit{database}.
 
 \section{Rastreabilidade das Decisões Arquiteturais}
 
-\begin{itemize}
-    \item \todo{AD-01 --- Solução \textit{self-hosted}: ligar aos objetivos do Cap. 1 sobre soberania dos dados, privacidade e custódia da prova. Tratar como restrição/driver arquitetural, não apenas como requisito não funcional.}
-    \item \todo{AD-02 --- \gls{SBC}/Raspberry Pi como \textit{gateway} remoto: justificar com redes externas 4G, \gls{CGNAT} e câmaras fora da rede institucional/controlada.}
-    \item \todo{AD-03 --- WireGuard/Tailscale para conectividade segura: relacionar com a LRRQ2; evitar \textit{port forwarding}, exposição direta das câmaras e dependência do \gls{P2P} dos fabricantes.}
-    \item \todo{AD-04 --- Camada de abstração / \textit{Digital Twin}: relacionar com a LRRQ1; normalizar câmaras heterogéneas e esconder diferenças de fabricantes, protocolos e capacidades.}
-    \item \todo{AD-05 --- \textit{Streaming} normalizado via \textit{media-parser}/\textit{nginx}: explicar que o \textit{browser} não comunica diretamente com a câmara e consome sempre um fluxo tratado pela plataforma.}
-    \item \todo{AD-06 --- \gls{AI} centralizada no servidor/\gls{GPU}: justificar com o Cap. 2; o \textit{Edge} é usado para conectividade/gateway, enquanto os modelos pesados ficam no servidor central.}
-    \item \todo{AD-07 --- \textit{Pipeline} incremental: Fase 1/2 no \gls{MVP} e Fase 3 pós-\gls{MVP}; evitar prometer validação da Fase 3 se esta for apenas extensão arquitetural.}
-    \item \todo{AD-08 --- Permissões granulares, auditoria e cadeia de custódia: ligar ao contexto forense; acesso por utilizador/processo/câmara/ação e registo de visualização, PTZ, exportação e deteção.}
-\end{itemize}
+Após a apresentação da arquitetura, importa explicar a origem de algumas das decisões que, sem esta fundamentação, poderiam ser interpretadas como arbitrárias ou insuficientemente justificadas.
+
+A utilização de um \gls{SBC} como \textit{gateway} remoto responde diretamente ao RF-02 e ao RNF-01, uma vez que permite alcançar a câmara através de um elemento intermédio controlado. A LRRQ2 reforça esta opção ao identificar as limitações associadas a redes móveis, cenários com \gls{CGNAT}, \textit{port forwarding} e dependência de mecanismos \gls{P2P} dos fabricantes. Associada a esta decisão está a conectividade segura através de um túnel baseado em WireGuard/Tailscale. Esta opção também se relaciona com o RF-02 e com o RNF-01, por permitir acesso remoto seguro sem exposição pública da câmara. A fundamentação principal encontra-se na LRRQ2, onde os túneis modernos baseados em WireGuard são apresentados como uma alternativa adequada a abordagens mais pesadas ou dependentes de infraestrutura proprietária. No contexto do \gls{MVP}, o Tailscale é assumido como meio prático para validar esta conectividade, mantendo a possibilidade de evolução futura para uma alternativa \textit{self-hosted}, como o Headscale.
+
+As camadas de abstração de vídeo e abstração operacional da câmara respondem ao RF-01 e concretizam o RNF-03, ao permitir que os componentes responsáveis pela comunicação com as câmaras evoluam ou sejam substituídos de forma independente. Adicionalmente, suportam os requisitos de visualização e controlo, RF-04 e RF-05, ao atribuir responsabilidades distintas ao \textit{media-parser}, para gestão do vídeo, e ao \textit{digital-twin}, para operações de controlo \gls{PTZ}. Esta opção encontra fundamento na LRRQ1, onde a literatura analisada defende a utilização de camadas intermédias para reduzir a dependência direta do hardware.
+
+A disponibilização do \textit{streaming} através do \textit{media-parser} e do \textit{nginx} concretiza o RF-04 e contribui para o RNF-01. O \textit{browser} não comunica diretamente com a câmara, sendo a complexidade de entrega do \textit{streaming} abstraída pelo componente \textit{nginx}. Esta decisão é coerente com a LRRQ1, que identifica a normalização do \textit{streaming} como requisito relevante para o desacoplamento entre cliente e dispositivo físico.
+
+Por fim, a execução assíncrona da análise automática num servidor de deteção especializado responde ao RF-07 e contribui para o RNF-03 e para o RNF-04. A separação do detetor face ao núcleo aplicacional reforça a modularidade da solução, enquanto a execução assíncrona evita bloquear a aplicação principal ou a visualização em direto. Esta decisão é suportada pelo estudo do estado da arte em visão computacional, que evidencia as limitações de executar modelos de \gls{AI} em dispositivos \textit{edge} de baixo custo e justifica a centralização do processamento pesado em infraestrutura com capacidade gráfica adequada.
 
 
 \section{Síntese}
 
-\begin{itemize}
-    \item \todo{Resumir que o capítulo transformou requisitos e estado da arte num desenho arquitetural para o FUSE.}
-    \item \todo{Fechar a arquitetura em quatro blocos: conectividade segura via \gls{SBC}/VPN; abstração de câmaras via \textit{Digital Twin}; \textit{streaming}/gravação centralizados; detector centralizado com \textit{pipeline} incremental.}
-    \item \todo{Reforçar o âmbito do \gls{MVP}: validação de \textit{streaming}, PTZ e deteção até Fase 2; Fase 3/VLM e hardening total \textit{self-hosted} ficam como evolução.}
-    \item \todo{Criar ponte para o Cap. 4: a implementação concretiza os componentes, interfaces e fluxos definidos neste capítulo.}
-\end{itemize}
+Este capítulo definiu o âmbito do \gls{MVP}, o modelo de domínio e os requisitos que orientam o desenho da solução. A partir dessa análise, foi proposta uma arquitetura conceptual para o \gls{FUSE}, estruturada em torno da conectividade segura a câmaras remotas, da abstração de dispositivos heterogéneos, da disponibilização centralizada de \textit{streaming} e gravação, e da integração de análise automática de vídeo.
+
+As decisões arquiteturais apresentadas procuram responder aos problemas identificados nos capítulos anteriores, mantendo o foco na validação experimental. O \autoref{chap:implementacao} descreve a concretização técnica desta arquitetura, detalhando os componentes, configurações e mecanismos implementados.
