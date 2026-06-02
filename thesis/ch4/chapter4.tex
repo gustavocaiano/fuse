@@ -111,7 +111,7 @@ O conceito de \textit{Câmara} foi implementado com uma chave estrangeira para \
 
 O \textit{Segmento de Gravação} foi modelado com uma chave estrangeira \textit{camera\_id}, uma vez que cada segmento de gravação corresponde sempre ao vídeo captado por uma câmara específica. Por sua vez, o \textit{Evento de Deteção} referencia o segmento onde a ocorrência foi identificada, através de \textit{recording\_segment\_id}. Como um evento de deteção pode envolver vários objetos detetados no mesmo intervalo temporal, o modelo \textit{Objeto de Deteção} referencia o evento correspondente através de uma chave estrangeira para \textit{Evento de Deteção}. Esta organização concretiza, na base de dados, a sequência descrita no modelo de domínio: câmara, segmento de gravação, evento de deteção e objetos detetados.
 
-Na componente de processos e acessos aos mesmos, a relação entre \textit{Process} e \textit{User} foi implementada através da tabela intermédia \textbf{process\_user}, permitindo associar utilizadores aos processos em que participam. A autorização baseada em papéis e permissões é suportada pelas tabelas de associação do sistema de permissões, nomeadamente \textbf{user\_has\_roles}, que associa utilizadores a \textit{roles}, e \textbf{role\_has\_permissions}, que define as permissões agregadas por cada perfil. Desta forma, a implementação mantém separada a pertença de um utilizador a um processo e o conjunto de permissões que esse utilizador possui na aplicação.
+Na componente de processos e acessos aos mesmos, a relação entre \textit{Processo} e \textit{Utilizador} foi implementada através da tabela intermédia \textbf{process\_user}, permitindo associar utilizadores aos processos em que participam. A modelação de papéis e permissões é retomada na subsecção seguinte, onde se descreve o mecanismo de controlo de acessos da aplicação.
 
 \subsection{Controlo de Acessos na Aplicação}
 
@@ -121,10 +121,10 @@ O controlo de acessos na aplicação foi implementado através da combinação d
 
 A associação entre utilizadores e processos é materializada pela tabela pivot \textit{process\_user}. Esta tabela representa os utilizadores atribuídos a cada processo e é usada como base para restringir as consultas efetuadas nos recursos operacionais da aplicação. Assim, quando um utilizador sem privilégios de gestão lista processos ou câmaras, a consulta é automaticamente limitada ao seu contexto operacional.
 
-O \autoref{lst:ch4_process_filtering} apresenta um excerto demonstrativo do mecanismo usado quando é necessário listar Processos e Câmaras na aplicação. 
+O \autoref{lst:ch4_process_filtering} apresenta um excerto demonstrativo do mecanismo usado quando é necessário listar processos e câmaras na aplicação. 
 
 \par\noindent\begin{minipage}{\linewidth}
-\begin{lstlisting}[caption={Excerto da filtragem por processo e câmara (php)},label={lst:ch4_process_filtering}]
+\begin{lstlisting}[caption={Excerto demonstrativo da filtragem por processo e câmara (php)},label={lst:ch4_process_filtering}]
 public static function getEloquentQuery(): Builder
 {
     return parent::getEloquentQuery()
@@ -169,7 +169,6 @@ Caso o utilizador não tenha esta permissão, o método \textbf{whereUserIsOpera
 Estes dois métodos são aplicados ao \textit{Processo} e à \textit{Câmara} através do \textit{trait} \textbf{HasProcessFiltering}. Desta maneira, futuramente, caso seja necessário estender a aplicação, este filtro funcionará com todos os modelos que usem este \textit{trait} e que, pela lógica de negócio, estejam associados a um processo.
 
 
-
 \subsubsection{\textit{Roles} e Permissões}
 
 A autorização das ações não depende diretamente das \textit{roles}, mas sim das permissões atribuídas a estas. As \textit{roles} funcionam como agregadores administrativos de permissões, permitindo que a configuração final da aplicação seja ajustada no momento de implantação sem alterar a lógica aplicacional. Assim, uma organização pode criar novos perfis ou alterar as permissões associadas aos perfis existentes, mantendo o mesmo mecanismo de validação.
@@ -177,10 +176,9 @@ A autorização das ações não depende diretamente das \textit{roles}, mas sim
 No \gls{MVP}, foram definidos perfis demonstrativos para representar diferentes níveis de responsabilidade. O perfil \textit{System Admin} possui acesso integral à aplicação. O perfil \textit{Manager} tem permissões de gestão sobre processos e câmaras, incluindo a capacidade de atribuir operadores a processos e de contornar a filtragem por processo. O perfil \textit{Controller} pode visualizar os processos e câmaras que lhe foram atribuídos e executar operações de controlo remoto sobre essas câmaras. O perfil \textit{Visualizer} não possui permissões de controlo das câmaras, estando restrito a visualização de informação, câmaras e gravações relativos aos processos permitidos.
 
 
-
 \subsection{Recursos Filament e Operação da Plataforma}
 
-A camada operacional da aplicação foi concretizada através de recursos Filament, que funcionam como ponto de ligação entre os modelos Eloquent e as tarefas executadas pelos utilizadores. Cada recurso define a forma como uma entidade é apresentada, pesquisada, editada ou acionada na plataforma, através de formulários, tabelas, páginas de visualização e ações contextuais. Desta forma, o modelo de domínio é disponibilizado numa interface orientada à operação do \gls{MVP}, padronizada e costumizável, sem transformar esta camada numa nova modelação conceptual.
+A camada operacional da aplicação foi concretizada através de recursos Filament, que funcionam como ponto de ligação entre os modelos Eloquent e as tarefas executadas pelos utilizadores. Cada recurso define a forma como uma entidade é apresentada, pesquisada, editada ou acionada na plataforma, através de formulários, tabelas, páginas de visualização e ações contextuais. Desta forma, o modelo de domínio é disponibilizado numa interface orientada à operação do \gls{MVP}, reutilizando a estrutura já definida nos modelos Eloquent e nas suas relações.
 
 \begin{table}[H]
     \centering
@@ -216,9 +214,9 @@ public static function getPages(): array
 
 Esta organização mostra que a Câmara foi tratada como o eixo operacional da interface. Embora existam entidades persistentes próprias para Segmentos de Gravação, Eventos de Deteção e Objetos Detetados, estas não foram expostas como recursos principais independentes. Em vez disso, são acedidas a partir da Câmara a que pertencem, preservando o contexto operacional do utilizador e evitando que a navegação da plataforma se fragmente em entidades técnicas pouco significativas fora desse contexto.
 
-Para além das páginas específicas, a vista de detalhe da Câmara agrega elementos associados à operação diária da plataforma, incluindo o \textit{stream} \gls{HLS} em direto, a ação de iniciar ou parar gravação, a navegação para reprodução de gravações, a consulta de deteções associadas e o acesso ao controlador \gls{PTZ}. A existência de indicadores de deteções não lidas permite ainda destacar eventos que requerem revisão pelo utilizador.
+Para além das páginas específicas, a vista de detalhe da Câmara agrega elementos associados à operação diária da plataforma, incluindo o \textit{streaming} \gls{HLS} em direto, a ação de iniciar ou parar gravação, a navegação para \textit{playback} de gravações, a consulta de deteções associadas e o acesso ao controlador \gls{PTZ}. A existência de indicadores de deteções não lidas permite ainda destacar eventos que requerem revisão pelo utilizador. O processamento que origina estas deteções é descrito na secção dedicada ao detetor automático, enquanto a sua persistência e apresentação ao utilizador são retomadas na secção dedicada aos eventos e artefactos de análise.
 
-Apesar de estas funcionalidades serem expostas a partir dos recursos Filament, a lógica operacional mais pesada não fica concentrada na definição da interface. As ações associadas aos recursos invocam serviços aplicacionais responsáveis pela coordenação com componentes como o MediaMTX, pela geração de sessões temporárias de reprodução ou pela consulta dos eventos persistidos. Assim, os recursos funcionam como a camada visível e interativa da aplicação, enquanto a lógica de integração e processamento permanece isolada em serviços e trabalhos em segundo plano, descritos nas subsecções seguintes.
+Estes recursos funcionam como a camada visível e interativa da aplicação, enquanto a lógica de integração e processamento permanece isolada em serviços e tarefas em segundo plano, descritos nas subsecções seguintes.
 
 \subsection{Serviços Aplicacionais, Configuração e Integração}
 % Explicar a separação da lógica de orquestração em serviços aplicacionais, evitando concentrar a lógica de integração nos recursos Filament ou nos controladores.
