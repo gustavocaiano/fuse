@@ -96,7 +96,7 @@ Role "0..*" -right- "0..*" Permissao : agrega
 Permissao  "0..*" -right-  "1" Action : do tipo
 
 Processo "0..*" -right- "0..*" Utilizador : investigado por
-Camara "0..*" -down- "0..1" Processo : está afeta a
+Camara "0..*" -down- "1" Processo : está afeta a
  ' Camara "1" .. "1" DetectionTargetClass : asd
 
 Camara "1" -right- "0..*" SegmentoGravacao : gera

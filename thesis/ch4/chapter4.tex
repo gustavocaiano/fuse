@@ -3,128 +3,327 @@
 \chapter{Implementação}
 \label{chap:implementacao}
 
-Este capítulo descreve o planeamento deste projeto, que foi estruturado para garantir a exequibilidade dos objetivos propostos dentro do prazo académico estipulado. A organização das atividades divide-se entre a fase de preparação (unidade curricular de \gls{PREPD}) e a fase de execução e escrita da dissertação (unidade curricular de \gls{DIMEI}).
+Este capítulo descreve a concretização técnica do \gls{MVP} do \gls{FUSE}, com foco nos mecanismos implementados para integrar câmaras heterogéneas, disponibilizar \textit{streaming} de forma segura, suportar controlo remoto e articular a plataforma central com o detetor automático de eventos. A apresentação parte das decisões de análise e desenho estabelecidas no \autoref{chap:analise_e_desenho} e restringe-se aos aspetos de implementação que condicionam o funcionamento, a segurança e a extensibilidade do sistema.
 
-\section{Definição do Âmbito e Entregáveis}
-\label{sec:ambito_entregaveis}
+\section{Ambiente Tecnológico e Implantação do MVP}
+A implementação foi organizada em \textit{containers} Docker, de modo a reduzir a dependência face ao ambiente de desenvolvimento e a manter separados os principais blocos funcionais definidos no \autoref{chap:analise_e_desenho}. Esta opção permitiu concretizar a arquitetura proposta através de componentes independentes, ligados por uma rede interna controlada e configurados por variáveis de ambiente, reduzindo o acoplamento entre a aplicação central, a gestão multimédia, o controlo operacional das câmaras e o módulo externo de deteção automática.
 
-O âmbito deste projeto foi decomposto através de um \gls{WBS}. Pelo mesmo, ilustrado na Figura \ref{fig:wbs}, estão organizados os entregáveis previstos por cinco fases principais, sendo estas:
+\subsection{Tecnologias Utilizadas}
 
-\begin{enumerate}
-    \item \textbf{Planeamento e Análise:} Focada na definição do problema e estado da arte. Inclui entregáveis como o Project Charter, o próprio \gls{WBS}, um Gantt Chart, um questionário e respetivas respostas dos \glspl{OPC}, este Extended Abstract e a revisão da literatura incluída no mesmo.
-    \item \textbf{Design:} Dedicada à modelação da solução. Os principais entregáveis previstos são a documentação da Arquitetura de Software (Vistas 4+1) e o Modelo de Domínio, assegurando que a estrutura do \gls{FUSE} é robusta antes da implementação.
-    \item \textbf{Desenvolvimento:} Fase central do projeto, onde será implementado o código da aplicação. Divide-se em três módulos críticos: Comunicações Seguras, Camada de Abstração e Módulo de Análise de Vídeo.
-    \item \textbf{Testes:} Validação da solução através de testes unitários e funcionais, em conjunto com a validação do protótipo em ambiente controlado ou cenário real.
-    \item \textbf{Conclusões:} Considerações finais do projeto, incluindo a redação final da dissertação, a interpretação dos resultados e a apresentação final.
-\end{enumerate}
+A aplicação central do \gls{FUSE}, anteriormente introduzida como \textit{app}, foi implementada com Laravel e Filament. Ao nível da interface, a solução segue a \textit{stack} TALL, composta por Tailwind CSS, Alpine.js, Livewire e Laravel.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{ch4/assets/WBS.png} % Placeholder
-\caption{WBS do projeto.}
-\label{fig:wbs}
-\end{figure}
+A persistência dos dados foi suportada por MySQL. O componente conceptual \textit{nginx} foi concretizado com Nginx, numa variante leve baseada em Alpine Linux. A gestão dos fluxos de vídeo foi concretizada com MediaMTX, configurado e utilizado como base técnica do componente conceptual \textit{media-parser}. Por sua vez, o componente conceptual \textit{digital-twin} foi implementado como um serviço em Python, autónomo, baseado em FastAPI e Uvicorn, recorrendo à biblioteca \texttt{onvif-zeep} para descoberta e execução de comandos \gls{PTZ} através de \gls{ONVIF}.
 
-\section{Plano de Trabalho}
-\label{sec:plano_trabalho}
+O módulo de deteção automática foi mantido como subsistema externo ao servidor aplicacional principal. Por esse motivo, a sua \textit{stack} tecnológica e respetiva fundamentação são apresentadas na \autoref{sec:detetor_automatico}.
 
-O objetivo desta secção é ilustrar e descrever a calendarização das entregas dos respetivos entregáveis mencionados anteriormente, garantindo um acompanhamento rigoroso do progresso do projeto. O planeamento temporal encontra-se representado no diagrama de Gantt, Figura \ref{fig:gantt}.
-
-A execução do cronograma inicia-se com um primeiro marco de controlo a 15 de dezembro de 2025. O encerramento da fase de planeamento (\gls{PREPD}) está estipulado para 22 de janeiro de 2026. O segundo grande bloco temporal, referente à unidade curricular de \gls{DIMEI}, tem como data-alvo de entrega final o dia 22 de junho de 2026.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{ch4/assets/gantt-labeled.png} % Placeholder
-\caption{Gantt Chart do projeto.}
-\label{fig:gantt}
-\end{figure}
+Para a conectividade com câmaras instaladas em redes externas não controladas, foi utilizada a tecnologia Tailscale, conforme previsto no desenho da solução. A configuração concreta desta ferramenta é retomada na secção dedicada à segurança, controlo de acesso e rastreabilidade.
 
 
+\subsubsection{Fundamentação de Escolhas}
 
-O diagrama de Gantt ilustra a distribuição temporal das atividades ao longo de aproximadamente 220 dias úteis, desde o início do projeto em outubro de 2025 até agosto de 2026. A fase de \textbf{Planeamento e Análise}, com duração prevista de 65 dias, concentra-se nos primeiros meses do projeto e inclui a elaboração do Extended Abstract, do Project Charter, do \gls{WBS}, bem como a realização do estudo do estado da arte e a aplicação de questionários junto dos \glspl{OPC}. Esta fase culmina com a produção do próprio Gantt Chart, que depende da conclusão do \gls{WBS}.
+A seleção tecnológica do \gls{MVP} privilegiou a coerência com os requisitos definidos, a rapidez de prototipagem e a simplicidade de implantação. A utilização de Laravel e Filament resulta diretamente dos requisitos tecnológicos da entidade de acolhimento, apresentados no \autoref{chap:introducao}. Para além desse alinhamento, o Filament é descrito na documentação oficial como uma framework \textit{Server-Driven UI} para Laravel construída sobre Livewire, Alpine.js e Tailwind CSS \cite{filament_overview}.
 
-A fase de \textbf{Design}, com duração de 17 dias, inicia-se imediatamente após o término do planeamento, em janeiro de 2026. Esta fase contempla a documentação da Arquitetura de Software através das Vistas 4+1 e a modelação do Domínio, estabelecendo as bases arquiteturais para o desenvolvimento subsequente.
+A escolha do MediaMTX foi orientada pelos requisitos de implementação do componente \textit{media-parser}. Este componente necessita de receber fluxos provenientes das câmaras, disponibilizá-los à plataforma num formato compatível e suportar a gravação segmentada utilizada nos processos posteriores de análise. O MediaMTX apresenta-se como um servidor e \textit{proxy} multimédia com suporte para múltiplos protocolos de entrada e saída de \textit{streaming}, incluindo \gls{RTSP} e \gls{HLS} \cite{mediamtx_intro}. Em particular, a utilização de \gls{HLS} como formato de entrega é coerente com a intermediação por \textit{proxy} planeada, uma vez que este protocolo assenta em segmentos de vídeo servidos sobre \gls{HTTP} \cite{mediamtx_hls}. Assim, a escolha não é apresentada como uma comparação face a alternativas, mas como uma opção adequada aos requisitos concretos do \gls{MVP}.
 
-O \textbf{Desenvolvimento}, a fase mais extensa com 85 dias de duração, estende-se de fevereiro a junho de 2026. Esta fase estrutura-se em três componentes principais que se desenvolvem de forma parcialmente paralela: as Comunicações Seguras (30 dias), a Camada de Abstração de Câmaras (30 dias) e o Módulo de Análise Automática de Vídeo (45 dias). O módulo de análise de vídeo, por sua vez, divide-se em duas etapas sequenciais: a implementação de uma pipeline bi-fásica (20 dias) seguida da evolução para uma pipeline tri-fásica (25 dias), permitindo uma abordagem incremental na integração das funcionalidades de deteção e classificação.
+No componente \textit{digital-twin}, a biblioteca \texttt{onvif-zeep} foi escolhida por disponibilizar uma implementação \textit{open-source} de cliente \gls{ONVIF} em Python \cite{onvif_zeep}. Esta opção permitiu encapsular as particularidades da comunicação \gls{ONVIF} num serviço próprio, preservando a aplicação central independente dos detalhes de baixo nível de um protocolo como este. Importa recordar que, para efeitos do \gls{MVP}, o controlo \gls{PTZ} implementado se limita a este protocolo \gls{ONVIF}. Contudo, o facto de este componente estar isolado permite que o suporte a outros protocolos seja acrescentado futuramente através da sua extensão, sem alterações estruturais à aplicação central.
 
-A fase de \textbf{Testes} inicia-se em paralelo com o desenvolvimento, em abril de 2026, e prolonga-se até ao final do projeto. Esta fase compreende a execução de testes unitários e funcionais durante 43 dias, seguida de um período de validação do protótipo em ambiente real que se estende por 60 dias, permitindo a recolha de feedback dos utilizadores finais e a produção do respetivo relatório.
+As restantes tecnologias de suporte, nomeadamente Docker Compose, Nginx e MySQL, correspondem a escolhas comuns e consolidadas na indústria. Por esse motivo, a sua utilização é justificada sobretudo pelo papel operacional que desempenham no \gls{MVP}, não exigindo uma fundamentação comparativa extensa. De forma semelhante, tecnologias como Tailscale e as opções associadas ao detetor, incluindo YOLO11-seg, são apenas enquadradas nesta secção, uma vez que a sua motivação técnica já foi introduzida no desenho arquitetural e é retomada nas secções específicas de segurança e deteção automática.
 
-Como se observa na Figura \ref{fig:gantt}, após a data de entrega da unidade curricular de \gls{DIMEI} a 22 de junho de 2026, ainda existe trabalho planeado que se estende até final de agosto de 2026. Esta extensão temporal deve-se ao facto de a validação do protótipo estar desde já expectada a requerer um período mais alargado do que o estipulado para o término formal da dissertação. Embora o início da fase de validação esteja previsto dentro do prazo académico, a sua conclusão completa poderá estender-se para além da data de entrega da dissertação. O feedback que for possível adquirir durante o período de validação será anexado ao relatório final, permitindo documentar os resultados obtidos e as observações recolhidas junto dos utilizadores finais, mesmo que o processo de validação se prolongue para além do término formal do trabalho académico.
+\subsection{Implementação com Docker Compose}
 
-\section{Project Charter e Gestão de Riscos}
-\label{sec:gestao_riscos}
-
-O Project Charter (Apêndice \ref{AppendixB}) constituiu o artefacto inicial deste projeto, servindo como primeiro documento para a formalização da proposta de dissertação junto da empresa acolhedora e da instituição académica. Dada a sua natureza preliminar, este documento apresentou uma visão inicial do problema e dos objetivos que, embora alinhados com a missão do \gls{FUSE}, se revelaram amplos, tendo sido posteriormente refinados e concretizados no \gls{WBS} e no plano de trabalhos detalhado anteriormente. As datas e entregáveis originais constantes no Charter foram, por conseguinte, ajustados para refletir um mais correto e detalhado planeamento.
-
-\subsection{Identificação de Stakeholders}
-\label{subsec:stakeholder_identification}
-
-Apesar dos ajustes realizados, o Project Charter mantém-se como a referência central para a identificação das partes interessadas (Stakeholders). A Tabela \ref{tab:stakeholders} apresenta o mapeamento atualizado dos Stakeholders, classificando-os quanto ao seu poder de influência e nível de interesse no sucesso do projeto. Como principais diferenças entre a identificação do presente documento e a do Project Charok ter,  destaca-se a inclusão da StabilityBubble, cuja posição estratégica evolui para fornecedor potencial do software pós-desenvolvimento, e a exclusão de entusiastas de Home Automation, inicialmente projetados como possível público-alvo. Esta exclusão dá-se devido à grande apropriação do \gls{FUSE} a entidades e \glspl{OPC}, dado que se torna uma solução demasiado desenvolvida para projetos caseiros e pequenos.
-
-Para a classificação dos Stakeholders, utilizou-se como base a ''Mendelow's Matrix'' \cite{Mendelow1981}. A atribuição dos níveis ('Alto', 'Médio', 'Baixo') obedeceu aos seguintes critérios:
-
-\begin{itemize}
-    \item \textbf{Poder:} Capacidade da entidade em influenciar decisões, alocar recursos ou bloquear o andamento do projeto.
-    \item \textbf{Interesse:} Grau de impacto que os resultados do projeto terão nas operações ou estratégia da entidade.
-\end{itemize}
+O servidor central foi implementado através de Docker Compose, agrupando os serviços principais numa rede interna denominada \textit{fuse-network}. Esta rede permite que os componentes, implementados como \textit{containers} individuais, comuniquem entre si internamente, sem que todas as interfaces tenham de ser expostas diretamente ao exterior. A \autoref{tab:ch4_componentes_implantacao} sintetiza o mapeamento entre os componentes conceptuais apresentados no capítulo anterior e os respetivos \textit{containers} ou volumes.
 
 \begin{table}[H]
-\centering
-\caption{Identificação de Stakeholders com atribuição de Poder e Interesse}
-\label{tab:stakeholders}
-\begin{tabular}{lllp{6cm}}
-\toprule
-\textbf{Nome} & \textbf{Poder} & \textbf{Interesse} & \textbf{Justificação} \\
-\midrule
-StabilityBubble / NovaForensic & Alto & Alto & Entidade promotora e futura fornecedora/exploradora comercial da solução \gls{FUSE}. \\
-\glspl{OPC} & Alto & Alto & Utilizadores finais críticos; o seu feedback valida a utilidade operacional e requisitos forenses. \\
-Paulo Baltarejo Sousa (Orientador) & Alto & Médio & Orientação académica e validação científica da metodologia e resultados. \\
-Francisco Loureiro (Supervisor) & Alto & Alto & Supervisão empresarial e alinhamento do produto com a estratégia de mercado. \\
-Gestores de Segurança & Médio & Médio & Potenciais clientes empresariais que beneficiam da centralização de sistemas \gls{CCTV}. \\
-Fornecedores de Câmaras & Baixo & Baixo & O \gls{FUSE} visa a eliminação da dependência de um só fornecedor, que tanto pode ser um novo fator decisivo para a escolha do fabricante. \\
-\bottomrule
-\end{tabular}
+    \centering
+    \caption{Mapeamento entre componentes conceptuais e recursos Docker}
+    \label{tab:ch4_componentes_implantacao}
+    \begin{tabular}{p{0.42\linewidth} p{0.42\linewidth}}
+        \toprule
+        \textbf{Componente conceptual} & \textbf{\textit{Container} ou volume} \\
+        \midrule
+        \textit{app} & \textit{Container} \textbf{fuse} \\
+        \textit{database} & \textit{Container} \textbf{mysql} \\
+        \textit{nginx} & \textit{Container} \textbf{nginx} \\
+        \textit{media-parser} & \textit{Container} \textbf{mediamtx} \\
+        \textit{digital-twin} & \textit{Container} \textbf{ptz} \\
+        \textit{recordings-volume} & Volume \textbf{./storage/app/recordings} \\
+        \bottomrule
+    \end{tabular}
 \end{table}
 
-\subsection{Gestão de Riscos}
-\label{subsec:risk_management}
+O \autoref{lst:ch4_docker_compose} apresenta a parte essencial da configuração de implantação, omitindo variáveis sensíveis, detalhes auxiliares e opções repetitivas que não acrescentam informação arquitetural relevante.
 
-Relativamente à gestão de riscos, trata-se de um processo contínuo que se iniciou com o levantamento preliminar no Project Charter. Embora a análise inicial focasse riscos mais genéricos (e.g., dependência de hardware), o planeamento aprofundado permitiu identificar ameaças mais específicas e definir estratégias de mitigação concretas. A Tabela \ref{tab:riscos} consolida os riscos, atribuindo-lhes uma probabilidade e um impacto, combinando alguns identificados na fase inicial com novos riscos técnicos decorrentes da complexidade da análise de vídeo e integração de redes. A quantificação do risco segue uma matriz de probabilidade e impacto (P×I), onde ambas as variáveis são classificadas numa escala de Likert \cite{Likert1932} de 1 a 5. Esta escala foi definida da seguinte forma:
+\par\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Excerto simplificado da configuração Docker Compose do servidor central (yaml)},label={lst:ch4_docker_compose}]
+services:
+  fuse:
+    build: ./docker/8.4
+    volumes:
+      - ./storage:/var/www/html/storage
+    networks:
+      - fuse-network
+  mediamtx:
+    image: bluenviron/mediamtx:1.17.0
+    volumes:
+      - ./storage/app/recordings:/recordings
+    networks:
+      - fuse-network
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    networks:
+      - fuse-network
+  mysql:
+    image: mysql/mysql-server:8.0
+    volumes:
+      - sail-mysql:/var/lib/mysql
+    networks:
+      - fuse-network
+  ptz:
+    build: ./docker/ptz
+    networks:
+      - fuse-network
+networks:
+  fuse-network:
+    driver: bridge
+volumes:
+  sail-mysql:
+    driver: local
+\end{lstlisting}
+\end{minipage}
 
-\begin{itemize}
-    \item \textbf{Probabilidade (P):} 1 representando um acontecimento raro ou extremamente improvável, e 5 algo que seja extremamente provável acontecer, possivelmente previsto.
-    \item \textbf{Impacto (I):} 1 compreende uma insignificância ou ligeiro atraso, enquanto que 5 impacta criticamente, possivelmente impossibilitando o projeto ou condicionando o resultado do mesmo.
-\end{itemize}
+Os serviços \textit{mediamtx}, \textit{mysql} e \textit{nginx} recorrem a imagens públicas adequadas às respetivas tecnologias, nomeadamente \texttt{bluenviron/mediamtx}, \texttt{mysql/mysql-server} e \texttt{nginx:alpine}. Em contraste, os serviços \textit{fuse} e \textit{ptz} são construídos localmente a partir dos respetivos \textit{Dockerfiles}, uma vez que incluem código aplicacional desenvolvido especificamente para o \gls{MVP}.
 
-A multiplicação destes fatores resulta no Risco Quantificado, permitindo priorizar as estratégias de mitigação para as ameaças com pontuação mais elevada, conforme demonstrado na Tabela \ref{tab:riscos}.
+Todos os \textit{containers} têm a possibilidade de comunicar entre si através da inserção numa rede Docker interna privada, denominada de \textit{fuse-network}. O único componente que se expõe para o exterior, de modo a possibilitar conexões externas, é o \textit{nginx}, ao qual é atribuída a função de atuar como entrada para qualquer pedido à aplicação. Para o efeito, é exposta a porta externa 80, ligada à porta interna com a mesma numeração.
+
+O \textit{recordings-volume} é partilhado pelos \textit{containers} \textit{fuse} e \textit{mediamtx}, concretizando a arquitetura anteriormente desenhada e apresentada no \autoref{chap:analise_e_desenho}, onde o componente \textit{media-parser} grava os segmentos para um volume consultável pelo componente \textit{app}, que vai estar encarregue de disponibilizar estas gravações para permitir o \textit{playback} aos utilizadores.
+
+\section{Orquestração Central e Modelo Operacional}
+
+Esta secção descreve a concretização técnica do componente aplicacional em Laravel. Considerando que o seu papel conceptual foi definido no \autoref{chap:analise_e_desenho}, a descrição centra-se nos mecanismos implementados para suportar a operação da plataforma, nomeadamente a persistência dos dados, a gestão administrativa das entidades, a aplicação de regras de autorização e a coordenação com os restantes serviços internos.
+
+\subsection{Concretização do Modelo de Domínio}
+
+O modelo de domínio apresentado no \autoref{chap:analise_e_desenho} foi materializado através de migrações de base de dados e modelos Eloquent, o mecanismo de mapeamento objeto-relacional do Laravel. Esta abordagem permitiu implementar tecnicamente as entidades operacionais, as respetivas chaves estrangeiras e as relações necessárias entre processos, câmaras, segmentos de gravação, eventos de deteção, objetos detetados, utilizadores, \textit{roles} e permissões.
+
+O conceito de \textit{Câmara} foi implementado com uma chave estrangeira para \textit{Processo}, uma vez que cada câmara se encontra sempre afeta a um processo no contexto operacional da plataforma. O modelo inclui também o alvo de deteção configurado, usado posteriormente para determinar que classe de objetos deve ser analisada. Esta opção pode parecer ambígua se a câmara for entendida apenas como dispositivo físico reutilizável, porém, no contexto da aplicação, uma \textit{Câmara} representa uma montagem ou configuração operacional concreta de um dispositivo num determinado processo. Assim, se o mesmo equipamento for instalado noutro local, associado a outro processo ou configurado com outro alvo de deteção, essa situação passa a corresponder a uma nova instância operacional na aplicação.
+
+O \textit{Segmento de Gravação} foi modelado com uma chave estrangeira \textit{camera\_id}, uma vez que cada segmento de gravação corresponde sempre ao vídeo captado por uma câmara específica. Por sua vez, o \textit{Evento de Deteção} referencia o segmento onde a ocorrência foi identificada, através de \textit{recording\_segment\_id}. Como um evento de deteção pode envolver vários objetos detetados no mesmo intervalo temporal, o modelo \textit{Objeto de Deteção} referencia o evento correspondente através de uma chave estrangeira para \textit{Evento de Deteção}. Esta organização concretiza, na base de dados, a sequência descrita no modelo de domínio: câmara, segmento de gravação, evento de deteção e objetos detetados.
+
+Na componente de processos e acessos aos mesmos, a relação entre \textit{Process} e \textit{User} foi implementada através da tabela intermédia \textbf{process\_user}, permitindo associar utilizadores aos processos em que participam. A autorização baseada em papéis e permissões é suportada pelas tabelas de associação do sistema de permissões, nomeadamente \textbf{user\_has\_roles}, que associa utilizadores a \textit{roles}, e \textbf{role\_has\_permissions}, que define as permissões agregadas por cada perfil. Desta forma, a implementação mantém separada a pertença de um utilizador a um processo e o conjunto de permissões que esse utilizador possui na aplicação.
+
+\subsection{Controlo de Acessos na Aplicação}
+
+O controlo de acessos na aplicação foi implementado através da combinação de dois mecanismos complementares. O primeiro delimita o âmbito operacional do utilizador, determinando que processos e câmaras ficam visíveis. O segundo define as ações que o utilizador pode executar sobre os recursos a que tem acesso, através de permissões agregadas em \textit{roles} que lhe são atribuídas.
+
+\subsubsection{Filtragem por Processo}
+
+A associação entre utilizadores e processos é materializada pela tabela pivot \textit{process\_user}. Esta tabela representa os utilizadores atribuídos a cada processo e é usada como base para restringir as consultas efetuadas nos recursos operacionais da aplicação. Assim, quando um utilizador sem privilégios de gestão lista processos ou câmaras, a consulta é automaticamente limitada ao seu contexto operacional.
+
+O \autoref{lst:ch4_process_filtering} apresenta um excerto demonstrativo do mecanismo usado quando é necessário listar Processos e Câmaras na aplicação. 
+
+\par\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Excerto da filtragem por processo e câmara (php)},label={lst:ch4_process_filtering}]
+public static function getEloquentQuery(): Builder
+{
+    return parent::getEloquentQuery()
+        ->relatedToUser(Auth::user());
+}
+\end{lstlisting}
+\end{minipage}
+
+Tanto na listagem de processos como na de câmaras, a consulta base do recurso chama o método \textbf{relatedToUser}, que é demonstrado no \autoref{lst:ch4_related_to_user}:
+\par\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Excerto do funcionamento do filtro \textit{relatedToUser} (php)},label={lst:ch4_related_to_user}]
+public function scopeRelatedToUser(Builder $query, ?User $user): void
+{
+    $query->when(
+        ! $user?->can(PermissionSeeder::BYPASS_PROCESS_FILTERING),
+        fn (Builder $query) => $query->whereUserIsOperator($user)
+    );
+}
+
+public function scopeWhereUserIsOperator(Builder $query, User $user): void
+{
+    if ($query->getModel() instanceof Process) {
+        $query->whereHas(
+            'operators',
+            fn (Builder $query) => $query->where('user_id', $user->id)
+        );
+        return;
+    }
+    
+    $query->whereHas('process', function (Builder $query) use ($user): void {
+        $query->whereUserIsOperator($user);
+    });
+}
+\end{lstlisting}
+\end{minipage}
+
+
+O método \textit{relatedToUser} apenas aplica a filtragem quando o utilizador autenticado não possui a permissão \textbf{bypass-process-filtering}. Esta lógica permite não aplicar restrições adicionais e evita consultas desnecessariamente restritivas quando o \textit{Utilizador} tem associada uma \textit{Role} com permissões para listar recursos sem filtrar pelos processos a que tem acesso.
+
+Caso o utilizador não tenha esta permissão, o método \textbf{whereUserIsOperator} concretiza a restrição por processo. Quando a consulta incide sobre processos, a filtragem é feita pela relação \textit{operators}, materializada pela tabela \textit{process\_user}. Quando a consulta incide sobre câmaras, a filtragem é aplicada através da relação com o respetivo processo, reutilizando o mesmo método e a mesma regra de associação entre processo e utilizador. Desta forma, a visibilidade dos processos e das câmaras é mantida coerente.
+
+Estes dois métodos são aplicados ao \textit{Processo} e à \textit{Câmara} através do \textit{trait} \textbf{HasProcessFiltering}. Desta maneira, futuramente, caso seja necessário estender a aplicação, este filtro funcionará com todos os modelos que usem este \textit{trait} e que, pela lógica de negócio, estejam associados a um processo.
+
+
+
+\subsubsection{\textit{Roles} e Permissões}
+
+A autorização das ações não depende diretamente das \textit{roles}, mas sim das permissões atribuídas a estas. As \textit{roles} funcionam como agregadores administrativos de permissões, permitindo que a configuração final da aplicação seja ajustada no momento de implantação sem alterar a lógica aplicacional. Assim, uma organização pode criar novos perfis ou alterar as permissões associadas aos perfis existentes, mantendo o mesmo mecanismo de validação.
+
+No \gls{MVP}, foram definidos perfis demonstrativos para representar diferentes níveis de responsabilidade. O perfil \textit{System Admin} possui acesso integral à aplicação. O perfil \textit{Manager} tem permissões de gestão sobre processos e câmaras, incluindo a capacidade de atribuir operadores a processos e de contornar a filtragem por processo. O perfil \textit{Controller} pode visualizar os processos e câmaras que lhe foram atribuídos e executar operações de controlo remoto sobre essas câmaras. O perfil \textit{Visualizer} não possui permissões de controlo das câmaras, estando restrito a visualização de informação, câmaras e gravações relativos aos processos permitidos.
+
+
+
+\subsection{Recursos Filament e Operação da Plataforma}
+
+A camada operacional da aplicação foi concretizada através de recursos Filament, que funcionam como ponto de ligação entre os modelos Eloquent e as tarefas executadas pelos utilizadores. Cada recurso define a forma como uma entidade é apresentada, pesquisada, editada ou acionada na plataforma, através de formulários, tabelas, páginas de visualização e ações contextuais. Desta forma, o modelo de domínio é disponibilizado numa interface orientada à operação do \gls{MVP}, padronizada e costumizável, sem transformar esta camada numa nova modelação conceptual.
 
 \begin{table}[H]
-\centering
-\caption{Identificação e gestão de riscos associados ao projeto}
-\label{tab:riscos}
-\begin{tabular}{lp{3cm}p{4cm}cccp{2.5cm}}
-\toprule
-\textbf{ID} & \textbf{Descrição} & \textbf{Causa} & \textbf{P} & \textbf{I} & \textbf{P*I} & \textbf{Estratégia} \\
-\midrule
-1 & Indisponibilidade de Hardware (\gls{GPU}) & A análise de vídeo requer hardware gráfico potente, que é escasso ou não disponível & 3 & 4 & 12 & Mitigar \\
-2 & Incompatibilidade de Protocolos & Determinada câmara não suporta o protocolo \gls{RTSP}, impossibilitando a integração prevista. & 2 & 2 & 4 & Aceitar \\
-3 & Falsos Positivos na Deteção & \textit{Pipeline} de \gls{AI} gera demasiados alertas falsos em condições adversas (chuva, noite). & 3 & 3 & 9 & Mitigar \\
-4 & Atraso no Cronograma & A complexidade da integração de múltiplos sistemas excede o tempo previsto para o semestre letivo. & 3 & 5 & 15 & Mitigar \\
-\bottomrule
-\end{tabular}
+    \centering
+    \caption{Principais recursos Filament da aplicação central}
+    \label{tab:ch4_filament_resources}
+    \begin{tabular}{p{0.25\linewidth} p{0.22\linewidth} p{0.43\linewidth}}
+        \toprule
+        \textbf{Recurso} & \textbf{Modelo} & \textbf{Função operacional no MVP} \\
+        \midrule
+        \textit{ProcessResource} & Processo & Gestão dos processos, consulta do seu estado operacional e associação de operadores e câmaras. \\
+        \textit{CameraResource} & Câmara & Configuração das câmaras e acesso às operações de visualização, gravação, reprodução, deteção e controlo remoto. \\
+        \textit{UserResource} & Utilizador & Administração de utilizadores e atribuição de \textit{roles}. \\
+        \textit{AuditResource} & Auditoria & Consulta de registos de auditoria, alterações efetuadas e informação de rastreabilidade. \\
+        \bottomrule
+    \end{tabular}
 \end{table}
 
-A Tabela \ref{tab:riscos} apresenta quatro riscos identificados, dos quais três requerem estratégias de mitigação e um é aceite como parte do âmbito do projeto. Pela análise à tabela, destaca-se os 1º e 4º riscos, Indisponibilidade de Hardware (\gls{GPU}) e Atraso no Cronograma, com os índices de risco mais elevados sendo eles 12 e 15, respetivamente. Por consequente, conclui-se que grande parte do sucesso do projeto e dos resultados obtidos dependerão intrinsecamente da gestão rigorosa dos recursos computacionais e do cumprimento dos prazos estipulados, bem como o seguimento do planeamento efetuado.
+O caso mais representativo, que será usado como exemplo, é o recurso de Câmara, uma vez que este não se limita às operações genéricas de criação, edição e consulta. A sua definição inclui páginas específicas para gravações e deteções, como se observa no \autoref{lst:ch4_camera_resource_pages}.
 
-As estratégias de resposta detalhadas para cada risco são as seguintes:
+\begin{lstlisting}[caption={Páginas definidas no recurso de Câmara (php)},label={lst:ch4_camera_resource_pages}]
+public static function getPages(): array
+{
+    return [
+        'index' => Pages\ListCameras::route('/'),
+        'create' => CreateCamera::route('/create'),
+        'view' => Pages\ViewCamera::route('/{record}'),
+        'edit' => Pages\EditCamera::route('/{record}/edit'),
+        'recordings' => Pages\Recordings::route('/{record}/recordings'),
+        'detections' => Pages\Detections::route('/{record}/detections'),
+    ];
+}
+\end{lstlisting}
 
-\textbf{Risco 1 - Indisponibilidade de Hardware (\gls{GPU}):} A estratégia de mitigação consiste em garantir que a integração com a \textit{pipeline} de análise automática seja feita de forma modular e desacoplada, permitindo a flexibilidade da escolha do modelo de \gls{AI} utilizado conforme o hardware disponível no momento. Esta abordagem assegura que o sistema possa adaptar-se a diferentes configurações de hardware sem comprometer a funcionalidade core.
+Esta organização mostra que a Câmara foi tratada como o eixo operacional da interface. Embora existam entidades persistentes próprias para Segmentos de Gravação, Eventos de Deteção e Objetos Detetados, estas não foram expostas como recursos principais independentes. Em vez disso, são acedidas a partir da Câmara a que pertencem, preservando o contexto operacional do utilizador e evitando que a navegação da plataforma se fragmente em entidades técnicas pouco significativas fora desse contexto.
 
-\textbf{Risco 2 - Incompatibilidade de Protocolos:} A opção pela estratégia de ``Aceitação'' serve para delimitar claramente o âmbito do projeto. O \gls{MVP} a ser desenvolvido não pretende ser universalmente compatível com todo o conjunto de câmaras existentes, mas sim provar o conceito através de um protocolo standard habitualmente presente (\gls{RTSP}), excluindo câmaras que não suportem este protocolo. Esta decisão permite focar o esforço de engenharia na inteligência do sistema e não na compatibilidade de drivers.
+Para além das páginas específicas, a vista de detalhe da Câmara agrega elementos associados à operação diária da plataforma, incluindo o \textit{stream} \gls{HLS} em direto, a ação de iniciar ou parar gravação, a navegação para reprodução de gravações, a consulta de deteções associadas e o acesso ao controlador \gls{PTZ}. A existência de indicadores de deteções não lidas permite ainda destacar eventos que requerem revisão pelo utilizador.
 
-\textbf{Risco 3 - Falsos Positivos na Deteção:} A mitigação será realizada através da implementação de um sistema de ajuste de sensibilidade configurável pelo utilizador, permitindo que este defina parâmetros como os segundos necessários de deteção do objeto antes do alerta ser gerado. Esta funcionalidade permite reduzir falsos positivos em condições adversas, como chuva ou condições de pouca luz.
+Apesar de estas funcionalidades serem expostas a partir dos recursos Filament, a lógica operacional mais pesada não fica concentrada na definição da interface. As ações associadas aos recursos invocam serviços aplicacionais responsáveis pela coordenação com componentes como o MediaMTX, pela geração de sessões temporárias de reprodução ou pela consulta dos eventos persistidos. Assim, os recursos funcionam como a camada visível e interativa da aplicação, enquanto a lógica de integração e processamento permanece isolada em serviços e trabalhos em segundo plano, descritos nas subsecções seguintes.
 
-\textbf{Risco 4 - Atraso no Cronograma:} A estratégia de mitigação assenta na adoção de uma abordagem de desenvolvimento incremental. Será assegurada a estabilidade do núcleo de visualização e deteção básica (\textit{pipeline} bi-fásica) como um \gls{MVP} robusto, antes de iterar para as funcionalidades avançadas de extração de atributos (\textit{pipeline} tri-fásica). Caso o desenvolvimento da \textit{pipeline} tri-fásica se revele incompatível com o tempo disponível, esta será tratada como trabalho futuro, garantindo sempre a entrega de um produto funcional.
+\subsection{Serviços Aplicacionais, Configuração e Integração}
+% Explicar a separação da lógica de orquestração em serviços aplicacionais, evitando concentrar a lógica de integração nos recursos Filament ou nos controladores.
+% Referir serviços como MediaParserService, PTZService, RecordingSegmentIngestService, RecordingFilesystemService, RecordingIntervalPlaybackSessionService, RecordingIntervalHlsRenderer e RecordingIntervalManifestService.
+% Integrar aqui a camada de clientes/integração, a configuração externa em config/fuse.php e variáveis de ambiente, e a injeção de dependências do Laravel.
+% Incluir um excerto curto de código que mostre a injeção de dependências, sem transformar a secção numa explicação geral de Laravel ou SOLID.
 
-A estratégia de mitigação para os riscos prioritários (Riscos 1 e 4) assenta fundamentalmente na modularidade e no desenvolvimento incremental. Ao garantir que a arquitetura do sistema é flexível quanto aos modelos de \gls{AI} e que as funcionalidades são entregues por fases, assegura-se que, mesmo na eventualidade destes riscos se materializarem, o projeto resultará sempre num produto funcional (\gls{MVP}), salvaguardando a dissertação. A monitorização destes riscos será realizada periodicamente em cada reunião de ponto de situação com o orientador e supervisor, permitindo o ajuste dinâmico das estratégias de resposta caso a probabilidade ou impacto de algum fator sofra alterações ao longo do ciclo de vida do projeto.
+\subsection{Processamento Assíncrono e Trabalhos em Segundo Plano}
+% Explicar que determinadas operações são executadas em segundo plano para não bloquear a interação principal da aplicação.
+% Exemplos a desenvolver: descoberta de portas/endpoints ONVIF disponíveis em câmaras, comunicação com o detetor automático e geração de sessões temporárias de reprodução.
+% Referir jobs como OnvifPortSearcher, AnalyzeRecordingSegmentJob e GenerateRecordingIntervalHlsJob.
+% Manter esta subsecção ao nível da orquestração; os detalhes específicos de cada fluxo devem ser desenvolvidos nas secções de streaming/PTZ, deteção automática e persistência.
 
+
+\section{Ingestão, Streaming, Gravação e Operação Remota}
+% Resumo: Explicar como as câmaras são registadas, configuradas e ligadas ao MediaMTX.
+% Descrever a criação e ingestão dos segmentos de gravação, a sua organização em armazenamento e a disponibilização dos streams.
+% Incluir reprodução por intervalo com FFmpeg/HLS, ONVIF, PTZ e digital twin como mecanismos de operação remota, se aplicável.
+% A criação/atualização automática de câmaras no MediaMTX deve ser detalhada nesta secção, pois concretiza a ligação entre o registo da câmara na app e a infraestrutura de streaming/gravação.
+% Ao falar da disponibilização do stream ao utilizador, apresentar apenas a parte do nginx.conf relacionada com o proxy/serviço do HLS usado pelo player.
+% Mencionar que o acesso ao HLS é protegido por um cookie emitido pela aplicação Laravel e validado pelo Nginx, mas remeter a explicação da assinatura, expiração e validação para a secção de segurança.
+
+\section{Segurança e Rastreabilidade}
+% Resumo: Concentrar aqui proteção de streams, exposição controlada, validação de chamadas externas e rastreabilidade.
+% Incluir Tailscale, exposição controlada por Cloudflare Tunnel, callbacks HMAC, logs/rastreabilidade e Software Composition Analysis.
+% Descrever mecanismos e metodologia, deixando resultados e evidência para o Capítulo~\ref{chap:resultados}.
+% Retomar aqui o nginx.conf, mas apenas a parte relativa à validação de acesso aos streams: cookie stream_auth, secure_link, validade temporal e segredo partilhado com a aplicação Laravel.
+% Explicar que a secção anterior descreve a disponibilização funcional do HLS, enquanto esta secção descreve a proteção desse acesso.
+% Aqui sim falar do HasAudits
+
+\subsection{tailscale}
+ falar da implementacao do tailscale. como é que a app chega a camera (falar do adversite-routes da rede tailscale e etc..)
+ 
+\subsection{gate}
+falar do tunel cloudflared para o acesso a api gate por https (não tendo que abrir nenhuma porta nem tendo que ter um ip publico)
+
+\subsection{Auditoria e Rastreabilidade}
+% Não repetir aqui o controlo de acessos aplicacional, que ficou na secção de orquestração central.
+% Focar a auditoria e rastreabilidade: registo de alterações, utilizador responsável, histórico de ações relevantes e suporte à análise posterior.
+
+\subsection{composição do software}
+
+falar do software composition analysis para identificar vulnerabilidades e problemas de dependencias usadas
+
+
+\section{Detetor Automático e Pipeline de Análise}
+\label{sec:detetor_automatico}
+% Resumo: Descrever o serviço externo de deteção: FastAPI, Celery, Redis, OpenCV e YOLO11-seg.
+% Explicar o pipeline: enqueue, download, motion gate, deteção, artefactos e callback.
+% Não apresentar desempenho, precisão, métricas ou casos de teste; isso pertence ao Capítulo~\ref{chap:resultados}.
+%
+% 
+esta secção explica a implementação do detetor automático, incluindo o ambiente e a stack utilizada.
+
+\subsection{ambiente e stack}
+Como referido anterioermente, o detetor automático é um serviço externo composto por 3 módulos, implementados como containers: detetor-api, detetor-worker e detector-cache. estes estão dentro da mesma rede interna docker e apenas o detector api expoe uma interface para fora da mesma, ermitindo receber chamadas fora da rede. 
+
+(aqui um excerto do docker compose)
+
+o componente detector-api e detector-worker são implementados em python e o detector-cache é uma instancia de Redis. 
+
+ao levantar os containers, existe um outro docker-compose que irá fazer o setup dos modelos de visão computacional usados , que no caso do MVP, apenas um modelo YOLO11-seg é utilizado. este é configuravel a nivel de concorrencia, tempo de execução e outros parametros. 
+
+(mostrar esse docker compose e configuracao)
+
+este detector-api tem ainda uma pequena interface web para visualização de métricas e logs em tempo real. 
+
+\subsection{funcionamento}
+o detetor recebe um pedido de processamento através do detector-pipeline , com um url de download do vídeo. quando o worker estiver livre e puder trabalhar vai fazer o download desse segmento e vai começar a aálisá-lo inserindo o no inicio da pipeline desenvolvida para a deteção que está descrita na figura seguinte:
+
+=== meter aqui a figura do detector-pipeline, com height = pagina em vez de width . 
+
+descrever o detector-pipeline (/Users/gustavocaiano/docs/github/isep/fuse/docs/diagrams/impl/detector-pipeline.puml)
+
+\subsection{conteudo do callback}
+
+o callbac do detetor automático, em caso negativo, é apenas uma atualização de estado da gravação para nao detectado. No caso de esta deteção ser positiva , estará presente a seguinte informação no callback : 
+
+ir ler detector-projetct para incluir aqui o que tem que ser falado do conteúdo do callback
+
+
+
+
+\section{Persistência dos Eventos e Artefactos de Análise}
+% Resumo: Explicar como o callback do detetor atualiza segmentos e cria eventos, objetos, metadados e referências a artefactos.
+% Mostrar a ligação entre segmento, câmara, job do detetor, estado de processamento e deteções persistidas.
+% Descrever estrutura e rastreabilidade dos outputs gerados, deixando avaliação e resultados para o Capítulo~\ref{chap:resultados}.
+ 
+basicamente aqui descrever como a informação do callback enviado pelo detector é recebida, processada e mapeada para cada entidade ou entidade nova dentro da app e depois persistida.
+
+ir ao project/ e explorar como isso é feito
+
+incluir aqui tambem um pedaço de código que permite a notificação do investigador quando entra e existe uma deteção nova.
+
+\subsection{artefactos que vao ser visuais}
+
+explicar aqui uma pequena sub seccao sobre o bbox . esta informacao da detecao é passada da area em que foi detetado o objeto e depois explicar como no frontend é visualizada esta parte.
+
+
+\section{Compromissos e Limitações da Implementação}
+% Resumo: Identificar decisões tomadas por restrições do MVP, tempo, infraestrutura ou maturidade técnica.
+% Não tratar dependências como limitações por defeito; só o são se impuserem restrições concretas.
+% Reservar métricas, evidência e impacto observado para o Capítulo~\ref{chap:resultados}.
+
+\section{Síntese}
+% Resumo: Fechar o capítulo mostrando como a implementação concretiza o desenho do Capítulo~\ref{chap:analise_e_desenho}.
+% Preparar a transição para o Capítulo~\ref{chap:resultados}, onde entram validação, resultados e avaliação.
+% Manter esta secção curta.

@@ -61,7 +61,7 @@ Esta inclui os critérios de inclusão e exclusão (I/E) relacionados com cada p
 
 
 
-A pesquisa foi conduzida em três bases de dados principais: IEEE Xplore (282 registos), ACM Digital Library (94 registos) e ScienceDirect (59 registos), totalizando 435 registos identificados através de pesquisa sistemática. Adicionalmente, foi identificado 1 registo \cite{resende_sistema_2025} através de outras fontes, resultando num total de 436 registos na fase de identificação. 
+A pesquisa foi conduzida em três bases de dados principais: IEEE Xplore (282 registos), ACM Digital Library (94 registos) e ScienceDirect (59 registos), totalizando 435 registos identificados através de pesquisa sistemática. Adicionalmente, foi identificado 1 registo \cite{resende_sistema_2025} através de outras fontes, resultando num total de 436 registos na fase de identificação.
 
 Após a remoção de duplicados (1 registo), foram analisados 435 registos na fase de \textit{screening} através da leitura de títulos e resumos. Desta análise, 412 registos foram excluídos por não cumprirem os critérios de inclusão, nomeadamente por focarem-se puramente em algoritmos de visão computacional sem arquitetura de sistema, abordarem domínios como agricultura ou saúde sem componente de vídeo, ou simplemsmente não se adequar ao tema de integração de dispositivos \gls{IoT} ou de camadas de abstração em design de software. Os 23 registos restantes foram avaliados em texto completo, dos quais 12 foram excluídos por falta de detalhes de implementação, ausência de diagrama de arquitetura claro, ou por serem propostas teóricas sem validação prática. O processo resultou na inclusão final de 11 estudos na revisão qualitativa, conforme ilustrado na Figura \ref{fig:lrrq1_prisma}.
 
@@ -157,7 +157,7 @@ Um consenso transversal na literatura é a impraticabilidade e insegurança da e
 
 \subsubsection{Limitações dos Protocolos Legacy e Comparação TCP vs. UDP}
 
-A literatura estabelece protocolos como OpenVPN e IPSec como referências sólidas para a transmissão de dados de sensores  \cite{fan_design_2019, guarino_data_2025}. No entanto, a sua aplicação a fluxos de vídeo em tempo real apresenta limitações severas. 
+A literatura estabelece protocolos como OpenVPN e IPSec como referências sólidas para a transmissão de dados de sensores  \cite{fan_design_2019, guarino_data_2025}. No entanto, a sua aplicação a fluxos de vídeo em tempo real apresenta limitações severas.
 O artigo \cite{asim_sect_2025} destaca o problema crítico do "TCP-over-TCP meltdown'': o encapsulamento de tráfego de vídeo (que beneficia da natureza \textit{fire-and-forget} do \gls{UDP}) dentro de túneis baseados em \gls{TCP} (comuns em \glspl{VPN} baseadas em \gls{SSL}) provoca um ciclo vicioso de retransmissões redundantes, resultando em latência exponencial sob redes instáveis.
 Para além da performance, o estudo \cite{xue_openvpn_2024} alerta para a vulnerabilidade de segurança: o tráfego OpenVPN possui padrões de dados identificáveis, como tamanho de pacotes e tempos de resposta, permitindo que \glspl{ISP} reconheçam e bloqueiem a conexão, mesmo quando encriptada.
 

@@ -170,9 +170,11 @@
 \RequirePackage{algpseudocode} % Part algorithmicx package, required to customize the layout of algorithms.
 
 \RequirePackage{listings} % Required for code listings
+\renewcommand{\lstlistingname}{Código}
+\renewcommand{\lstlistlistingname}{Lista de Códigos}
 \lstset{ %
   backgroundcolor=\color{white},   % choose the background color; 
-  basicstyle=\footnotesize,        % the size of the fonts that are used for the code
+  basicstyle=\ttfamily\footnotesize, % the size and typeface used for the code
   breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
   breaklines=true,                 % sets automatic line breaking
   captionpos=b,                    % sets the caption-position to bottom
