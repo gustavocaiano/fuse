@@ -170,8 +170,8 @@
 \RequirePackage{algpseudocode} % Part algorithmicx package, required to customize the layout of algorithms.
 
 \RequirePackage{listings} % Required for code listings
-\renewcommand{\lstlistingname}{Código}
-\renewcommand{\lstlistlistingname}{Lista de Códigos}
+\renewcommand{\lstlistingname}{Excerto de Código}
+\renewcommand{\lstlistlistingname}{Lista de Excertos de Código}
 \lstset{ %
   backgroundcolor=\color{white},   % choose the background color; 
   basicstyle=\ttfamily\footnotesize, % the size and typeface used for the code
