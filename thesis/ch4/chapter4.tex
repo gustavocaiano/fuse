@@ -318,9 +318,10 @@ private static function buildAPIUrl(string $operation, string $name): string
 \end{lstlisting}
 \end{minipage}
 
-A configuração define o endereço de acesso interno ao \textit{media-parser}, a porta da API  e o caminho usado para contactar o componente. O cliente usa esses valores para construir o \textit{endpoint} final. Este mecanismo é usado não apenas para a ligação ao \textit{media-parser}, mas também para o serviço PTZ, para o detetor automático e para o acesso à base de dados. Deste modo, uma alteração futura da tecnologia usada para concretizar o \textit{media-parser}, ou outro componente, concentrar-se-ia na configuração e na respetiva classe cliente, sem exigir que a interface Filament ou os serviços aplicacionais fossem reescritos.
+A configuração define o endereço de acesso interno ao \textit{media-parser}, a porta da API e o caminho usado para contactar o componente. O cliente usa esses valores para construir o \textit{endpoint} final. Este mecanismo é usado não apenas para a ligação ao \textit{media-parser}, mas também para o serviço PTZ, para o detetor automático e para outros parâmetros operacionais da plataforma. Deste modo, uma alteração futura da tecnologia usada para concretizar o \textit{media-parser}, ou outro componente, concentrar-se-á na configuração e na respetiva classe cliente, sem exigir que a interface Filament ou os serviços aplicacionais fossem reescritos.
 
 \subsection{Processamento Assíncrono e Trabalhos em Segundo Plano}
+\label{subsec:processamento_assincrono}
 
 Algumas operações de integração não devem bloquear a interação principal do utilizador, sobretudo quando envolvem descoberta de serviços ou chamadas a componentes externos. Por esse motivo, a aplicação recorre a trabalhos em segundo plano para executar processos que podem demorar ou falhar sem comprometer a resposta dos recursos na interface.
 
@@ -340,12 +341,103 @@ Esta abordagem reduz a configuração manual necessária para ativar o controlo 
 
 
 \section{Ingestão, Streaming, Gravação e Operação Remota}
-% Resumo: Explicar como as câmaras são registadas, configuradas e ligadas ao MediaMTX.
-% Descrever a criação e ingestão dos segmentos de gravação, a sua organização em armazenamento e a disponibilização dos streams.
-% Incluir reprodução por intervalo com FFmpeg/HLS, ONVIF, PTZ e digital twin como mecanismos de operação remota, se aplicável.
-% A criação/atualização automática de câmaras no MediaMTX deve ser detalhada nesta secção, pois concretiza a ligação entre o registo da câmara na app e a infraestrutura de streaming/gravação.
-% Ao falar da disponibilização do stream ao utilizador, apresentar apenas a parte do nginx.conf relacionada com o proxy/serviço do HLS usado pelo player.
-% Mencionar que o acesso ao HLS é protegido por um cookie emitido pela aplicação Laravel e validado pelo Nginx, mas remeter a explicação da assinatura, expiração e validação para a secção de segurança.
+
+\todo{falta aqui mini introdução}
+
+\subsection{Configuração Funcional do \textit{media-parser}}
+
+A configuração funcional do componente \textit{media-parser} é definida no ficheiro específico da tecnologia que o concretiza no \gls{MVP}, neste caso o \texttt{mediamtx.yml}. O \autoref{lst:ch4_mediamtx_config} apresenta um excerto simplificado desta configuração, omitindo valores sensíveis e parâmetros não essenciais, uma vez que não alteram a compreensão do fluxo implementado.
+
+\par\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Excerto simplificado da configuração funcional do MediaMTX (yaml)},label={lst:ch4_mediamtx_config}]
+api: yes
+apiAddress: :9997
+
+hls: yes
+hlsAddress: :8888
+hlsAlwaysRemux: yes
+hlsVariant: lowLatency
+
+pathDefaults:
+  recordPath: ./recordings/%path/%Y-%m-%d_%H-%M-%S-%f
+  recordFormat: fmp4
+  recordSegmentDuration: 30s
+  recordDeleteAfter: 30d
+  runOnRecordSegmentComplete: >-
+    curl --fail --silent --show-error --output /dev/null
+    --header 'X-MTX-Hook-Token: <token>'
+    --data-urlencode 'camera=$MTX_PATH'
+    --data-urlencode 'segment_path=$MTX_SEGMENT_PATH'
+    '${MEDIAMTX_SEGMENT_HOOK_URL}'
+\end{lstlisting}
+\end{minipage}
+
+A API do MediaMTX é ativada nas linhas 1 e 2 do \autoref{lst:ch4_mediamtx_config}. Esta interface permite que a \textit{app} atualize dinamicamente, por Câmara, os caminhos geridos pelo \textit{media-parser}. Quando uma Câmara é criada, editada ou removida na aplicação, a respetiva configuração de acesso ao vídeo é enviada para o MediaMTX. Desta forma, os caminhos disponíveis no componente multimédia coincidem com a configuração operacional definida na aplicação.
+
+As linhas 4 a 7 configuram a disponibilização do vídeo através de \gls{HLS}. Esta é a opção de implementação que permite padronizar o \textit{streaming} disponibilizado pelo componente para visualização no \textit{browser}. A opção \texttt{hlsAlwaysRemux} mantém a geração \gls{HLS} disponível mesmo antes do primeiro pedido, reduzindo o tempo inicial de visualização, enquanto \texttt{hlsVariant: lowLatency} seleciona uma variante mais leve, adequada à reprodução contínua em direto. O encaminhamento destes pedidos \gls{HLS} através do Nginx é descrito na subsecção seguinte.
+
+As linhas 10 a 13 definem a organização da gravação segmentada. O caminho de gravação inclui um identificador da Câmara e um \textit{timestamp} do segmento. A duração mínima de cada segmento é configurada para 30 segundos e a retenção em disco limitada a 30 dias. Estes parâmetros, como introduzido anteriormente, evitam tratar a gravação como um ficheiro contínuo único, produzindo unidades temporais que podem ser posteriormente registadas, consultadas e processadas pela aplicação.
+
+Por fim, o comando \texttt{runOnRecordSegmentComplete}, apresentado a partir da linha 14, define o comando a ser executado pelo MediaMTX quando um segmento de gravação fica completo. Este envia à \textit{app} a identificação da Câmara e o caminho do ficheiro gravado, permitindo que a aplicação crie o respetivo Segmento de Gravação. Os mecanismos de autenticação deste \textit{callback} são tratados na secção de segurança.
+
+\subsection{Encaminhamento HLS pelo Nginx}
+
+Na implementação, o Nginx separa os pedidos aplicacionais dos pedidos de \textit{streaming}: a interface é encaminhada para a \textit{app}, enquanto os pedidos \gls{HLS} são encaminhados para o MediaMTX. Esta separação evita que a aplicação Laravel intermedie continuamente os fragmentos de vídeo, mantendo-a focada na validação operacional e na coordenação dos serviços internos.
+
+O \autoref{lst:ch4_nginx_hls_proxy} apresenta um excerto simplificado desta configuração, omitindo a lógica de autenticação e autorização dos pedidos \gls{HLS}, descrita posteriormente na \autoref{sec:seguranca_e_rastreabilidade}.
+
+\par\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Encaminhamento funcional de pedidos aplicacionais e HLS no Nginx (nginx)},label={lst:ch4_nginx_hls_proxy}]
+server {
+    listen 443;
+
+    location ~* ^/player/(?<camera_name>[^/]+)(?<remaining_path>/.*)?$ {
+        proxy_redirect ~^/([^/]+)(.*)$ /player/$1$2;
+        proxy_pass http://mediamtx:8888/$camera_name$remaining_path;
+    }
+
+    location / {
+        proxy_pass http://fuse:80;
+    }
+}
+\end{lstlisting}
+\end{minipage}
+
+O bloco \texttt{/player} captura o identificador da Câmara e o restante caminho do recurso \gls{HLS} (linha 4), encaminhando o pedido para o servidor \gls{HLS} interno do MediaMTX (linha 6). O \texttt{proxy\_redirect} (linha 5) preserva o prefixo público usado pelo Nginx em eventuais referências devolvidas pelo serviço multimédia. Os restantes pedidos são encaminhados para a aplicação Laravel (linha 10), permitindo que, para o utilizador, a interface e o \textit{streaming} sejam servidos pelo mesmo ponto de entrada, embora internamente sejam tratados por componentes distintos.
+
+\subsection{Operação Remota PTZ}
+
+Depois da descoberta do \textit{endpoint} \gls{PTZ} compatível de uma determinada câmara, como apresentado anteriormente na \autoref{subsec:processamento_assincrono}, a aplicação persiste em base de dados a configuração necessária para esta integração. Contudo, a \textit{app} não implementa diretamente os detalhes de controlo dos protocolos suportados, limitando-se a transformar a interação de controlo do utilizador numa intenção operacional e passá-la para o componente especializado \textit{digital-twin}.
+
+O serviço aplicacional \texttt{DigitalTwinClient}, similarmente ao \texttt{MediaParserClient} apresentado anteriormente, envia estes pedidos para o \textit{container} \texttt{ptz}, usando o endereço, credenciais, porta, protocolo e vetor de movimento da Câmara. O \autoref{lst:ch4_ptz_protocol_dispatch} apresenta, de forma simplificada, como o componente \textit{digital-twin} valida o protocolo pretendido e traduz a intenção recebida para a implementação correspondente.
+
+\par\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Excerto simplificado de encaminhamento de controlo PTZ (python)},label={lst:ch4_ptz_protocol_dispatch}]
+def handle_protocol(protocol, url, port, user, password, action, **kwargs):
+    if protocol == 'onvif':
+        if action == "move":
+            onvif_client.move(
+                url=url,
+                port=port,
+                user=user,
+                password=password,
+                x=kwargs.get("x", 0.0),
+                y=kwargs.get("y", 0.0),
+                z=kwargs.get("z", 0.0),
+            )
+        elif action == "stop":
+            onvif_client.stop(
+                url=url,
+                port=port,
+                user=user,
+                password=password,
+            )
+    else:
+        raise ValueError(f"Unsupported protocol: {protocol}")
+\end{lstlisting}
+\end{minipage}
+
+ Quando a ação recebida é de movimento, é validado o protocolo pretendido e o serviço encaminha os eixos \texttt{x}, \texttt{y} e \texttt{z} para o a câmara, que se trata do cliente \gls{ONVIF} (linhas 3 a 12). Já quando a ação é de paragem, delega no método correspondente do mesmo cliente (linhas 13 a 19). A conversão final para chamadas concretas \texttt{ContinuousMove} e \texttt{Stop} fica encapsulada nesse cliente, implementado com \texttt{onvif-zeep}. Assim, a variação por protocolo fica concentrada no componente \texttt{ptz}, permitindo acrescentar novos clientes de controlo sem alterar a lógica principal da \textit{app}.
 
 \section{Segurança e Rastreabilidade}
 \label{sec:seguranca_e_rastreabilidade}
