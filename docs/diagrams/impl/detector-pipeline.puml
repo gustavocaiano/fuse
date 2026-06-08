@@ -31,9 +31,6 @@ skinparam note {
 
 start
 
-:Segmento de vídeo
-recebido pelo detector;
-
 
 partition "Fase 1 - Deteção de Movimento" {
   :Selecionar frames do vídeo

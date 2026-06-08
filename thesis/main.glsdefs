@@ -362,6 +362,34 @@ parent={},%
 %
 }%
 
+\glsdefs@newdocentry{ACL}%
+{%
+name={\acronymfont {\glsentryshort {ACL}}},%
+sort={ACL},%
+type={acronym},%
+first={ACL},%
+firstplural={ACLs},%
+text={ACL},%
+plural={ACLs},%
+description={Access Control List},%
+descriptionplural={Access Control List},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Access Control List},%
+longplural={Access Control Lists},%
+short={ACL},%
+shortplural={ACLs},%
+counter={page},%
+parent={},%
+%
+}%
+
 \glsdefs@newdocentry{ABAC}%
 {%
 name={\acronymfont {\glsentryshort {ABAC}}},%
@@ -1118,6 +1146,34 @@ parent={},%
 %
 }%
 
+\glsdefs@newdocentry{HMAC}%
+{%
+name={\acronymfont {\glsentryshort {HMAC}}},%
+sort={HMAC},%
+type={acronym},%
+first={HMAC},%
+firstplural={HMACs},%
+text={HMAC},%
+plural={HMACs},%
+description={Hash-based Message Authentication Code},%
+descriptionplural={Hash-based Message Authentication Code},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Hash-based Message Authentication Code},%
+longplural={Hash-based Message Authentication Codes},%
+short={HMAC},%
+shortplural={HMACs},%
+counter={page},%
+parent={},%
+%
+}%
+
 \glsdefs@newdocentry{MQTT}%
 {%
 name={\acronymfont {\glsentryshort {MQTT}}},%
@@ -1197,6 +1253,34 @@ long={Representational State Transfer},%
 longplural={Representational State Transfers},%
 short={REST},%
 shortplural={RESTs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{API}%
+{%
+name={\acronymfont {\glsentryshort {API}}},%
+sort={API},%
+type={acronym},%
+first={API},%
+firstplural={APIs},%
+text={API},%
+plural={APIs},%
+description={Application Programming Interface},%
+descriptionplural={Application Programming Interface},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Application Programming Interface},%
+longplural={Application Programming Interfaces},%
+short={API},%
+shortplural={APIs},%
 counter={page},%
 parent={},%
 %
@@ -1393,6 +1477,34 @@ long={Bounding Box},%
 longplural={Bounding Boxs},%
 short={BBOX},%
 shortplural={BBOXs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{FPS}%
+{%
+name={\acronymfont {\glsentryshort {FPS}}},%
+sort={FPS},%
+type={acronym},%
+first={FPS},%
+firstplural={FPSs},%
+text={FPS},%
+plural={FPSs},%
+description={Frames Per Second},%
+descriptionplural={Frames Per Second},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Frames Per Second},%
+longplural={Frames Per Seconds},%
+short={FPS},%
+shortplural={FPSs},%
 counter={page},%
 parent={},%
 %

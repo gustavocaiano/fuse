@@ -6,7 +6,7 @@
 Este capítulo descreve a concretização técnica do \gls{MVP} do \gls{FUSE}, com foco nos mecanismos implementados para integrar câmaras heterogéneas, disponibilizar \textit{streaming} de forma segura, suportar controlo remoto e articular a plataforma central com o detetor automático de eventos. A apresentação parte das decisões de análise e desenho estabelecidas no \autoref{chap:analise_e_desenho} e restringe-se aos aspetos de implementação que condicionam o funcionamento, a segurança e a extensibilidade do sistema.
 
 \section{Ambiente Tecnológico e Implantação do MVP}
-A implementação foi organizada em \textit{containers} Docker, de modo a reduzir a dependência face ao ambiente de desenvolvimento e a manter separados os principais blocos funcionais definidos no \autoref{chap:analise_e_desenho}. Esta opção permitiu concretizar a arquitetura proposta através de componentes independentes, ligados por uma rede interna controlada e configurados por variáveis de ambiente, reduzindo o acoplamento entre a aplicação central, a gestão multimédia, o controlo operacional das câmaras e o \textit{proxy} e a base de dados.
+A implementação foi organizada em \textit{containers} Docker, de modo a reduzir a dependência face ao ambiente de desenvolvimento e a manter separados os principais blocos funcionais definidos no \autoref{chap:analise_e_desenho}. Esta opção permitiu concretizar a arquitetura proposta através de componentes independentes, ligados por uma rede interna controlada e configurados por variáveis de ambiente, reduzindo o acoplamento entre os mesmos.
 
 \subsection{Tecnologias Utilizadas}
 
@@ -18,18 +18,15 @@ Para a conectividade com câmaras instaladas em redes externas não controladas,
 
 O módulo de deteção automática foi mantido como subsistema externo ao servidor aplicacional principal. Por esse motivo, a sua \textit{stack} tecnológica e respetiva fundamentação são apresentadas na \autoref{sec:detetor_automatico} (\nameref{sec:detetor_automatico}).
 
-
-
-
 \subsubsection{Fundamentação de Escolhas}
 
-A seleção tecnológica do \gls{MVP} privilegiou a coerência com os requisitos definidos, a rapidez de prototipagem e a simplicidade de implantação. A utilização de Laravel e Filament resulta diretamente dos requisitos tecnológicos da entidade de acolhimento, apresentados no \autoref{chap:introducao}. Para além desse alinhamento, o Filament é descrito na documentação oficial como uma framework \textit{Server-Driven UI} para Laravel construída sobre Livewire, Alpine.js e Tailwind CSS \cite{filament_overview}.
+A seleção tecnológica do \gls{MVP} privilegiou a coerência com os requisitos definidos, a rapidez de prototipagem e a simplicidade de implantação. A utilização de Laravel e Filament resulta diretamente dos requisitos tecnológicos da entidade de acolhimento, apresentados no \autoref{chap:introducao}. Filament é descrito na documentação oficial como uma framework \textit{Server-Driven UI} para Laravel construída sobre Livewire, Alpine.js e Tailwind CSS \cite{filament_overview}.
 
-A escolha do MediaMTX foi orientada pelos requisitos de implementação do componente \textit{media-parser}. Este componente necessita de receber fluxos provenientes das câmaras, disponibilizá-los à plataforma num formato compatível e suportar a gravação segmentada utilizada nos processos posteriores de análise. O MediaMTX apresenta-se como um servidor e \textit{proxy} multimédia com suporte para múltiplos protocolos de entrada e saída de \textit{streaming}, incluindo \gls{RTSP} e \gls{HLS} \cite{mediamtx_intro}. Assim, a escolha não é apresentada como uma comparação face a alternativas, mas como uma opção adequada aos requisitos concretos do \gls{MVP}.
+A escolha do MediaMTX foi orientada pelos requisitos de implementação do componente \textit{media-parser}. Este componente deverá receber vídeo proveniente das câmaras e posteriormente disponibilizá-lo à plataforma num formato compatível, bem como suportar a gravação segmentada utilizada nos processos seguintes de análise. O MediaMTX apresenta-se como um servidor  \textit{proxy} multimédia com suporte para múltiplos protocolos de entrada e saída de \textit{streaming}, incluindo \gls{RTSP} e \gls{HLS} \cite{mediamtx_intro}. Assim, a escolha não é apresentada como uma comparação face a alternativas, mas como uma opção adequada aos requisitos concretos do \gls{MVP}.
 
 No componente \textit{digital-twin}, a biblioteca \texttt{onvif-zeep} foi escolhida por disponibilizar uma implementação \textit{open-source} de cliente \gls{ONVIF} em Python \cite{onvif_zeep}. Esta opção permitiu encapsular as particularidades da comunicação \gls{ONVIF} num serviço próprio, preservando a aplicação central independente dos detalhes de baixo nível de um protocolo como este. Importa recordar que, para efeitos do \gls{MVP}, o controlo \gls{PTZ} implementado se limita a este protocolo \gls{ONVIF}. Contudo, o facto de este componente estar isolado permite que o suporte a outros protocolos seja acrescentado futuramente através da sua extensão, sem alterações estruturais à aplicação central.
 
-As restantes tecnologias de suporte, nomeadamente Docker Compose, Nginx, MySQL, FastAPI e Uvicorn, correspondem a escolhas comuns e consolidadas na indústria. Por esse motivo, a sua utilização é justificada sobretudo pelo papel operacional que desempenham no \gls{MVP}, não exigindo uma fundamentação comparativa extensa. De forma semelhante, tecnologias como Tailscale e as opções associadas ao detetor, incluindo YOLO11-seg, são apenas enquadradas nesta secção, uma vez que a sua motivação técnica já foi introduzida no desenho arquitetural e é retomada nas secções específicas de segurança e deteção automática.
+As restantes tecnologias de suporte, nomeadamente Docker Compose, Nginx, MySQL, FastAPI e Uvicorn, correspondem a escolhas comuns e consolidadas na indústria. De forma semelhante, tecnologias como Tailscale e as opções associadas ao detetor são apenas enquadradas nesta secção, uma vez que a sua motivação técnica já foi introduzida no desenho arquitetural e é retomada nas secções específicas de segurança e deteção automática. \todo{isto está mal eu não introduzo nada do detetor}
 
 \subsection{Implementação com Docker Compose}
 
@@ -109,10 +106,11 @@ Esta secção descreve a concretização técnica do componente aplicacional em 
 
 O modelo de domínio apresentado no \autoref{chap:analise_e_desenho} foi materializado através de migrações de base de dados e modelos Eloquent, o mecanismo de mapeamento objeto-relacional do Laravel.
 
-O conceito de Câmara foi implementado com uma chave estrangeira para Processo, \texttt{process\_id}, uma vez que cada câmara se encontra sempre afeta a um processo no contexto operacional da plataforma. O modelo inclui também o alvo de deteção configurado, usado posteriormente para determinar que classe de objetos deve ser analisada. Esta opção pode parecer ambígua se a câmara for entendida apenas como dispositivo físico reutilizável, porém, no contexto da aplicação, uma \textit{Câmara} representa uma montagem ou configuração operacional concreta de um dispositivo num determinado processo. Assim, se o mesmo equipamento for instalado noutro local, associado a outro processo ou configurado com outro alvo de deteção, essa situação passa a corresponder a uma nova instância operacional na aplicação.
+O conceito de Câmara foi implementado com chave estrangeira para Processo, \texttt{process\_id}, uma vez que cada câmara se encontra sempre afeta a um processo no contexto operacional da plataforma. O modelo inclui também o alvo de deteção configurado, usado posteriormente para determinar que classe de objetos deve ser analisada. Esta opção pode parecer ambígua se a câmara for entendida apenas como dispositivo físico reutilizável, porém, no contexto da aplicação, uma \textit{Câmara} representa uma montagem ou configuração operacional concreta de um dispositivo num determinado processo. Assim, se o mesmo equipamento for instalado noutro local, associado a outro processo ou configurado com outro alvo de deteção, essa situação passa a corresponder a uma nova instância operacional na aplicação.
 
 O Segmento de Gravação foi modelado com uma chave estrangeira \texttt{camera\_id}, uma vez que cada segmento de gravação corresponde sempre ao vídeo captado por uma câmara específica. Por sua vez, o Evento de Deteção referencia o segmento onde a ocorrência foi identificada, através de \textit{recording\_segment\_id}. Como um evento de deteção pode envolver vários objetos detetados no mesmo intervalo temporal, o modelo Objeto de Deteção referencia o evento correspondente através de uma chave estrangeira para Evento de Deteção, \texttt{event\_id}. Esta organização concretiza, na base de dados, a sequência descrita no modelo de domínio: câmara, segmento de gravação, evento de deteção e objetos detetados. 
  \todo{Pergunta: posso por  câmara -> segmento de gravação -> evento de deteção -> objetos detetados ? }
+ \todo{com setas?}
 
 Na componente de processos e acessos aos mesmos, a relação entre \textit{Processo} e \textit{Utilizador} foi implementada através da tabela intermédia \texttt{process\_user}, permitindo associar utilizadores aos processos em que participam. A modelação de perfis e permissões é retomada na subsecção seguinte \todo{está mal ? referencio?}, onde se descreve o mecanismo de controlo de acessos da aplicação.
 
@@ -169,14 +167,14 @@ O método \texttt{relatedToUser} (linha 1) apenas aplica a filtragem quando o ut
 
 Caso o utilizador não tenha esta permissão, o método \texttt{whereUserIsOperator} (linha 9) concretiza a restrição por processo. Quando a consulta incide sobre processos, a filtragem é feita pela relação \texttt{operators} (linha 13), materializada pela tabela \texttt{process\_user}. Quando a consulta incide sobre câmaras, a filtragem é aplicada através da relação com o respetivo processo (linha 19), reutilizando o mesmo método e a mesma regra de associação entre processo e utilizador (linha 20). Desta forma, a visibilidade dos processos e das câmaras é mantida coerente.
 
-Estes dois métodos são aplicados ao Processo e à Câmara através do \textit{trait} \texttt{HasProcessFiltering}. Desta maneira, futuramente, caso seja necessário extender a aplicação, este filtro funcionará com todos os modelos que usem este \textit{trait} e que, pela lógica de negócio, estejam associados a um processo.
+Estes dois métodos são aplicados ao Processo e à Câmara através da utilização do \textit{trait} \texttt{HasProcessFiltering}. Desta maneira, futuramente, caso seja necessário extender a aplicação, este filtro funcionará com todos os modelos que usem este \textit{trait} e que, pela lógica de negócio, estejam associados a um processo.
 
 
 \subsubsection{\textit{Roles} e Permissões}
 
 A autorização das ações não depende diretamente das \textit{roles}, mas sim das permissões atribuídas a estas. As \textit{roles} funcionam como agregadores administrativos de permissões, permitindo que a configuração final da aplicação seja ajustada no momento de implantação sem alterar a lógica aplicacional. Assim, uma organização pode criar novos perfis ou alterar as permissões associadas aos perfis existentes, mantendo o mesmo mecanismo de validação.
 
-Ao nível da implementação, esta separação é materializada por tabelas \textit{pivot} distintas. A tabela \texttt{user\_has\_roles} associa utilizadores às respetivas \textit{roles}, enquanto a tabela \texttt{role\_has\_permissions} define o conjunto de permissões agregadas por cada \textit{role}. Assim, a aplicação não precisa de validar diretamente o nome da \textit{role}, mas sim se o utilizador possui a permissão necessária para a ação em causa, através de uma das \textit{roles} a ele atribuídas.
+Ao nível da implementação, esta separação é materializada por tabelas \textit{pivot} distintas. A tabela \texttt{user\_has\_roles} associa utilizadores às respetivas \textit{roles}, enquanto a tabela \texttt{role\_has\_ permissions} define o conjunto de permissões agregadas por cada \textit{role}. Assim, a aplicação não precisa de validar diretamente o nome da \textit{role}, mas sim se o utilizador possui a permissão necessária para a ação em causa, através de uma das \textit{roles} a ele atribuídas.
 
 No \gls{MVP}, foram definidos perfis demonstrativos para representar diferentes níveis de responsabilidade. O perfil \textit{System Admin} possui acesso integral à aplicação, sendo o único com acesso a auditoria e gestão de utilizadores. O perfil \textit{Manager} tem permissões de gestão sobre processos e câmaras, incluindo a capacidade de atribuir operadores a processos e de contornar a filtragem por processo. O perfil \textit{Controller} pode visualizar os processos e câmaras que lhe foram atribuídos e executar operações de controlo remoto sobre essas câmaras. O perfil \textit{Visualizer} não possui permissões de controlo das câmaras, estando restrito a visualização de informação, câmaras e gravações relativos aos processos permitidos.
 
@@ -257,7 +255,7 @@ Conforme observado, esta \textit{Action} é usada para iniciar ou parar a grava�
 
 \subsubsection{Camada de Clientes de Integração}
 
-Quando a operação acionada precisa de contactar um componente externo, a aplicação recorre a uma camada de clientes de integração. Esta camada funciona como fronteira entre a aplicação Laravel e os módulos especializados, evitando que os recursos Filament ou os serviços aplicacionais conheçam diretamente a estrutura completa das APIs externas.
+Quando a operação acionada precisa de contactar um componente externo, a aplicação recorre a uma camada de clientes de integração. Esta camada funciona como fronteira entre a aplicação Laravel e os módulos especializados, evitando que os recursos Filament ou os serviços aplicacionais conheçam diretamente a estrutura completa das \glspl{API} externas.
 
 No caso da gravação, a \textit{Action} apresentada no \autoref{lst:ch4_start_stop_recording_action} delega a operação em \texttt{MediaParserService}. Este serviço calcula o novo estado pretendido para a Câmara e, por sua vez, chama \texttt{MediaParserClient}, responsável por enviar a atualização ao MediaMTX. O \autoref{lst:ch4_recording_client_flow} apresenta este fluxo de forma simplificada.
 
@@ -318,7 +316,7 @@ private static function buildAPIUrl(string $operation, string $name): string
 \end{lstlisting}
 \end{minipage}
 
-A configuração define o endereço de acesso interno ao \textit{media-parser}, a porta da API e o caminho usado para contactar o componente. O cliente usa esses valores para construir o \textit{endpoint} final. Este mecanismo é usado não apenas para a ligação ao \textit{media-parser}, mas também para o serviço PTZ, para o detetor automático e para outros parâmetros operacionais da plataforma. Deste modo, uma alteração futura da tecnologia usada para concretizar o \textit{media-parser}, ou outro componente, concentrar-se-á na configuração e na respetiva classe cliente, sem exigir que a interface Filament ou os serviços aplicacionais fossem reescritos.
+A configuração define o endereço de acesso interno ao \textit{media-parser}, a porta da \gls{API} e o caminho usado para contactar o componente. O cliente usa esses valores para construir o \textit{endpoint} final. Este mecanismo é usado não apenas para a ligação ao \textit{media-parser}, mas também para o serviço PTZ, para o detetor automático e para outros parâmetros operacionais da plataforma. Deste modo, uma alteração futura da tecnologia usada para concretizar o \textit{media-parser}, ou outro componente, concentrar-se-á na configuração e na respetiva classe cliente, sem exigir que a interface Filament ou os serviços aplicacionais fossem reescritos.
 
 \subsection{Processamento Assíncrono e Trabalhos em Segundo Plano}
 \label{subsec:processamento_assincrono}
@@ -340,9 +338,9 @@ No registo da Câmara, o utilizador indica o endereço do dispositivo, mas não 
 Esta abordagem reduz a configuração manual necessária para ativar o controlo \gls{PTZ}. Se a Câmara não responder às combinações testadas, permanece utilizável para visualização e gravação, apenas sem controlo remoto automático. O mesmo padrão permite acrescentar futuramente outras tarefas assíncronas de descoberta de correspondência de protocolo, sem exigir configuração técnica detalhada no momento do registo.
 
 
-\section{Ingestão, Streaming, Gravação e Operação Remota}
+\section{Streaming, Gravação e Operação Remota}
 
-\todo{falta aqui mini introdução}
+Esta secção concretiza a implementação relativa ao vídeo, que foi desenhada no \autoref{chap:analise_e_desenho}, descrevendo como o \textit{media-parser}, o Nginx e o serviço \textit{digital-twin} suportam a receção da \textit{stream}, a disponibilização em \gls{HLS} e a gravação segmentada. Também é explicada a operação remota \gls{PTZ}.
 
 \subsection{Configuração Funcional do \textit{media-parser}}
 
@@ -372,22 +370,23 @@ pathDefaults:
 \end{lstlisting}
 \end{minipage}
 
-A API do MediaMTX é ativada nas linhas 1 e 2 do \autoref{lst:ch4_mediamtx_config}. Esta interface permite que a \textit{app} atualize dinamicamente, por Câmara, os caminhos geridos pelo \textit{media-parser}. Quando uma Câmara é criada, editada ou removida na aplicação, a respetiva configuração de acesso ao vídeo é enviada para o MediaMTX. Desta forma, os caminhos disponíveis no componente multimédia coincidem com a configuração operacional definida na aplicação.
+A \gls{API} do MediaMTX é ativada nas linhas 1 e 2 do \autoref{lst:ch4_mediamtx_config}. Esta interface permite que a \textit{app} atualize dinamicamente, por Câmara, os caminhos geridos pelo \textit{media-parser}. Quando uma Câmara é criada, editada ou removida na aplicação, a respetiva configuração de acesso ao vídeo é enviada para o MediaMTX. Desta forma, os caminhos disponíveis no componente multimédia coincidem com a configuração operacional definida na aplicação.
 
-As linhas 4 a 7 configuram a disponibilização do vídeo através de \gls{HLS}. Esta é a opção de implementação que permite padronizar o \textit{streaming} disponibilizado pelo componente para visualização no \textit{browser}. A opção \texttt{hlsAlwaysRemux} mantém a geração \gls{HLS} disponível mesmo antes do primeiro pedido, reduzindo o tempo inicial de visualização, enquanto \texttt{hlsVariant: lowLatency} seleciona uma variante mais leve, adequada à reprodução contínua em direto. O encaminhamento destes pedidos \gls{HLS} através do Nginx é descrito na subsecção seguinte.
+As linhas 4 a 7 configuram a disponibilização do vídeo através de \gls{HLS}. Esta é a opção de implementação que permite padronizar o \textit{streaming} disponibilizado pelo componente para visualização no \textit{browser}. A opção \texttt{hlsAlwaysRemux} mantém a geração \gls{HLS} disponível mesmo antes do primeiro pedido, reduzindo o tempo inicial de visualização, enquanto \texttt{hlsVariant: lowLatency} seleciona uma variante mais leve, adequada à reprodução contínua em direto. O \textit{proxy} destes pedidos \gls{HLS} através do Nginx é descrito na subsecção seguinte.
 
 As linhas 10 a 13 definem a organização da gravação segmentada. O caminho de gravação inclui um identificador da Câmara e um \textit{timestamp} do segmento. A duração mínima de cada segmento é configurada para 30 segundos e a retenção em disco limitada a 30 dias. Estes parâmetros, como introduzido anteriormente, evitam tratar a gravação como um ficheiro contínuo único, produzindo unidades temporais que podem ser posteriormente registadas, consultadas e processadas pela aplicação.
 
 Por fim, o comando \texttt{runOnRecordSegmentComplete}, apresentado a partir da linha 14, define o comando a ser executado pelo MediaMTX quando um segmento de gravação fica completo. Este envia à \textit{app} a identificação da Câmara e o caminho do ficheiro gravado, permitindo que a aplicação crie o respetivo Segmento de Gravação. Os mecanismos de autenticação deste \textit{callback} são tratados na secção de segurança.
 
-\subsection{Encaminhamento HLS pelo Nginx}
+\subsection{\textit{Proxy} HLS pelo Nginx}
+\label{sec:ch4_nginx_hls_proxy}
 
 Na implementação, o Nginx separa os pedidos aplicacionais dos pedidos de \textit{streaming}: a interface é encaminhada para a \textit{app}, enquanto os pedidos \gls{HLS} são encaminhados para o MediaMTX. Esta separação evita que a aplicação Laravel intermedie continuamente os fragmentos de vídeo, mantendo-a focada na validação operacional e na coordenação dos serviços internos.
 
 O \autoref{lst:ch4_nginx_hls_proxy} apresenta um excerto simplificado desta configuração, omitindo a lógica de autenticação e autorização dos pedidos \gls{HLS}, descrita posteriormente na \autoref{sec:seguranca_e_rastreabilidade}.
 
 \par\noindent\begin{minipage}{\linewidth}
-\begin{lstlisting}[caption={Encaminhamento funcional de pedidos aplicacionais e HLS no Nginx (nginx)},label={lst:ch4_nginx_hls_proxy}]
+\begin{lstlisting}[caption={\textit{Proxy} funcional de pedidos aplicacionais e HLS no Nginx (nginx)},label={lst:ch4_nginx_hls_proxy}]
 server {
     listen 443;
 
@@ -414,7 +413,7 @@ O serviço aplicacional \texttt{DigitalTwinClient}, similarmente ao \texttt{Medi
 \par\noindent\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Excerto simplificado de encaminhamento de controlo PTZ (python)},label={lst:ch4_ptz_protocol_dispatch}]
 def handle_protocol(protocol, url, port, user, password, action, **kwargs):
-    if protocol == 'onvif':
+    if protocol == "onvif":
         if action == "move":
             onvif_client.move(
                 url=url,
@@ -441,65 +440,238 @@ def handle_protocol(protocol, url, port, user, password, action, **kwargs):
 
 \section{Segurança e Rastreabilidade}
 \label{sec:seguranca_e_rastreabilidade}
-% Resumo: Concentrar aqui proteção de streams, exposição controlada, validação de chamadas externas e rastreabilidade.
-% Incluir Tailscale, exposição controlada por Cloudflare Tunnel, callbacks HMAC, logs/rastreabilidade e Software Composition Analysis.
-% Descrever mecanismos e metodologia, deixando resultados e evidência para o Capítulo~\ref{chap:resultados}.
-% Retomar aqui o nginx.conf, mas apenas a parte relativa à validação de acesso aos streams: cookie stream_auth, secure_link, validade temporal e segredo partilhado com a aplicação Laravel.
-% Explicar que a secção anterior descreve a disponibilização funcional do HLS, enquanto esta secção descreve a proteção desse acesso.
-% Aqui sim falar do HasAudits
 
-\subsection{tailscale}
- falar da implementacao do tailscale. como é que a app chega a camera (falar do adversite-routes da rede tailscale e etc..)
+Esta secção apresenta os mecanismos de segurança e rastreabilidade relevantes para a solução implementada. São descritas a conectividade segura com Tailscale, a proteção do \textit{streaming} \gls{HLS}, a autenticação de chamadas entre componentes e a auditoria de operações relevante.
 
-\subsection{gate}
-falar do tunel cloudflared para o acesso a api gate por https (não tendo que abrir nenhuma porta nem tendo que ter um ip publico)
+\subsection{Conectividade Segura com Tailscale}
+
+Na implementação do \gls{MVP}, a conectividade segura entre o servidor \gls{FUSE} e o local remoto é concretizada através do Tailscale. O cliente Tailscale é configurado no servidor \gls{FUSE} e no \gls{SBC} instalado junto da Câmara, não diretamente na própria Câmara. Deste modo, como fundamentado no \autoref{chap:estado_da_arte} (\nameref{chap:estado_da_arte}), o \gls{SBC} assume o papel de \textit{gateway} seguro da rede local onde o dispositivo se encontra, permitindo que a Câmara seja alcançada pelo servidor central sem exposição direta à Internet pública.
+
+O comando seguinte é executado no \gls{SBC} para associar este equipamento à \textit{tailnet}, isto é, à rede privada formada pelos dispositivos autorizados no Tailscale:
+
+\begin{quote}
+\small
+\begin{verbatim}
+tailscale up --auth-key=<auth-key> --advertise-routes=x.x.x.x/24
+\end{verbatim}
+\end{quote}
+
+A configuração relevante consiste em usar o parâmetro \texttt{--advertise-routes} para tornar a rede alcançável através da \textit{tailnet}. Assim, os componentes alojados no \textit{fuse-server} conseguem alcançar os endereços da rede remota, incluindo a Câmara, através do túnel estabelecido pelo \gls{SBC}. No comando exemplificado, o valor \texttt{x.x.x.x/24} representa o prefixo da rede local a anunciar, e o sufixo \texttt{/24} indica o número de bits da máscara de rede. Um exemplo de prefixo seria \texttt{192.168.10.0/24}.
+
+A autenticação deste dispositivo na \textit{tailnet} é realizada através do parâmetro \texttt{--auth-key}. Este parâmetro espera uma chave de autenticação que é gerada no painel de administração do Tailscale.
+
+No lado do servidor \gls{FUSE}, o cliente Tailscale foi considerado ao nível do \textit{fuse-server}, em vez de ser configurado individualmente em cada \textit{container}. Esta opção reduz duplicação de configuração e autenticação, uma vez que a \textit{app}, o \textit{media-parser} e o \textit{digital-twin} necessitam de alcançar a rede remota para funções distintas. A aplicação continua a coordenar as operações ao nível dos serviços, mas a conectividade de rede é concentrada no servidor.
+
+A esta configuração junta-se a definição de \glspl{ACL} no Tailscale, usadas como políticas de acesso. A comunicação pretendida é essencialmente iniciada pelo \textit{fuse-server} para alcançar as redes remotas necessárias, pelo que não é necessário conceder aos \glspl{SBC} acesso livre ao servidor central. Ao restringir esse sentido de comunicação, o acesso indevido a um \gls{SBC} em cenário real deixa de implicar, por si só, capacidade de movimento lateral para os serviços internos do \gls{FUSE}.
+
+\subsection{Proteção do \textit{Streaming} \gls{HLS}}
+
+O \textit{proxy} \gls{HLS} apresentado na \autoref{sec:ch4_nginx_hls_proxy} não pode ser tratado como um recurso aberto. A proteção implementada separa duas responsabilidades: a \textit{app} decide se o Utilizador pode visualizar a Câmara, enquanto o \textit{nginx} valida cada pedido \gls{HLS} antes de o encaminhar para o \textit{media-parser}. Desta forma, a aplicação central não serve o \textit{streaming}, mas continua a controlar a emissão da autorização necessária para esse acesso.
+
+O \autoref{lst:ch4_nginx_hls_secure_link} apresenta um excerto simplificado da validação aplicada pelo Nginx, omitindo o segredo \texttt{STREAM\_SECRET}.
+
+\par\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Validação simplificada do acesso HLS no Nginx (nginx)},label={lst:ch4_nginx_hls_secure_link}]
+location ~* ^/player/(?<camera_name>[^/]+)(?<remaining_path>/.*)?$ {
+    set $stream_secret "<STREAM_SECRET>";
+    secure_link $cookie_stream_auth;
+    secure_link_md5 "$secure_link_expires$camera_name$stream_secret";
+
+    if ($secure_link = "") { return 403; }
+    if ($secure_link = "0") { return 403; }
+
+    proxy_pass http://mediamtx:8888/$camera_name$remaining_path;
+}
+\end{lstlisting}
+\end{minipage}
+
+Neste mecanismo, o cookie \texttt{stream\_auth} funciona como uma autorização temporária para uma Câmara específica. O seu valor contém uma assinatura e um limite temporal de validade, no formato \texttt{HASH,EXPIRES}. A assinatura é calculada pela aplicação com base nesse limite temporal, no identificador da Câmara e num segredo partilhado com o Nginx, sendo depois validada pelo \texttt{secure\_link}. No \gls{MVP}, a validade configurada é de 30 segundos. Caso o cookie esteja ausente, fora do período de validade ou tenha sido manipulado, o Nginx recusa o pedido com código \texttt{403} (linha 6 e 7). Apenas pedidos válidos são encaminhados para o MediaMTX.
+
+Como a autorização é temporária, a interface volta a avaliar o acesso de 10 em 10 segundos enquanto o leitor de vídeo está ativo, através de \texttt{wire:poll.10s}. Quando o Utilizador continua autorizado, a aplicação reemite o cookie \texttt{stream\_auth}. Esta opção permite manter a visualização contínua sem atribuir uma credencial de longa duração ao \textit{streaming}. Caso uma autorização seja reutilizada indevidamente, a sua validade fica limitada à curta janela temporal configurada.
+
+% TODO: Se houver tempo, acrescentar subsecção sobre Cloudflare Tunnel: exposição HTTPS controlada do gate sem abrir portas no servidor nem exigir IP público.
+
+\subsection{Autenticação de Chamadas entre Componentes}
+\label{subsec:autenticacao_chamadas_entre_componentes}
+
+Para além da proteção do acesso ao \textit{streaming}, a implementação inclui validações específicas nas chamadas entre componentes. Cada integração relevante usa tokens, chaves ou assinaturas baseadas em segredos previamente configurados no ambiente. A aplicação valida esses elementos antes de alterar estados ou persistir dados, reduzindo o risco de aceitar notificações ou resultados originados por componentes não autorizados.
+
+O exemplo mais representativo é o callback do detetor automático, uma vez que este devolve resultados de análise que serão posteriormente persistidos. Neste fluxo, o pedido inclui os cabeçalhos \texttt{X-Detector-Key} (chave), \texttt{X-Detector-Timestamp} e \texttt{X-Detector-Signature} (assinatura). A chave identifica o serviço autorizado, enquanto a assinatura é calculada com \gls{HMAC} SHA-256 sobre a combinação entre o instante temporal indicado e o corpo do pedido. A aplicação valida estes elementos no \texttt{EventResultRequest}, permitindo rejeitar resultados sem chave válida, fora do intervalo temporal aceite ou com conteúdo alterado.
+
+O mesmo princípio de acesso limitado é aplicado ao envio de segmentos para análise. Quando o \texttt{AnalyzeRecordingSegmentJob} submete um segmento ao detetor, fornece um url temporariamente assinado para descarregar apenas esse ficheiro, com validade própria definida por configuração. O endpoint que serve o ficheiro valida a assinatura do url e a chave do detetor. Assim, o detetor recebe acesso ao segmento necessário para a análise, sem obter acesso livre ao armazenamento interno da aplicação. Este fluxo é detalhado na \autoref{sec:detetor_automatico}.
 
 \subsection{Auditoria e Rastreabilidade}
-% Não repetir aqui o controlo de acessos aplicacional, que ficou na secção de orquestração central.
-% Focar a auditoria e rastreabilidade: registo de alterações, utilizador responsável, histórico de ações relevantes e suporte à análise posterior.
 
-\subsection{composição do software}
+A rastreabilidade operacional foi implementada ao nível aplicacional, sobre os modelos Eloquent. Para concretizar este mecanismo foi utilizado o pacote \texttt{owen-it/laravel-auditing}, que permite registar automaticamente alterações em modelos que implementem o \textit{trait} \texttt{HasAudits}. Este \textit{trait} é aplicado na classe \texttt{BaseModel}, herdada pelos principais modelos de domínio da aplicação, como se observa no \autoref{lst:ch4_base_model_audits}.
 
-falar do software composition analysis para identificar vulnerabilidades e problemas de dependencias usadas
+\par\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Aplicação do \textit{trait} de auditoria na classe base dos modelos (php)},label={lst:ch4_base_model_audits}]
+abstract class BaseModel extends Model implements Auditable
+{
+    use HasAudits;
+}
+\end{lstlisting}
+\end{minipage}
 
+Desta forma, cada operação de escrita na base de dados, ou seja, operações de criação, atualização ou eliminação, passam a gerar registos de auditoria de forma uniforme nos modelos que extendem desta classe base.
+
+Cada registo de auditoria guarda o Utilizador associado à operação, o tipo de evento, a entidade auditada, os valores antigos e novos e a data e hora da alteração. Também inclui o url, endereço IP, \textit{browser} e sistema operativo, quando disponíveis. Estes registos são consultáveis por administradores na aplicação, através de uma listagem e de uma página de detalhe. Para evitar a exposição indevida de informação sensível, determinados campos, como palavras-passe ou tokens, são mascarados antes de serem apresentados na interface de auditoria.
 
 \section{Detetor Automático e Pipeline de Análise}
 \label{sec:detetor_automatico}
-% Resumo: Descrever o serviço externo de deteção: FastAPI, Celery, Redis, OpenCV e YOLO11-seg.
-% Explicar o pipeline: enqueue, download, motion gate, deteção, artefactos e callback.
-% Não apresentar desempenho, precisão, métricas ou casos de teste; isso pertence ao Capítulo~\ref{chap:resultados}.
-%
-%
-esta secção explica a implementação do detetor automático, incluindo o ambiente e a stack utilizada.
+O detetor automático concretiza, em termos de implementação, o componente \textit{detector} definido no \autoref{chap:analise_e_desenho}. Esta secção descreve o ambiente tecnológico utilizado, a forma como os subcomponentes conceptuais foram implantados, a \textit{pipeline} de análise implementada até à Fase 2 do \gls{MVP} e o contrato de resultado devolvido à aplicação central.
 
-\subsection{ambiente e stack}
-Como referido anterioermente, o detetor automático é um serviço externo composto por 3 módulos, implementados como containers: detetor-api, detetor-worker e detector-cache. estes estão dentro da mesma rede interna docker e apenas o detector api expoe uma interface para fora da mesma, ermitindo receber chamadas fora da rede.
+\subsection{Ambiente Tecnológico e Implantação do Serviço}
 
-(aqui um excerto do docker compose)
+A implementação do detetor retoma a divisão interna definida para o componente \textit{detector}, composto por \textit{detector-api}, \textit{detector-worker} e \textit{detector-cache}. Nesta subsecção, cada subcomponente é descrito quanto à sua concretização técnica no \gls{MVP}.
 
-o componente detector-api e detector-worker são implementados em python e o detector-cache é uma instancia de Redis.
+\subsubsection{Tecnologias Utilizadas}
+O \textit{detector-api} foi implementado em Python com FastAPI e Uvicorn. Este subcomponente materializa a interface de entrada do detetor, que recebe pedidos de análise de segmentos, valida o pedido recebido e coloca a tarefa de análise numa fila assíncrona.
 
-ao levantar os containers, existe um outro docker-compose que irá fazer o setup dos modelos de visão computacional usados , que no caso do MVP, apenas um modelo YOLO11-seg é utilizado. este é configuravel a nivel de concorrencia, tempo de execução e outros parametros.
+O \textit{detector-worker} foi igualmente implementado em Python, mas utilizando Celery para executar as tarefas colocadas previamente na fila. É neste subcomponente que são executadas as operações de obtenção do ficheiro correspondente ao segmento de gravação, e respetivo processamento de vídeo. A filtragem inicial é realizada com OpenCV e a deteção de objetos com o modelo \textbf{YOLO11-seg}. A execução deste modelo é suportada por PyTorch e CUDA.
 
-(mostrar esse docker compose e configuracao)
+O \textit{detector-cache} foi concretizado com Redis. Na implementação, este subcomponente concretiza a fila necessária ao processamento assíncrono, sendo utilizado pela configuração do Celery como infraestrutura de suporte aos trabalhos de análise.
 
-este detector-api tem ainda uma pequena interface web para visualização de métricas e logs em tempo real.
+\subsubsection{Fundamentação de Escolhas}
 
-\subsection{funcionamento}
-o detetor recebe um pedido de processamento através do detector-pipeline , com um url de download do vídeo. quando o worker estiver livre e puder trabalhar vai fazer o download desse segmento e vai começar a aálisá-lo inserindo o no inicio da pipeline desenvolvida para a deteção que está descrita na figura seguinte:
+A seleção tecnológica do detetor automático foi orientada pela necessidade de concretizar a \textit{pipeline} definida para o \gls{MVP}, mantendo coerência com as decisões já fundamentadas no \autoref{chap:estado_da_arte} e no \autoref{chap:analise_e_desenho}.
 
-=== meter aqui a figura do detector-pipeline, com height = pagina em vez de width .
+A utilização de Python resulta da maturidade do seu ecossistema para visão computacional e inferência de modelos de aprendizagem automática. Neste contexto, o FastAPI permite definir os \textit{endpoints} de análise e validar de forma estruturada os dados de entrada e saída, enquanto o Uvicorn assegura a execução do serviço \gls{HTTP}. A utilização de Celery, em conjunto com Redis, concretiza a execução de trabalhos em segundo plano e o suporte à fila de processamento.
 
-descrever o detector-pipeline (/Users/gustavocaiano/docs/github/isep/fuse/docs/diagrams/impl/detector-pipeline.puml)
+Para a Fase 1 da \textit{pipeline}, o OpenCV foi escolhido por disponibilizar operações \textit{standard} de processamento de vídeo e imagem, adequadas à deteção inicial de movimento descrita no \autoref{sec:estado_arte_visao}. Para a Fase 2, a escolha do YOLO11-seg parte da análise realizada no \autoref{subsec:deteção_objetos}, onde o YOLO11 foi identificado como uma evolução recente da família \gls{YOLO} adequada a cenários que exigem compromisso entre velocidade e precisão. Na implementação, foi utilizada a sua variante de segmentação, identificada pelo sufixo ''\texttt{-seg}'', por se adequar à extração das regiões visuais associadas aos objetos detetados. A utilização de PyTorch e CUDA decorre da necessidade de executar essa inferência com aceleração por \gls{GPU}, quando disponível.
 
-\subsection{conteudo do callback}
+\subsubsection{Implantação com Docker Compose}
+Depois desta concretização tecnológica, os três subcomponentes conceptuais são mapeados para três \textit{containers} distintos, nomeados de acordo com o componente que representam. O \autoref{lst:ch4_detector_compose} apresenta um excerto simplificado desta implantação.
 
-o callbac do detetor automático, em caso negativo, é apenas uma atualização de estado da gravação para nao detectado. No caso de esta deteção ser positiva , estará presente a seguinte informação no callback :
+\par\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Excerto simplificado da implantação do serviço de deteção (yaml)},label={lst:ch4_detector_compose}]
+services:
+  detector-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu
+    ports:
+      - "8080:8080"
+    command: ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+  detector-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu
+    gpus: all
+    volumes:
+      - <model-dir>:/models/yolo11:ro
+    command: ["python", "-m", "celery", "-A", "app.queue.celery_app", "worker"]
+  detector-cache:
+    image: redis:7-alpine
+\end{lstlisting}
+\end{minipage}
 
-ir ler detector-projetct para incluir aqui o que tem que ser falado do conteúdo do callback
+O \textit{detector-api} e o \textit{detector-worker} são construídos a partir do mesmo \textit{Dockerfile} com suporte \gls{GPU} (linhas 3 a 5 e 10 a 12), partilhando o mesmo ambiente de execução e dependências. O primeiro executa a \gls{API} \gls{HTTP} com Uvicorn (linha 8), enquanto o segundo declara acesso à \gls{GPU} (linha 13) e executa o processo Celery responsável pelos trabalhos assíncronos (linha 16). O \textit{detector-cache} utiliza uma imagem Redis leve (linha 18), suficiente para suportar a fila e o estado operacional dos trabalhos.
+
+O modelo \texttt{yolo11s-seg.pt} não é guardado em repositório de versões com o código-fonte da aplicação. No protótipo, é descarregado por um script de apoio a partir do repositório público \texttt{Ultralytics/YOLO11}, alojado na plataforma Hugging Face, usada para disponibilização e distribuição de modelos de aprendizagem automática. Esse script configura também o caminho do modelo usado pelo serviço e prepara a montagem de volume indicada nas linhas 14 e 15, permitindo que o \textit{detector-worker} aceda ao modelo em tempo de execução. Assim, o modelo permanece como um artefacto externo ao código aplicacional, podendo ser substituído sem alterar a aplicação.
+
+\subsection{Pipeline de Análise}
+
+A \textit{pipeline} de análise implementada no detetor segue a sequência apresentada na \autoref{fig:ch4_detector_pipeline}. Esta figura representa a sequência de ações executadas no \gls{MVP}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=0.87\textheight,keepaspectratio]{ch4/assets/detector-pipeline.png}
+\caption{Pipeline de análise implementada no detetor automático.}
+\label{fig:ch4_detector_pipeline}
+\end{figure}
+
+O fluxo representado na figura começa já no interior do detetor. A receção do pedido assíncrono e a obtenção do segmento através do url assinado são partes do fluxo de integração entre componentes que foram introduzidas conceptualmente. Os detalhes relevantes da implementação das mesmas são explicados na \autoref{subsec:autenticacao_chamadas_entre_componentes}, pelo que não são abordados novamente nesta subsecção. Assim, nesta subsecção assume-se que o \textit{detector-worker} já recebeu a tarefa e dispõe do ficheiro a analisar. A partir desse ponto, o objetivo da \textit{pipeline} é decidir se o segmento contém atividade relevante e, caso contenha, se existe algum objeto da classe alvo configurada para a Câmara.
 
 
+A primeira fase funciona como um \textit{motion gate}. O detetor não compara todos os \textit{frames} do vídeo; em vez disso, seleciona uma amostra de \textit{frames} com base numa taxa de amostragem configurável ao nível da aplicação. Esta taxa é combinada com o \gls{FPS} original do vídeo para calcular o intervalo entre os \textit{frames} analisados.
 
+Cada \textit{frame} selecionado é depois preparado para comparação, convertendo para tons de cinzento e aplicando redução de ruído, tornando a comparação menos sensível a variações pequenas. Em seguida, cada \textit{frame} preparado é comparado com o anterior para medir a alteração visual ocorrida entre dois instantes consecutivos da amostra.
+
+O valor de movimento obtido é comparado com a sensibilidade configurada para a análise. Se a alteração medida igualar ou ultrapassar este valor,  o segmento passa a ser considerado como contendo movimento relevante. Caso contrário, a análise termina, sem avançar, com o estado \texttt{NOT\_DETECTED}.
+
+Quando existe movimento relevante, a \textit{pipeline} delimita os intervalos temporais do vídeo onde essa atividade ocorreu, guardando os segundos de início e fim de cada intervalo. Intervalos muito próximos são depois agrupados numa janela de análise maior, o que evita fragmentar a mesma ocorrência em múltiplos intervalos demasiado curtos.
+
+A segunda fase aplica a versão de segmentação do modelo YOLO11, \textbf{YOLO11-seg}, apenas às janelas com movimento. A deteção de objetos passa então de incidir sobre a totalidade do segmento a concentrar-se apenas nas partes onde a Fase 1 indicou atividade visual.
+
+Após a inferência, são mantidas apenas as deteções compatíveis com a classe alvo configurada para a Câmara e com confiança suficiente. Quando o mecanismo de seguimento temporal associa observações sucessivas ao mesmo objeto, estas são agregadas através do respetivo identificador único de seguimento.
+
+A terceira fase de extração de atributos, que não foi implementada no \gls{MVP}, está incluída na representação. A sua presença no fluxo tem apenas função conceptual, indicando onde seriam integrados mecanismos futuros de análise de características.
+
+O \autoref{lst:ch4_detector_pipeline_orchestration} apresenta uma representação simplificada da função que orquestra a passagem entre a deteção de movimento e a deteção de objetos.
+
+\par\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Representação simplificada da orquestração interna da \textit{pipeline} de análise (python)},label={lst:ch4_detector_pipeline_orchestration}]
+def analyze_segment(payload, local_video_path, job_id):
+    motion_score, has_motion, _ = detect_motion_score(local_video_path)
+
+    if not has_motion:
+        return CallbackPayload(status="NOT_DETECTED", events=[])
+
+    motion_segments = detect_motion_segments(local_video_path)
+
+    events = detect_objects(
+        local_video_path,
+        payload.target_class,
+        motion_score,
+        motion_context={"segments": motion_segments},
+    )
+    return CallbackPayload(
+        status="DETECTED" if events else "NOT_DETECTED",
+        events=events,
+    )
+\end{lstlisting}
+\end{minipage}
+
+A chamada a \texttt{detect\_motion\_score} corresponde à primeira decisão da \textit{pipeline}; se não houver movimento, o resultado é imediatamente produzido como \texttt{NOT\_DETECTED}. Apenas quando há movimento são calculados os intervalos de atividade e invocado o detetor de objetos. A decisão final entre \texttt{DETECTED} e \texttt{NOT\_DETECTED} depende da existência de eventos devolvidos pela Fase 2.
+
+\subsection{Contrato de Resultado}
+
+Depois de concluída a análise, o detetor devolve à aplicação um resultado estruturado. O \autoref{lst:ch4_detector_events_contract} apresenta um exemplo simplificado do conteúdo relevante desse resultado, focado na estrutura \texttt{events[]}.
+
+\par\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Exemplo simplificado da estrutura de eventos devolvida pelo detetor (json)},label={lst:ch4_detector_events_contract}]
+{
+  "segment_uid": "seg_01HZX7QCVS9ANR",
+  "status": "DETECTED",
+  "events": [
+    {
+      "event_type": "object_detection",
+      "start_second": 1.2,
+      "end_second": 3.8,
+      "confidence": 0.91,
+      "motion_score": 0.35,
+      "metadata": {
+        "engine": "yolo11_seg_tracker"
+      },
+      "objects": [
+        {
+          "label": "person",
+          "confidence": 0.91,
+          "track_id": "trk_001",
+          "bbox_samples": [
+            {
+              "t": 1.2,
+              "bbox": { "x": 0.12, "y": 0.20, "w": 0.30, "h": 0.50 }
+            },
+            {
+              "t": 1.6,
+              "bbox": { "x": 0.15, "y": 0.21, "w": 0.30, "h": 0.50 }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+\end{lstlisting}
+\end{minipage}
+
+O campo \texttt{segment\_uid} (linha 2) referencia o Segmento de Gravação a que pertence a resposta do \textit{callback}, permitindo à aplicação associar o resultado recebido ao segmento previamente submetido para análise. O campo \texttt{status} (linha 3) indica o resultado global da análise. Os estados \texttt{DETECTED} e \texttt{NOT\_DETECTED} já foram descritos na \textit{pipeline}. Em caso de erro técnico pode ainda ser devolvido \texttt{FAILED}. Quando existe deteção, \texttt{events[]} (linha 4) contém as ocorrências identificadas no Segmento de Gravação.
+
+Em cada evento, \texttt{event\_type} (linha 6) identifica a ocorrência, \texttt{start\_second} (linha 7) e \texttt{end\_second} (linha 8) delimitam o intervalo relativo ao início do segmento, \texttt{confidence} (linha 9) indica a confiança do evento, numa escala de 0 a 1. O \texttt{motion\_score} (linha 10) preserva a pontuação de movimento associada, atribuída na deteção de movimento. O campo \texttt{metadata} (linha 11 a 13) fica reservado para informação técnica adicional do motor de deteção.
+
+A lista \texttt{objects[]} (linha 14) contém os objetos que justificam o evento. Cada objeto inclui a classe e a confiança da deteção, podendo também incluir \texttt{track\_id} (linha 18) para seguimento temporal. O campo mais relevante para a utilização posterior é \texttt{bbox\_samples} (linha 19), que representa amostras temporais da localização do mesmo objeto ao longo do evento. Cada amostra contém o instante relativo \texttt{t} e uma \gls{BBOX} normalizada, permitindo descrever a evolução espacial do objeto durante o intervalo detetado.
 
 \section{Persistência dos Eventos e Artefactos de Análise}
 % Resumo: Explicar como o callback do detetor atualiza segmentos e cria eventos, objetos, metadados e referências a artefactos.
@@ -519,7 +691,7 @@ explicar aqui uma pequena sub seccao sobre o bbox . esta informacao da detecao �
 
 \section{Compromissos e Limitações da Implementação}
 % Resumo: Identificar decisões tomadas por restrições do MVP, tempo, infraestrutura ou maturidade técnica.
-% Não tratar dependências como limitações por defeito; só o são se impuserem restrições concretas.
+% Não tratar escolhas de bibliotecas ou ferramentas como limitações por defeito; só o são se impuserem restrições concretas.
 % Reservar métricas, evidência e impacto observado para o Capítulo~\ref{chap:resultados}.
 
 \section{Síntese}
