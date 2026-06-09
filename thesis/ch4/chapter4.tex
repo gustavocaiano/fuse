@@ -3,10 +3,10 @@
 \chapter{Implementação}
 \label{chap:implementacao}
 
-Este capítulo descreve a concretização técnica do \gls{MVP} do \gls{FUSE}, com foco nos mecanismos implementados para integrar câmaras heterogéneas, disponibilizar \textit{streaming} de forma segura, suportar controlo remoto e articular a plataforma central com o detetor automático de eventos. A apresentação parte das decisões de análise e desenho estabelecidas no \autoref{chap:analise_e_desenho} e restringe-se aos aspetos de implementação que condicionam o funcionamento, a segurança e a extensibilidade do sistema.
+Este capítulo descreve a concretização técnica do \gls{MVP} do \gls{FUSE}, partindo da arquitetura definida no \autoref{chap:analise_e_desenho} e focando os mecanismos que tornam operacional a integração de câmaras heterogéneas, o acesso seguro ao vídeo, o controlo remoto e a análise automática de segmentos gravados. A exposição organiza-se em torno de seis dimensões de implementação: o ambiente tecnológico e a implantação dos serviços, a orquestração central da aplicação e do modelo operacional, os mecanismos de \textit{streaming}, gravação e controlo \gls{PTZ}, os mecanismos de segurança e rastreabilidade, a implementação do detetor automático e a persistência dos eventos e artefactos de análise.
 
 \section{Ambiente Tecnológico e Implantação do MVP}
-A implementação foi organizada em \textit{containers} Docker, de modo a reduzir a dependência face ao ambiente de desenvolvimento e a manter separados os principais blocos funcionais definidos no \autoref{chap:analise_e_desenho}. Esta opção permitiu concretizar a arquitetura proposta através de componentes independentes, ligados por uma rede interna controlada e configurados por variáveis de ambiente, reduzindo o acoplamento entre os mesmos.
+Esta secção apresenta o ambiente tecnológico utilizado na concretização do \gls{MVP} do \gls{FUSE} e a forma como os componentes definidos no \autoref{chap:analise_e_desenho} foram materializados em serviços. Inicialmente, são identificadas as principais tecnologias usadas na aplicação central, na persistência, no \textit{streaming}, no controlo remoto e na integração com o detetor automático. De seguida, descreve-se a implantação do servidor central, incluindo a organização dos serviços, volumes e rede interna que suportam a execução integrada da solução.
 
 \subsection{Tecnologias Utilizadas}
 
@@ -26,11 +26,11 @@ A escolha do MediaMTX foi orientada pelos requisitos de implementação do compo
 
 No componente \textit{digital-twin}, a biblioteca \texttt{onvif-zeep} foi escolhida por disponibilizar uma implementação \textit{open-source} de cliente \gls{ONVIF} em Python \cite{onvif_zeep}. Esta opção permitiu encapsular as particularidades da comunicação \gls{ONVIF} num serviço próprio, preservando a aplicação central independente dos detalhes de baixo nível de um protocolo como este. Importa recordar que, para efeitos do \gls{MVP}, o controlo \gls{PTZ} implementado se limita a este protocolo \gls{ONVIF}. Contudo, o facto de este componente estar isolado permite que o suporte a outros protocolos seja acrescentado futuramente através da sua extensão, sem alterações estruturais à aplicação central.
 
-As restantes tecnologias de suporte, nomeadamente Docker Compose, Nginx, MySQL, FastAPI e Uvicorn, correspondem a escolhas comuns e consolidadas na indústria. De forma semelhante, tecnologias como Tailscale e as opções associadas ao detetor são apenas enquadradas nesta secção, uma vez que a sua motivação técnica já foi introduzida no desenho arquitetural e é retomada nas secções específicas de segurança e deteção automática. \todo{isto está mal eu não introduzo nada do detetor}
+As restantes tecnologias de suporte, nomeadamente Docker Compose, Nginx, MySQL, FastAPI e Uvicorn, correspondem a escolhas comuns e consolidadas na indústria. De forma semelhante, tecnologias como Tailscale e as opções associadas ao detetor são apenas enquadradas nesta secção, uma vez que a sua motivação técnica já foi introduzida no desenho arquitetural e é retomada nas secções específicas de segurança e deteção automática.
 
-\subsection{Implementação com Docker Compose}
+\subsection{Implantação com Docker Compose}
 
-O servidor central foi implementado através de Docker Compose, agrupando os serviços principais numa rede interna denominada \textit{fuse-network}. Esta rede permite que os componentes, implementados como \textit{containers} individuais, comuniquem entre si internamente, sem que todas as interfaces tenham de ser expostas diretamente ao exterior. A \autoref{tab:ch4_componentes_implantacao} sintetiza o mapeamento entre os componentes conceptuais apresentados no capítulo anterior e os respetivos \textit{containers} ou volumes.
+A utilização de Docker Compose permitiu concretizar a arquitetura modular definida anteriormente, mapeando os principais componentes conceptuais para \textit{containers}, volumes e interfaces de comunicação internas. O servidor central agrupa os serviços principais numa rede interna denominada \textit{fuse-network}, através da qual os componentes comunicam entre si sem que todas as interfaces tenham de ser expostas diretamente ao exterior. A \autoref{tab:ch4_componentes_implantacao} sintetiza o mapeamento entre os componentes conceptuais apresentados no capítulo anterior e os respetivos \textit{containers} ou volumes.
 
 \begin{table}[H]
     \centering
@@ -106,21 +106,29 @@ Esta secção descreve a concretização técnica do componente aplicacional em 
 
 O modelo de domínio apresentado no \autoref{chap:analise_e_desenho} foi materializado através de migrações de base de dados e modelos Eloquent, o mecanismo de mapeamento objeto-relacional do Laravel.
 
-O conceito de Câmara foi implementado com chave estrangeira para Processo, \texttt{process\_id}, uma vez que cada câmara se encontra sempre afeta a um processo no contexto operacional da plataforma. O modelo inclui também o alvo de deteção configurado, usado posteriormente para determinar que classe de objetos deve ser analisada. Esta opção pode parecer ambígua se a câmara for entendida apenas como dispositivo físico reutilizável, porém, no contexto da aplicação, uma \textit{Câmara} representa uma montagem ou configuração operacional concreta de um dispositivo num determinado processo. Assim, se o mesmo equipamento for instalado noutro local, associado a outro processo ou configurado com outro alvo de deteção, essa situação passa a corresponder a uma nova instância operacional na aplicação.
+A \autoref{fig:ch4_modelo_relacional} apresenta um diagrama relacional simplificado da concretização do modelo de domínio na base de dados. Para facilitar a leitura, os rótulos das entidades são apresentados em português, mantendo-se os nomes técnicos das chaves estrangeiras quando correspondem diretamente à implementação.
 
-O Segmento de Gravação foi modelado com uma chave estrangeira \texttt{camera\_id}, uma vez que cada segmento de gravação corresponde sempre ao vídeo captado por uma câmara específica. Por sua vez, o Evento de Deteção referencia o segmento onde a ocorrência foi identificada, através de \textit{recording\_segment\_id}. Como um evento de deteção pode envolver vários objetos detetados no mesmo intervalo temporal, o modelo Objeto de Deteção referencia o evento correspondente através de uma chave estrangeira para Evento de Deteção, \texttt{event\_id}. Esta organização concretiza, na base de dados, a sequência descrita no modelo de domínio: câmara, segmento de gravação, evento de deteção e objetos detetados. 
- \todo{Pergunta: posso por  câmara -> segmento de gravação -> evento de deteção -> objetos detetados ? }
- \todo{com setas?}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{ch4/assets/entity-relationship.png}
+\caption{Diagrama relacional simplificado da concretização do modelo de domínio}
+\label{fig:ch4_modelo_relacional}
+\end{figure}
 
-Na componente de processos e acessos aos mesmos, a relação entre \textit{Processo} e \textit{Utilizador} foi implementada através da tabela intermédia \texttt{process\_user}, permitindo associar utilizadores aos processos em que participam. A modelação de perfis e permissões é retomada na subsecção seguinte \todo{está mal ? referencio?}, onde se descreve o mecanismo de controlo de acessos da aplicação.
+O conceito de Câmara foi implementado com chave estrangeira para Processo, \texttt{process\_id}, uma vez que cada câmara se encontra sempre afeta a um processo no contexto operacional da plataforma. O modelo inclui também o alvo de deteção configurado, usado posteriormente para determinar que classe de objetos deve ser analisada. Esta opção pode parecer ambígua se a câmara for entendida apenas como dispositivo físico reutilizável, porém, no contexto da aplicação, uma Câmara representa uma montagem ou configuração operacional concreta de um dispositivo num determinado processo. Assim, se o mesmo equipamento for instalado noutro local, associado a outro processo ou configurado com outro alvo de deteção, essa situação passa a corresponder a uma nova instância operacional na aplicação.
+
+O Segmento de Gravação foi modelado com uma chave estrangeira \texttt{camera\_id}, uma vez que cada segmento de gravação corresponde sempre ao vídeo captado por uma câmara específica. Por sua vez, o Evento de Deteção referencia o segmento onde a ocorrência foi identificada, através de \texttt{recording\_segment\_id}. Como um evento de deteção pode envolver vários objetos detetados no mesmo intervalo temporal, o modelo Objeto de Deteção referencia o evento correspondente através de uma chave estrangeira para Evento de Deteção, \texttt{event\_id}. Esta organização concretiza, na base de dados, a sequência descrita no modelo de domínio: câmara, segmento de gravação, evento de deteção e objetos detetados. 
+
+Na componente de processos e acessos aos mesmos, a relação entre Processo e Utilizador foi implementada através da tabela \textit{pivot} \texttt{process\_user}, permitindo associar utilizadores aos processos em que participam. A modelação de perfis e permissões é retomada na \autoref{sec:controle_de_acessos}, onde se descreve o mecanismo de controlo de acessos da aplicação.
 
 \subsection{Controlo de Acessos na Aplicação}
+\label{sec:controle_de_acessos}
 
 O controlo de acessos na aplicação foi implementado através da combinação de dois mecanismos complementares. O primeiro delimita o âmbito operacional do utilizador, determinando que processos e câmaras ficam visíveis. O segundo define as ações que o utilizador pode executar sobre os recursos a que tem acesso, através de permissões agregadas em \textit{roles} que lhe são atribuídas.
 
 \subsubsection{Filtragem por Processo}
 
-A associação entre utilizadores e processos é materializada pela tabela pivot \texttt{process\_user}. Esta tabela representa os utilizadores atribuídos a cada processo e é usada como base para restringir as consultas efetuadas nos recursos operacionais da aplicação. Assim, quando um utilizador sem privilégios de gestão lista processos ou câmaras, a consulta é automaticamente limitada ao seu contexto operacional.
+A associação entre utilizadores e processos é materializada pela tabela \textit{pivot} \texttt{process\_user}. Esta tabela representa os utilizadores atribuídos a cada processo e é usada como base para restringir as consultas efetuadas nos recursos operacionais da aplicação. Assim, quando um utilizador sem privilégios de gestão lista processos ou câmaras, a consulta é automaticamente limitada ao seu contexto operacional.
 
 O \autoref{lst:ch4_process_filtering} apresenta um excerto demonstrativo do mecanismo usado quando é necessário listar processos e câmaras na aplicação.
 
@@ -494,11 +502,11 @@ Como a autorização é temporária, a interface volta a avaliar o acesso de 10 
 \subsection{Autenticação de Chamadas entre Componentes}
 \label{subsec:autenticacao_chamadas_entre_componentes}
 
-Para além da proteção do acesso ao \textit{streaming}, a implementação inclui validações específicas nas chamadas entre componentes. Cada integração relevante usa tokens, chaves ou assinaturas baseadas em segredos previamente configurados no ambiente. A aplicação valida esses elementos antes de alterar estados ou persistir dados, reduzindo o risco de aceitar notificações ou resultados originados por componentes não autorizados.
+Para além da proteção do acesso ao \textit{streaming}, a implementação inclui validações específicas nas chamadas entre componentes. Cada integração relevante usa \textit{tokens}, chaves ou assinaturas baseadas em segredos previamente configurados no ambiente. A aplicação valida esses elementos antes de alterar estados ou persistir dados, reduzindo o risco de aceitar notificações ou resultados originados por componentes não autorizados.
 
-O exemplo mais representativo é o callback do detetor automático, uma vez que este devolve resultados de análise que serão posteriormente persistidos. Neste fluxo, o pedido inclui os cabeçalhos \texttt{X-Detector-Key} (chave), \texttt{X-Detector-Timestamp} e \texttt{X-Detector-Signature} (assinatura). A chave identifica o serviço autorizado, enquanto a assinatura é calculada com \gls{HMAC} SHA-256 sobre a combinação entre o instante temporal indicado e o corpo do pedido. A aplicação valida estes elementos no \texttt{EventResultRequest}, permitindo rejeitar resultados sem chave válida, fora do intervalo temporal aceite ou com conteúdo alterado.
+O exemplo mais representativo é o \textit{callback} do detetor automático, uma vez que este devolve resultados de análise que serão posteriormente persistidos. Neste fluxo, o pedido inclui os cabeçalhos \texttt{X-Detector-Key} (chave), \texttt{X-Detector-Timestamp} e \texttt{X-Detector-Signature} (assinatura). A chave identifica o serviço autorizado, enquanto a assinatura é calculada com \gls{HMAC} SHA-256 sobre a combinação entre o instante temporal indicado e o corpo do pedido. A aplicação valida estes elementos no \texttt{EventResultRequest}, permitindo rejeitar resultados sem chave válida, fora do intervalo temporal aceite ou com conteúdo alterado.
 
-O mesmo princípio de acesso limitado é aplicado ao envio de segmentos para análise. Quando o \texttt{AnalyzeRecordingSegmentJob} submete um segmento ao detetor, fornece um url temporariamente assinado para descarregar apenas esse ficheiro, com validade própria definida por configuração. O endpoint que serve o ficheiro valida a assinatura do url e a chave do detetor. Assim, o detetor recebe acesso ao segmento necessário para a análise, sem obter acesso livre ao armazenamento interno da aplicação. Este fluxo é detalhado na \autoref{sec:detetor_automatico}.
+O mesmo princípio de acesso limitado é aplicado ao envio de segmentos para análise. Quando o \texttt{AnalyzeRecordingSegmentJob} submete um segmento ao detetor, fornece um url temporariamente assinado para descarregar apenas esse ficheiro, com validade própria definida por configuração. O \textit{endpoint} que serve o ficheiro valida a assinatura do url e a chave do detetor. Assim, o detetor recebe acesso ao segmento necessário para a análise, sem obter acesso livre ao armazenamento interno da aplicação. Este fluxo é detalhado na \autoref{sec:detetor_automatico}.
 
 \subsection{Auditoria e Rastreabilidade}
 
@@ -515,7 +523,7 @@ abstract class BaseModel extends Model implements Auditable
 
 Desta forma, cada operação de escrita na base de dados, ou seja, operações de criação, atualização ou eliminação, passam a gerar registos de auditoria de forma uniforme nos modelos que extendem desta classe base.
 
-Cada registo de auditoria guarda o Utilizador associado à operação, o tipo de evento, a entidade auditada, os valores antigos e novos e a data e hora da alteração. Também inclui o url, endereço IP, \textit{browser} e sistema operativo, quando disponíveis. Estes registos são consultáveis por administradores na aplicação, através de uma listagem e de uma página de detalhe. Para evitar a exposição indevida de informação sensível, determinados campos, como palavras-passe ou tokens, são mascarados antes de serem apresentados na interface de auditoria.
+Cada registo de auditoria guarda o Utilizador associado à operação, o tipo de evento, a entidade auditada, os valores antigos e novos e a data e hora da alteração. Também inclui o url, endereço IP, \textit{browser} e sistema operativo, quando disponíveis. Estes registos são consultáveis por administradores na aplicação, através de uma listagem e de uma página de detalhe. Para evitar a exposição indevida de informação sensível, determinados campos, como palavras-passe ou \textit{tokens}, são mascarados antes de serem apresentados na interface de auditoria.
 
 \section{Detetor Automático e Pipeline de Análise}
 \label{sec:detetor_automatico}
@@ -674,19 +682,17 @@ Em cada evento, \texttt{event\_type} (linha 6) identifica a ocorrência, \texttt
 A lista \texttt{objects[]} (linha 14) contém os objetos que justificam o evento. Cada objeto inclui a classe e a confiança da deteção, podendo também incluir \texttt{track\_id} (linha 18) para seguimento temporal. O campo mais relevante para a utilização posterior é \texttt{bbox\_samples} (linha 19), que representa amostras temporais da localização do mesmo objeto ao longo do evento. Cada amostra contém o instante relativo \texttt{t} e uma \gls{BBOX} normalizada, permitindo descrever a evolução espacial do objeto durante o intervalo detetado.
 
 \section{Persistência dos Eventos e Artefactos de Análise}
-% Resumo: Explicar como o callback do detetor atualiza segmentos e cria eventos, objetos, metadados e referências a artefactos.
-% Mostrar a ligação entre segmento, câmara, job do detetor, estado de processamento e deteções persistidas.
-% Descrever estrutura e rastreabilidade dos outputs gerados, deixando avaliação e resultados para o Capítulo~\ref{chap:resultados}.
+% Bullet guidance:
+% - Explicar que cada callback do detetor é associado a um Segmento de Gravação específico através do `segment_uid` e atualiza o estado desse segmento (`DETECTED`, `NOT_DETECTED` ou `FAILED`).
+% - Explicar que, quando o estado recebido corresponde a uma deteção positiva, a aplicação cria um ou mais Eventos de Deteção associados ao Segmento de Gravação e à Câmara correspondente.
+% - Explicar que cada Evento de Deteção pode conter um ou mais Objetos Detetados, persistindo a classe, a confiança, o `track_id` e a evidência geométrica associada.
+% - Explicar que as BBOX são persistidas em coordenadas normalizadas (`x`, `y`, `w`, `h`, entre 0 e 1), podendo existir uma BBOX principal e/ou `bbox_samples` temporais para representar a evolução do objeto ao longo do evento.
 
-basicamente aqui descrever como a informação do callback enviado pelo detector é recebida, processada e mapeada para cada entidade ou entidade nova dentro da app e depois persistida.
-
-ir ao project/ e explorar como isso é feito
-
-incluir aqui tambem um pedaço de código que permite a notificação do investigador quando entra e existe uma deteção nova.
-
-\subsection{artefactos que vao ser visuais}
-
-explicar aqui uma pequena sub seccao sobre o bbox . esta informacao da detecao é passada da area em que foi detetado o objeto e depois explicar como no frontend é visualizada esta parte.
+\subsection{Visualização das BBOX no Frontend}
+% Bullet guidance:
+% - Explicar, de forma curta, que as BBOX normalizadas são convertidas em percentagens sobre o player de vídeo, permitindo desenhar retângulos sobre o objeto durante a revisão do incidente.
+% - Caso existam `bbox_samples`, explicar que o frontend pode atualizar a posição da BBOX ao longo da reprodução, acompanhando temporalmente a posição do objeto detetado.
+% - Mencionar brevemente a sinalização operacional de novas deteções através de notificação Filament e do badge com contador de deteções ainda não revistas.
 
 
 \section{Compromissos e Limitações da Implementação}

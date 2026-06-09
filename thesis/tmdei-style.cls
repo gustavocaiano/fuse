@@ -560,6 +560,13 @@ breaklinks=true,
 }{%nothing
 }
 
+\AtBeginDocument{%
+\providecommand*{\sectionautorefname}{Secção}%
+\providecommand*{\subsectionautorefname}{Subsecção}%
+\renewcommand*{\sectionautorefname}{Secção}%
+\renewcommand*{\subsectionautorefname}{Subsecção}%
+}
+
 %----------------------------------------------------------------------------------------
 
 % Define some commands to keep the formatting separated from the content 

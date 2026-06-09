@@ -1,125 +1,110 @@
-@startuml oldmd
+@startuml domain-model
+
+
 
 
 hide circle
 hide methods
 skinparam classAttributeIconSize 0
-skinparam linetype ortho 
 
-entity "User" as User {
-  * id : bigint
-  --
-  name : string
-  username : string
-  email : string
-  is_confirmed : bool
-  has_email_authentication : bool
+skinparam linetype ortho
+skinparam shadowing false
+skinparam nodesep 90
+skinparam ranksep 75
+skinparam ArrowFontSize 11
+skinparam ArrowThickness 1
+skinparam ArrowColor #2F3A4A
+
+
+
+class "Utilizador" as Utilizador {
+  nome
+  email
 }
 
-entity "Role" as Role {
-  * id : bigint
-  --
-  name : string
-  guard_name : string
-  ad_group_name : string?
+class "Role" as Role {  
+  nome
 }
 
-entity "Permission" as Permission {
-  * id : bigint
-  --
-  name : string
-  guard_name : string
-  group : string
+class "Permissão" as Permissao {
+  entidade relacionada
 }
 
-entity "Process" as Process {
-  * id : bigint
-  --
-  number : string
-  status : ProcessStatus
-  crime_type : string?
-  abilio_id : bigint?
-  deadline_at : datetime?
+class "Processo" as Processo {
+  NUIPC
+  data de abertura
+  tipo de crime
 }
 
-' entity "process_user" as ProcessUser {
-'   * process_id : bigint
-'   * user_id : bigint
-'   -- 
-'   start_at : datetime?
-'   end_at : datetime?
+class "Câmara" as Camara {
+  identificação
+  localização
+  url
+  alvo de deteção
+}
+
+class "Segmento de Gravação" as SegmentoGravacao {
+  período temporal
+  estado de processamento
+}
+
+class "Evento de Deteção" as EventoDetecao {
+  tipo
+  segundo de início
+  segundo de fim
+  confiança
+  revisto
+  relevância
+}
+
+class "Objeto Detetado" as ObjetoDetetado {
+  classe
+  confiança
+  localização na imagem
+}
+
+
+
+' enum "classe de deteção" as DetectionTargetClass {
+'   person
+'   vehicle
 ' }
 
-entity "Camera" as Camera {
-  * id : bigint
-  --
-  process_id : bigint?
-  slug : string
-  name : string
-  user : string
-  password : string?
-  path : string?
-  ip_address : string
-  rtsp_port : string
-  rec : bool
-  detection_enabled : bool
-  detection_target_class : person|vehicle
-  ptz_protocol : string?
-  ptz_port : string?
+' enum "estado de processamento" as SegmentStatus {
+'   pending
+'   queued
+'   processing
+'   detected
+'   not_detected
+'   failed
+'   skipped
+' }
+
+enum "Tipo de ação" as Action {
+  CRIAR
+  ELIMINAR
+  DESTRUIR
+  RESTAURAR
+  ATUALIZAR
+  VISUALIZAR
+  VISUALIZAR_TODAS
 }
 
-entity "RecordingSegment" as RecordingSegment {
-  * id : bigint
-  --
-  camera_id : bigint
-  segment_uid : string
-  relative_path : string
-  started_at : datetime?
-  duration_seconds : float
-  size_bytes : int?
-  status : queued | processing | detected | not_detected | failed
-  target_class : person | vehicle?
-  detector_job_id : string?
-  detector_metadata : json?
-  last_error : text?
-}
 
-entity "DetectionEvent" as DetectionEvent {
-  * id : bigint
-  --
-  camera_id : bigint
-  recording_segment_id : bigint
-  event_type : string
-  event_start_seconds : float?
-  event_end_seconds : float?
-  event_start_at : datetime?
-  event_end_at : datetime?
-  confidence : float?
-  motion_score : float?
-  metadata : json?
-}
+Utilizador "0..*" -right- "0..*" Role : assume
+Role "0..*" -right- "0..*" Permissao : agrega
+Permissao  "0..*" -right-  "1" Action : do tipo
 
-entity "DetectionObject" as DetectionObject {
-  * id : bigint
-  --
-  detection_event_id : bigint
-  label : string?
-  confidence : float?
-  track_id : string?
-  bbox : json?
-  bbox_samples : json?
-  mask_ref : string?
-  metadata : json?
-}
+Processo "0..*" -right- "0..*" Utilizador : investigado por
+Camara "0..*" -down- "1" Processo : está afeta a
+ ' Camara "1" .. "1" DetectionTargetClass : asd
 
-User }o--o{ Role 
-Role }o-down-o{ Permission 
-Process }o-o{ User  
-Process ||--o{ Camera 
-Camera ||--o{ RecordingSegment 
+Camara "1" -right- "0..*" SegmentoGravacao : gera
+SegmentoGravacao "1" -right- "0..*" EventoDetecao : é identificado
+' SegmentoGravacao "1" -right- "1" SegmentStatus : tem estado
+EventoDetecao "1" -right- "0..*" ObjetoDetetado : contém
 
-RecordingSegment ||-left-o{ DetectionEvent 
 
-DetectionEvent ||-up-o{ DetectionObject 
+
 
 @enduml

@@ -1,0 +1,107 @@
+@startuml entity-relationship
+
+
+
+
+hide circle
+hide methods
+skinparam classAttributeIconSize 0
+
+skinparam linetype ortho
+skinparam shadowing false
+skinparam nodesep 60
+skinparam ranksep 60
+skinparam ArrowFontSize 10
+skinparam ArrowThickness 0.5
+skinparam ArrowColor #2F3A4A
+
+
+
+class "Utilizador" as Utilizador {
+  id
+  --
+}
+
+class "Role" as Role {  
+  id
+  --
+}
+
+class "Permissão" as Permissao {
+  id
+  --
+}
+
+class "Processo" as Processo {
+  id
+  --
+}
+
+class "Câmara" as Camara {
+  id
+  --
+  process_id
+}
+
+class "Segmento de Gravação" as SegmentoGravacao {
+  id
+  --
+  camera_id
+}
+
+class "Evento de Deteção" as EventoDetecao {
+  id
+  --
+  recording_segment_id
+}
+
+class "Objeto Detetado" as ObjetoDetetado {
+  id
+  --
+  event_id
+}
+
+class role_has_permissions {
+  role_id
+  permission_id
+}
+
+class user_has_roles {
+  user_id
+  role_id
+}
+class process_user {
+  process_id
+  user_id
+}
+
+
+
+
+
+
+Utilizador "1" -right- "0..*" user_has_roles
+user_has_roles "0..*" -right- "1" Role 
+
+
+Role "1" -right- "0..*" role_has_permissions
+role_has_permissions "0..*" -up- "1" Permissao 
+
+
+
+Processo "1" -- "0..*" process_user 
+process_user "0..*" -right- "1" Utilizador 
+
+
+Camara "0..*" -down- "1" Processo 
+
+
+Camara "1" -right- "0..*" SegmentoGravacao 
+SegmentoGravacao "1" -right- "0..*" EventoDetecao 
+' SegmentoGravacao "1" -right- "1" SegmentStatus : tem estado
+EventoDetecao "1" -right- "0..*" ObjetoDetetado 
+
+
+
+
+@enduml
